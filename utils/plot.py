@@ -2,9 +2,13 @@
 Plot tools 2D
 @author: huiming zhou
 """
+import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+
 from .env import Env, Grid, Map, Node
+
 
 class Plot:
     def __init__(self, start, goal, env: Env):
@@ -12,12 +16,15 @@ class Plot:
         self.goal = Node(goal, goal, 0, 0)
         self.env = env
         self.fig = plt.figure()
+        self.ax = self.fig.add_subplot()
 
-    def animation(self, path, name, cost=None, expand=None):
+    def animation(self, path, name, cost=None, expand=None, history_pose=None):
         name = name + "\ncost: " + str(cost) if cost else name
         self.plotEnv(name)
         if expand:
             self.plotExpand(expand)
+        if history_pose:
+            self.plotHistoryPose(history_pose)
         self.plotPath(path)
         plt.show()
 
@@ -95,12 +102,47 @@ class Plot:
 
         plt.pause(0.01)
 
-    def plotPath(self, path):
+    def plotPath(self, path) -> None:
         path_x = [path[i][0] for i in range(len(path))]
         path_y = [path[i][1] for i in range(len(path))]
         plt.plot(path_x, path_y, linewidth='2', color='#13ae00')
         plt.plot(self.start.current[0], self.start.current[1], marker="s", color="#ff0000")
         plt.plot(self.goal.current[0], self.goal.current[1], marker="s", color="#1155cc")
+
+    def plotAgent(self, pose: tuple, radius: float=1) -> None:
+        x, y, theta = pose
+        ref_vec = np.array([[radius / 2], [0]])
+        rot_mat = np.array([[np.cos(theta), -np.sin(theta)],
+                            [np.sin(theta),  np.cos(theta)]])
+        end_pt = rot_mat @ ref_vec + np.array([[x], [y]])
+
+        try:
+            self.ax.artists.pop()
+            for art in self.ax.get_children():
+                if isinstance(art, matplotlib.patches.FancyArrow):
+                    art.remove()
+        except:
+            pass
+
+        self.ax.arrow(x, y, float(end_pt[0]) - x, float(end_pt[1]) - y,
+                width=0.1, head_width=0.40, color="r")
+        circle = plt.Circle((x, y), radius, color="r", fill=False)
+        self.ax.add_artist(circle)
+
+    def plotHistoryPose(self, history_pose):
+        count = 0
+        for pose in history_pose:
+            if count < len(history_pose) - 1:
+                plt.plot([history_pose[count][0], history_pose[count + 1][0]],
+                    [history_pose[count][1], history_pose[count + 1][1]], c="r")
+            count += 1
+            self.plotAgent(pose)
+            plt.gcf().canvas.mpl_connect('key_release_event',
+                                        lambda event: [exit(0) if event.key == 'escape' else None])
+            if count < len(history_pose) / 3:         length = 5
+            elif count < len(history_pose) * 2 / 3:   length = 10
+            else:                                     length = 20
+            if count % length == 0:             plt.pause(0.01)
 
     def connect(self, name: str, func) -> None:
         self.fig.canvas.mpl_connect(name, func)
