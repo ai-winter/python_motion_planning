@@ -27,6 +27,16 @@ class ACO(EvolutionarySearcher):
         environment
     heuristic_type: str
         heuristic function type, default is euclidean
+    n_ants: int
+        number of ants
+    alpha, beta: float
+        pheromone and heuristic factor weight coefficient
+    rho: float
+        evaporation coefficient
+    Q: float
+        pheromone gain
+    max_iter: int
+        maximum iterations
 
     Examples
     ----------
@@ -74,7 +84,7 @@ class ACO(EvolutionarySearcher):
         path: list
             planning path
         '''
-        ants_list, best_length_list, best_path = [], [], None
+        best_length_list, best_path = [], None
 
         # pheromone initialization
         pheromone_edges = {}
@@ -91,6 +101,7 @@ class ACO(EvolutionarySearcher):
 
         # main loop
         for _ in range(self.max_iter):
+            ants_list = []
             for _ in range(self.n_ants):
                 ant = self.Ant()
                 ant.current_node = self.start
