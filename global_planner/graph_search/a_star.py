@@ -5,7 +5,6 @@
 @update: 2023.1.13
 '''
 import os, sys
-import math
 import heapq
 
 sys.path.append(os.path.abspath(os.path.join(__file__, "../../")))
@@ -92,7 +91,7 @@ class AStar(GraphSearcher):
                 heapq.heappush(OPEN, node_n)
             
             CLOSED.append(node)
-        return [], []
+        return ([], []), []
 
     def getNeighbor(self, node: Node) -> list:
         '''

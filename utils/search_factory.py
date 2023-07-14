@@ -7,9 +7,7 @@
 import sys, os
 sys.path.append(os.path.abspath(os.path.join(__file__, "../../")))
 
-from graph_search import *
-from sample_search import *
-
+from global_planner import *
 
 class SearchFactory(object):
     def __init__(self) -> None:
@@ -37,6 +35,8 @@ class SearchFactory(object):
         elif planner_name == "rrt_star":
             return RRTStar(**config)
         elif planner_name == "informed_rrt":
-            return InformedRRT(**config)  
+            return InformedRRT(**config)
+        elif planner_name == "aco":
+            return ACO(**config)
         else:
             raise ValueError("The `planner_name` must be set correctly.")

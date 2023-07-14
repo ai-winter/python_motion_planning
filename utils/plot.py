@@ -15,10 +15,10 @@ class Plot:
         self.start = Node(start, start, 0, 0)
         self.goal = Node(goal, goal, 0, 0)
         self.env = env
-        self.fig = plt.figure()
+        self.fig = plt.figure("planning")
         self.ax = self.fig.add_subplot()
 
-    def animation(self, path, name, cost=None, expand=None, history_pose=None):
+    def animation(self, path, name, cost=None, expand=None, history_pose=None, cost_curve=None) -> None:
         name = name + "\ncost: " + str(cost) if cost else name
         self.plotEnv(name)
         if expand:
@@ -26,9 +26,21 @@ class Plot:
         if history_pose:
             self.plotHistoryPose(history_pose)
         self.plotPath(path)
+
+        if cost_curve:
+            plt.figure("cost curve")
+            self.plotCostCurve(cost_curve, name)
+
         plt.show()
 
-    def plotEnv(self, name):
+    def plotEnv(self, name: str) -> None:
+        '''
+        Plot environment with static obstacles.
+
+        Parameters
+        ----------
+        name: Algorithm name or some other information
+        '''
         plt.plot(self.start.current[0], self.start.current[1], marker="s", color="#ff0000")
         plt.plot(self.goal.current[0], self.goal.current[1], marker="s", color="#1155cc")
 
@@ -70,7 +82,14 @@ class Plot:
         plt.title(name)
         plt.axis("equal")
 
-    def plotExpand(self, expand):
+    def plotExpand(self, expand: list) -> None:
+        '''
+        Plot expanded grids using in graph searching.
+
+        Parameters
+        ----------
+        expand: Expanded grids during searching
+        '''
         if self.start in expand:
             expand.remove(self.start)
         if self.goal in expand:
@@ -102,7 +121,14 @@ class Plot:
 
         plt.pause(0.01)
 
-    def plotPath(self, path) -> None:
+    def plotPath(self, path: list) -> None:
+        '''
+        Plot path in global planning.
+
+        Parameters
+        ----------
+        path: Path found in global planning
+        '''
         path_x = [path[i][0] for i in range(len(path))]
         path_y = [path[i][1] for i in range(len(path))]
         plt.plot(path_x, path_y, linewidth='2', color='#13ae00')
@@ -110,6 +136,14 @@ class Plot:
         plt.plot(self.goal.current[0], self.goal.current[1], marker="s", color="#1155cc")
 
     def plotAgent(self, pose: tuple, radius: float=1) -> None:
+        '''
+        Plot agent with specifical pose.
+
+        Parameters
+        ----------
+        pose: Pose of agent
+        radius: Radius of agent
+        '''
         x, y, theta = pose
         ref_vec = np.array([[radius / 2], [0]])
         rot_mat = np.array([[np.cos(theta), -np.sin(theta)],
@@ -129,7 +163,7 @@ class Plot:
         circle = plt.Circle((x, y), radius, color="r", fill=False)
         self.ax.add_artist(circle)
 
-    def plotHistoryPose(self, history_pose):
+    def plotHistoryPose(self, history_pose) -> None:
         count = 0
         for pose in history_pose:
             if count < len(history_pose) - 1:
@@ -144,6 +178,21 @@ class Plot:
             else:                                     length = 20
             if count % length == 0:             plt.pause(0.01)
 
+    def plotCostCurve(self, cost_list: list, name: str) -> None:
+        '''
+        Plot cost curve with epochs using in evolutionary searching.
+
+        Parameters
+        ----------
+        cost_list: Cost with epochs
+        name: Algorithm name or some other information
+        '''
+        plt.plot(cost_list, color="b")
+        plt.xlabel("epochs")
+        plt.ylabel("cost value")
+        plt.title(name)
+        plt.grid()
+
     def connect(self, name: str, func) -> None:
         self.fig.canvas.mpl_connect(name, func)
 
@@ -153,31 +202,3 @@ class Plot:
     def update(self):
         self.fig.canvas.draw_idle()
 
-    @staticmethod
-    def color_list():
-        cl_v = ['silver',
-                'wheat',
-                'lightskyblue',
-                'royalblue',
-                'slategray']
-        cl_p = ['gray',
-                'orange',
-                'deepskyblue',
-                'red',
-                'm']
-        return cl_v, cl_p
-
-    @staticmethod
-    def color_list_2():
-        cl = ['silver',
-              'steelblue',
-              'dimgray',
-              'cornflowerblue',
-              'dodgerblue',
-              'royalblue',
-              'plum',
-              'mediumslateblue',
-              'mediumpurple',
-              'blueviolet',
-              ]
-        return cl

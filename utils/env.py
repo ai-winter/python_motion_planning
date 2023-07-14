@@ -58,6 +58,9 @@ class Node(object):
         return self.g + self.h < node.g + node.h or \
                 (self.g + self.h == node.g + node.h and self.h < node.h)
 
+    def __hash__(self) -> int:
+        return hash(self.current)
+
     def __str__(self) -> str:
         return "----------\ncurrent:{}\nparent:{}\ng:{}\nh:{}\n----------" \
             .format(self.current, self.parent, self.g, self.h)

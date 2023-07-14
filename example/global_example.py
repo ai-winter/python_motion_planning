@@ -30,9 +30,9 @@ if __name__ == '__main__':
     # planner = search_factory("jps", start=start, goal=goal, env=env)
     # planner = search_factory("d_star", start=start, goal=goal, env=env)
     # planner = search_factory("lpa_star", start=start, goal=goal, env=env)
-    planner = search_factory("d_star_lite", start=start, goal=goal, env=env)
+    # planner = search_factory("d_star_lite", start=start, goal=goal, env=env)
     # animation
-    planner.run()
+    # planner.run()
 
     # ========================================================
 
@@ -52,3 +52,11 @@ if __name__ == '__main__':
 
     # # animation
     # planner.run()
+
+    # ========================================================
+
+    '''
+    evolutionary search
+    '''
+    planner = search_factory("aco", start=start, goal=goal, env=env)
+    planner.run()
