@@ -5,5 +5,14 @@ from .jps import JPS
 from .d_star import DStar
 from .lpa_star import LPAStar
 from .d_star_lite import DStarLite
+from .voronoi import VoronoiPlanner
 
-__all__ = ["AStar", "Dijkstra", "GBFS", "JPS", "DStar", "LPAStar", "DStarLite"]
+__all__ = ["AStar",
+           "Dijkstra",
+           "GBFS",
+           "JPS",
+           "DStar",
+           "LPAStar",
+           "DStarLite",
+           "VoronoiPlanner"
+        ]

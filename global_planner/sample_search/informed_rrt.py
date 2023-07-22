@@ -163,9 +163,9 @@ class InformedRRT(RRTStar):
         self.plot.clean()
         name = str(self) + "\ncost: " + str(cost)
         self.plot.plotEnv(name)
-        for x in self.sample_list:
-            if x.parent:
-                plt.plot([x.parent[0], x.current[0]], [x.parent[1], x.current[1]], 
+        for s_node in self.sample_list:
+            if s_node.parent:
+                plt.plot([s_node.px, s_node.x], [s_node.py, s_node.y], 
                     color="#dddddd", linestyle="-")
         if self.c_best < float("inf"):
             self.drawEllipse()

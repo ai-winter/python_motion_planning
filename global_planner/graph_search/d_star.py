@@ -35,7 +35,7 @@ class DNode(Node):
         self.k = k
 
     def __add__(self, node):
-        return DNode((self.current[0] + node.current[0], self.current[1] + node.current[1]), 
+        return DNode((self.x + node.x, self.y + node.y), 
                      self.parent, self.t, self.h + node.h, self.k)
 
     def __str__(self) -> str:

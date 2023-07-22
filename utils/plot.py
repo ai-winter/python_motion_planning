@@ -41,8 +41,8 @@ class Plot:
         ----------
         name: Algorithm name or some other information
         '''
-        plt.plot(self.start.current[0], self.start.current[1], marker="s", color="#ff0000")
-        plt.plot(self.goal.current[0], self.goal.current[1], marker="s", color="#1155cc")
+        plt.plot(self.start.x, self.start.y, marker="s", color="#ff0000")
+        plt.plot(self.goal.x, self.goal.y, marker="s", color="#1155cc")
 
         if isinstance(self.env, Grid):
             obs_x = [x[0] for x in self.env.obstacles]
@@ -99,7 +99,7 @@ class Plot:
         if isinstance(self.env, Grid):
             for x in expand:
                 count += 1
-                plt.plot(x.current[0], x.current[1], color="#dddddd", marker='s')
+                plt.plot(x.x, x.y, color="#dddddd", marker='s')
                 plt.gcf().canvas.mpl_connect('key_release_event',
                                             lambda event: [exit(0) if event.key == 'escape' else None])
                 if count < len(expand) / 3:         length = 20
@@ -111,7 +111,7 @@ class Plot:
             for x in expand:
                 count += 1
                 if x.parent:
-                    plt.plot([x.parent[0], x.current[0]], [x.parent[1], x.current[1]], 
+                    plt.plot([x.parent[0], x.x], [x.parent[1], x.y], 
                         color="#dddddd", linestyle="-")
                     plt.gcf().canvas.mpl_connect('key_release_event',
                                                  lambda event:
@@ -132,8 +132,8 @@ class Plot:
         path_x = [path[i][0] for i in range(len(path))]
         path_y = [path[i][1] for i in range(len(path))]
         plt.plot(path_x, path_y, linewidth='2', color='#13ae00')
-        plt.plot(self.start.current[0], self.start.current[1], marker="s", color="#ff0000")
-        plt.plot(self.goal.current[0], self.goal.current[1], marker="s", color="#1155cc")
+        plt.plot(self.start.x, self.start.y, marker="s", color="#ff0000")
+        plt.plot(self.goal.x, self.goal.y, marker="s", color="#1155cc")
 
     def plotAgent(self, pose: tuple, radius: float=1) -> None:
         '''

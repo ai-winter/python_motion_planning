@@ -127,8 +127,8 @@ class SampleSearcher(Planner):
         x, y = node1.current
 
         # direction
-        dx = node2.current[0] - node1.current[0]
-        dy = node2.current[1] - node1.current[1]
+        dx = node2.x - node1.x
+        dy = node2.y - node1.y
         d  = [dx, dy]
         d2 = np.dot(d, d)
 

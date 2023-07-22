@@ -79,8 +79,8 @@ class RRTConnect(RRT):
                     while True:
                         dist = min(self.max_dist, self.dist(node_new, node_new_b))
                         theta = self.angle(node_new_b, node_new)
-                        node_new_b2 = Node((node_new_b.current[0] + dist * math.cos(theta),
-                                           (node_new_b.current[1] + dist * math.sin(theta))),
+                        node_new_b2 = Node((node_new_b.x + dist * math.cos(theta),
+                                           (node_new_b.y + dist * math.sin(theta))),
                                             node_new_b.current, node_new_b.g + dist, 0)
                         if not self.isCollision(node_new_b2, node_new_b):
                             self.sample_list_b.append(node_new_b2)

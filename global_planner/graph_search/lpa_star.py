@@ -34,7 +34,7 @@ class LNode(Node):
         self.key = key
 
     def __add__(self, node):
-        return LNode((self.current[0] + node.current[0], self.current[1] + node.current[1]), 
+        return LNode((self.x + node.x, self.y + node.y), 
                       self.g, self.rhs, self.key)
 
     def __lt__(self, node) -> bool:

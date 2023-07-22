@@ -6,6 +6,8 @@
 '''
 from math import sqrt
 from abc import ABC, abstractmethod
+from scipy.spatial import cKDTree
+import numpy as np
 
 class Node(object):
     '''
@@ -38,15 +40,14 @@ class Node(object):
     >>> node1 != node3
     >>> True
     '''
-    def __init__(self, current: tuple, parent: tuple, g: float, h: float) -> None:
+    def __init__(self, current: tuple, parent: tuple=None, g: float=0, h: float=0) -> None:
         self.current = current
         self.parent = parent
         self.g = g
         self.h = h
     
     def __add__(self, node):
-        return Node((self.current[0] + node.current[0], self.current[1] + node.current[1]), 
-                     self.parent, self.g + node.g, self.h)
+        return Node((self.x + node.x, self.y + node.y), self.parent, self.g + node.g, self.h)
 
     def __eq__(self, node) -> bool:
         return self.current == node.current
@@ -64,6 +65,28 @@ class Node(object):
     def __str__(self) -> str:
         return "----------\ncurrent:{}\nparent:{}\ng:{}\nh:{}\n----------" \
             .format(self.current, self.parent, self.g, self.h)
+    
+    @property
+    def x(self) -> float:
+        return self.current[0]
+    
+    @property
+    def y(self) -> float:
+        return self.current[1]
+
+    @property
+    def px(self) -> float:
+        if self.parent:
+            return self.parent[0]
+        else:
+            return None
+
+    @property
+    def py(self) -> float:
+        if self.parent:
+            return self.parent[1]
+        else:
+            return None
 
 class Env(ABC):
     '''
@@ -107,6 +130,7 @@ class Grid(Env):
                         Node((0, -1), None, 1, None), Node((-1, -1), None, sqrt(2), None)]
         # obstacles
         self.obstacles = None
+        self.obstacles_tree = None
         self.init()
     
     def init(self) -> None:
@@ -158,9 +182,11 @@ class Grid(Env):
             obstacles.add((40, i))
 
         self.obstacles = obstacles
+        self.obstacles_tree = cKDTree(np.array(list(obstacles)))
 
     def update(self, obstacles):
         self.obstacles = obstacles 
+        self.obstacles_tree = cKDTree(np.array(list(obstacles)))
 
 
 class Map(Env):

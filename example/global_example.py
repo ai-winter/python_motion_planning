@@ -31,8 +31,17 @@ if __name__ == '__main__':
     # planner = search_factory("d_star", start=start, goal=goal, env=env)
     # planner = search_factory("lpa_star", start=start, goal=goal, env=env)
     # planner = search_factory("d_star_lite", start=start, goal=goal, env=env)
+    planner = search_factory("voronoi", start=start, goal=goal, env=env, n_knn=4,
+                                max_edge_len=10.0, inflation_r=1.0)
+    
     # animation
-    # planner.run()
+    planner.run()
+    # from scipy.spatial import cKDTree
+    # import numpy as np  
+    # points_ref = np.array([(1, 1), (3, 3), (4, 4), (5, 4), (6, 6)])
+    # tree = cKDTree(points_ref)
+    # _, idx = tree.query((3, 3), k=4)
+    # print(points_ref)
 
     # ========================================================
 
@@ -58,5 +67,5 @@ if __name__ == '__main__':
     '''
     evolutionary search
     '''
-    planner = search_factory("aco", start=start, goal=goal, env=env)
-    planner.run()
+    # planner = search_factory("aco", start=start, goal=goal, env=env)
+    # planner.run()

@@ -28,6 +28,8 @@ class SearchFactory(object):
             return LPAStar(**config)
         elif planner_name == "d_star_lite":
             return DStarLite(**config)
+        elif planner_name == "voronoi":
+            return VoronoiPlanner(**config)
         elif planner_name == "rrt":
             return RRT(**config)
         elif planner_name == "rrt_connect":

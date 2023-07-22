@@ -122,10 +122,10 @@ class JPS(AStar):
             return new_node
 
         # diagonal
-        if motion.current[0] and motion.current[1]:
+        if motion.x and motion.y:
             # if exists jump point at horizontal or vertical
-            x_dir = Node((motion.current[0], 0), None, 1, None)
-            y_dir = Node((0, motion.current[1]), None, 1, None)
+            x_dir = Node((motion.x, 0), None, 1, None)
+            y_dir = Node((0, motion.y), None, 1, None)
             if self.jump(new_node, x_dir) or self.jump(new_node, y_dir):
                 return new_node
             

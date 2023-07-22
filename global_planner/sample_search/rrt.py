@@ -136,8 +136,8 @@ class RRT(SampleSearcher):
         # regular and generate new node
         dist, theta = self.dist(node_near, node), self.angle(node_near, node)
         dist = min(self.max_dist, dist)
-        node_new = Node((node_near.current[0] + dist * math.cos(theta),
-                        (node_near.current[1] + dist * math.sin(theta))),
+        node_new = Node((node_near.x + dist * math.cos(theta),
+                        (node_near.y + dist * math.sin(theta))),
                          node_near.current, node_near.g + dist, 0)
         
         # obstacle check
