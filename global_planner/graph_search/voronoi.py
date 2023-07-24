@@ -139,7 +139,6 @@ class VoronoiPlanner(GraphSearcher):
                 continue
 
             # goal found
-            # print(node.x, " ", node.y)
             if node == self.goal:
                 CLOSED.append(node)
                 return self.extractPath(CLOSED)
@@ -150,6 +149,7 @@ class VoronoiPlanner(GraphSearcher):
                     continue
                 
                 node_n.parent = node.current
+                node_n.g = self.dist(node_n, node)
                 if not dijkstra:
                     node_n.h = self.h(node_n, self.goal)
 
