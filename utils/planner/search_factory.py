@@ -1,6 +1,6 @@
 '''
-@file: local_planner.py
-@breif: Base class for local planner.
+@file: search_factory.py
+@breif: Facotry class for global planner.
 @author: Winter
 @update: 2023.3.2
 '''

@@ -1,6 +1,6 @@
 '''
-@file: global_planner.py
-@breif: global planner application entry
+@file: global_example.py
+@breif: global planner application examples
 @author: Winter
 @update: 2023.3.2
 '''
@@ -36,12 +36,6 @@ if __name__ == '__main__':
     
     # animation
     planner.run()
-    # from scipy.spatial import cKDTree
-    # import numpy as np  
-    # points_ref = np.array([(1, 1), (3, 3), (4, 4), (5, 4), (6, 6)])
-    # tree = cKDTree(points_ref)
-    # _, idx = tree.query((3, 3), k=4)
-    # print(points_ref)
 
     # ========================================================
 

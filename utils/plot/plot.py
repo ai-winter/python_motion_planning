@@ -7,7 +7,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
-from .env import Env, Grid, Map, Node
+from ..environment.env import Env, Grid, Map, Node
 
 
 class Plot:
@@ -202,3 +202,27 @@ class Plot:
     def update(self):
         self.fig.canvas.draw_idle()
 
+    @staticmethod
+    def plotArrow(x, y, theta, length, color):
+        angle = np.deg2rad(30)
+        d = 0.5 * length
+        w = 2
+
+        x_start, y_start = x, y
+        x_end = x + length * np.cos(theta)
+        y_end = y + length * np.sin(theta)
+
+        theta_hat_L = theta + np.pi - angle
+        theta_hat_R = theta + np.pi + angle
+
+        x_hat_start = x_end
+        x_hat_end_L = x_hat_start + d * np.cos(theta_hat_L)
+        x_hat_end_R = x_hat_start + d * np.cos(theta_hat_R)
+
+        y_hat_start = y_end
+        y_hat_end_L = y_hat_start + d * np.sin(theta_hat_L)
+        y_hat_end_R = y_hat_start + d * np.sin(theta_hat_R)
+
+        plt.plot([x_start, x_end], [y_start, y_end], color=color, linewidth=w)
+        plt.plot([x_hat_start, x_hat_end_L], [y_hat_start, y_hat_end_L], color=color, linewidth=w)
+        plt.plot([x_hat_start, x_hat_end_R], [y_hat_start, y_hat_end_R], color=color, linewidth=w)

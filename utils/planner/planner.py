@@ -6,8 +6,8 @@
 '''
 import math
 from abc import abstractmethod, ABC
-from .env import Env, Node
-from .plot import Plot
+from ..environment.env import Env, Node
+from ..plot.plot import Plot
 
 class Planner(ABC):
     def __init__(self, start: tuple, goal: tuple, env: Env) -> None:
