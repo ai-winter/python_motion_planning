@@ -16,5 +16,7 @@ class CurveFactory(object):
     def __call__(self, curve_name, **config):
         if curve_name == "dubins":
             return Dubins(**config)
+        elif curve_name == "bezier":
+            return Bezier(**config)
         else:
             raise ValueError("The `curve_name` must be set correctly.")

@@ -34,10 +34,8 @@ class Dubins(Curve):
     >>> generator = Dubins(step, max_curv)
     >>> generator.run(points)
     '''
-		
 	def __init__(self, step: float, max_curv: float) -> None:
 		super().__init__(step, max_curv)
-		self.points = []
 	
 	def __str__(self) -> str:
 		return "Dubins Curve"
@@ -269,7 +267,7 @@ class Dubins(Curve):
 
 	def generation(self, start_pose: tuple, goal_pose: tuple):
 		'''
-		Generate the curve with Dubins Curve.
+		Generate the Dubins Curve.
 
 		Parameters
 		----------
@@ -375,7 +373,7 @@ class Dubins(Curve):
 		
 		# animation
 		plt.figure("curve generation")
-		plt.plot(path_x, path_y, linewidth=1, color="#dddddd")
+		plt.plot(path_x, path_y, linewidth=2, c="#1f77b4")
 		for x, y, theta in points:
 			Plot.plotArrow(x, y, np.deg2rad(theta), 2, 'blueviolet')
 
