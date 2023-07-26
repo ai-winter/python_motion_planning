@@ -35,7 +35,8 @@ class Dubins(Curve):
     >>> generator.run(points)
     '''
 	def __init__(self, step: float, max_curv: float) -> None:
-		super().__init__(step, max_curv)
+		super().__init__(step)
+		self.max_curv = max_curv
 	
 	def __str__(self) -> str:
 		return "Dubins Curve"

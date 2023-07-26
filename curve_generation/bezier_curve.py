@@ -21,8 +21,6 @@ class Bezier(Curve):
     ----------
     step: float
         Simulation or interpolation size
-    max_curv: float
-        The maximum curvature of the curve
 	offset: float
 		The offset of control points
 
@@ -30,11 +28,11 @@ class Bezier(Curve):
     ----------
     >>> from curve_generation import Bezier
     >>>	points = [(0, 0, 0), (10, 10, -90), (20, 5, 60)]
-    >>> generator = Bezier(step, max_curv, offset)
+    >>> generator = Bezier(step, offset)
     >>> generator.run(points)
 	'''
-	def __init__(self, step: float, max_curv: float, offset: float) -> None:
-		super().__init__(step, max_curv)
+	def __init__(self, step: float, offset: float) -> None:
+		super().__init__(step)
 		self.offset = offset
 	
 	def __str__(self) -> str:

@@ -1,4 +1,5 @@
-from .dubins_curve import Dubins
+from .polynomial_curve import Polynomial
 from .bezier_curve import Bezier
+from .dubins_curve import Dubins
 
-__all__ = ["Dubins", "Bezier"]
+__all__ = ["Polynomial", "Dubins", "Bezier"]

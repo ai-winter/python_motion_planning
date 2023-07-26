@@ -22,7 +22,8 @@ if __name__ == '__main__':
 
     # create generator
     # generator = curve_factory("dubins", step=0.1, max_curv=0.25)
-    generator = curve_factory("bezier", step=0.1, max_curv=0.25, offset=3.0)
+    # generator = curve_factory("bezier", step=0.1, offset=3.0)
+    generator = curve_factory("polynomial", step=2, max_acc=1.0, max_jerk=0.5)
 
     # animation
     generator.run(points)

@@ -226,3 +226,29 @@ class Plot:
         plt.plot([x_start, x_end], [y_start, y_end], color=color, linewidth=w)
         plt.plot([x_hat_start, x_hat_end_L], [y_hat_start, y_hat_end_L], color=color, linewidth=w)
         plt.plot([x_hat_start, x_hat_end_R], [y_hat_start, y_hat_end_R], color=color, linewidth=w)
+
+    @staticmethod
+    def plotCar(x, y, theta, width, length, color):
+        theta_B = np.pi + theta
+
+        xB = x + length / 4 * np.cos(theta_B)
+        yB = y + length / 4 * np.sin(theta_B)
+
+        theta_BL = theta_B + np.pi / 2
+        theta_BR = theta_B - np.pi / 2
+
+        x_BL = xB + width / 2 * np.cos(theta_BL)        # Bottom-Left vertex
+        y_BL = yB + width / 2 * np.sin(theta_BL)
+        x_BR = xB + width / 2 * np.cos(theta_BR)        # Bottom-Right vertex
+        y_BR = yB + width / 2 * np.sin(theta_BR)
+
+        x_FL = x_BL + length * np.cos(theta)               # Front-Left vertex
+        y_FL = y_BL + length * np.sin(theta)
+        x_FR = x_BR + length * np.cos(theta)               # Front-Right vertex
+        y_FR = y_BR + length * np.sin(theta)
+
+        plt.plot([x_BL, x_BR, x_FR, x_FL, x_BL],
+                 [y_BL, y_BR, y_FR, y_FL, y_BL],
+                 linewidth=1, color=color)
+
+        Plot.plotArrow(x, y, theta, length / 2, color)

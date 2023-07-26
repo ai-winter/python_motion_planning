@@ -18,5 +18,7 @@ class CurveFactory(object):
             return Dubins(**config)
         elif curve_name == "bezier":
             return Bezier(**config)
+        elif curve_name == "polynomial":
+            return Polynomial(**config)
         else:
             raise ValueError("The `curve_name` must be set correctly.")

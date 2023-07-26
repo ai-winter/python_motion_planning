@@ -100,6 +100,7 @@ class ACO(EvolutionarySearcher):
         max_steps = self.env.x_range * self.env.y_range / 2 + max(self.env.x_range, self.env.y_range)
 
         # main loop
+        cost_list = []
         for _ in range(self.max_iter):
             ants_list = []
             for _ in range(self.n_ants):
@@ -159,12 +160,16 @@ class ACO(EvolutionarySearcher):
                     for i in range(len(ant.path) - 1):
                         pheromone_edges[(ant.path[i], ant.path[i + 1])] += c
             
-            best_length_list.append(bpl)
-            if bpl <= min(best_length_list):
-                best_path = bp
+            if bpl < float("inf"):
+                best_length_list.append(bpl)
+
+            if len(best_length_list) > 0:
+                cost_list.append(min(best_length_list))
+                if bpl <= min(best_length_list):
+                    best_path = bp
 
         if best_path:
-            return self.extractPath(best_path), best_length_list
+            return self.extractPath(best_path), cost_list
         return ([], []), []
 
 

@@ -8,7 +8,7 @@ import math
 from abc import ABC, abstractmethod
 
 class Curve(ABC):
-	def __init__(self, step: float, max_curv: float) -> None:
+	def __init__(self, step: float) -> None:
 		'''
 		Base class for curve generation.
 
@@ -16,11 +16,8 @@ class Curve(ABC):
 		----------
 		step: float
 			Simulation or interpolation size
-		max_curv: float
-			The maximum curvature of the curve
 		'''
 		self.step = step
-		self.max_curv = max_curv
 
 	@abstractmethod
 	def run(self, points: list):
@@ -30,7 +27,7 @@ class Curve(ABC):
 		pass
 
 	@abstractmethod
-	def generation(self, start: tuple, goal: tuple):
+	def generation(self, start_pose: tuple, goal_pose: tuple):
 		'''
 		Generate the curve.
 		'''
