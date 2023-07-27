@@ -96,7 +96,7 @@ Planner      |   Version   | Animation
 | **Bezier** | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/curve_generation/bezier_curve.py) | ![bezier_curve_python.png](gif/bezier_curve_python.png)
 | **BSpline** | ![Status](https://img.shields.io/badge/develop-v1.0-red) |![Status](https://img.shields.io/badge/gif-none-yellow)
 | **Dubins** | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/curve_generation/dubins_curve.py) | ![dubins_curve_python.png](gif/dubins_curve_python.png)
-| **Reeds-Shepp** | ![Status](https://img.shields.io/badge/develop-v1.0-red) |![Status](https://img.shields.io/badge/gif-none-yellow)
+| **Reeds-Shepp** | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/curve_generation/reeds_shepp.py) | ![reeds_shepp_python.png](gif/reeds_shepp_python.gif)
 
 
 

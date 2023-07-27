@@ -20,5 +20,7 @@ class CurveFactory(object):
             return Bezier(**config)
         elif curve_name == "polynomial":
             return Polynomial(**config)
+        elif curve_name == "reeds_shepp":
+            return ReedsShepp(**config)
         else:
             raise ValueError("The `curve_name` must be set correctly.")
