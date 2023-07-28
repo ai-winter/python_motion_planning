@@ -22,5 +22,7 @@ class CurveFactory(object):
             return Polynomial(**config)
         elif curve_name == "reeds_shepp":
             return ReedsShepp(**config)
+        elif curve_name == "cubic_spline":
+            return CubicSpline(**config)
         else:
             raise ValueError("The `curve_name` must be set correctly.")
