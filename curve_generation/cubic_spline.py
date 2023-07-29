@@ -36,6 +36,25 @@ class CubicSpline(Curve):
 		return "Cubic Spline"
 
 	def spline(self, x_list: list, y_list: list, t: list):
+		'''
+		Running both generation and animation.
+
+		Parameters
+		----------
+		x_list: list[tuple]
+			path points x-direction
+		y_list: list[tuple]
+			path points y-direction
+		t: list
+			parameter
+		
+		Return
+        ----------
+        p: list
+            The (x, y) of curve with given t
+		dp: list
+			The derivative (dx, dy) of curve with given t
+		'''
 		# cubic polynomial functions
 		a, b, c, d = y_list, [], [], []
 		h = np.diff(x_list)
@@ -76,6 +95,14 @@ class CubicSpline(Curve):
 		pass
 
 	def run(self, points: list):
+		'''
+		Running both generation and animation.
+
+		Parameters
+		----------
+		points: list[tuple]
+			path points
+		'''
 		assert len(points) >= 2, "Number of points should be at least 2."
 		import matplotlib.pyplot as plt
 
@@ -89,7 +116,7 @@ class CubicSpline(Curve):
 			raise NotImplementedError
 		
 		dx, dy = np.diff(x_list), np.diff(y_list)
-		ds = [math.sqrt(idx ** 2 + idy ** 2) for (idx, idy) in zip(dx, dy)]
+		ds = [math.hypot(idx, idy) for (idx, idy) in zip(dx, dy)]
 		s = [0]
 		s.extend(np.cumsum(ds))
 		t = np.arange(0, s[-1], self.step)

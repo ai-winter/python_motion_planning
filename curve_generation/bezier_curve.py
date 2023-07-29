@@ -147,6 +147,7 @@ class Bezier(Curve):
 			Plot.plotArrow(x, y, np.deg2rad(theta), 2, 'blueviolet')
 
 		plt.axis("equal")
+		plt.legend()
 		plt.title(str(self))
 		plt.show()
 		

@@ -24,5 +24,7 @@ class CurveFactory(object):
             return ReedsShepp(**config)
         elif curve_name == "cubic_spline":
             return CubicSpline(**config)
+        elif curve_name == "bspline":
+            return BSpline(**config)
         else:
             raise ValueError("The `curve_name` must be set correctly.")

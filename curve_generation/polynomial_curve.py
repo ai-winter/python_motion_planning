@@ -110,6 +110,21 @@ class Polynomial(Curve):
             return len(self.time)
 
     def generation(self, start_pose: tuple, goal_pose: tuple):
+        '''
+        Generate the polynomial Curve.
+
+        Parameters
+        ----------
+        start_pose: tuple
+            Initial pose (x, y, yaw)
+        goal_pose: tuple
+            Target pose (x, y, yaw)
+
+        Return
+        ----------
+        traj: Traj
+            The first trajectory that satisfies the acceleration and jerk constraint
+        '''
         sx, sy, syaw, sv, sa = start_pose
         gx, gy, gyaw, gv, ga = goal_pose
         
