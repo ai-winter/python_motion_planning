@@ -6,6 +6,7 @@ from .d_star import DStar
 from .lpa_star import LPAStar
 from .d_star_lite import DStarLite
 from .voronoi import VoronoiPlanner
+from .theta_star import ThetaStar
 
 __all__ = ["AStar",
            "Dijkstra",
@@ -14,5 +15,6 @@ __all__ = ["AStar",
            "DStar",
            "LPAStar",
            "DStarLite",
-           "VoronoiPlanner"
+           "VoronoiPlanner",
+           "ThetaStar"
         ]
