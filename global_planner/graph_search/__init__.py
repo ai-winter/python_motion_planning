@@ -7,6 +7,7 @@ from .lpa_star import LPAStar
 from .d_star_lite import DStarLite
 from .voronoi import VoronoiPlanner
 from .theta_star import ThetaStar
+from .lazy_theta_star import LazyThetaStar
 
 __all__ = ["AStar",
            "Dijkstra",
@@ -16,5 +17,6 @@ __all__ = ["AStar",
            "LPAStar",
            "DStarLite",
            "VoronoiPlanner",
-           "ThetaStar"
+           "ThetaStar",
+           "LazyThetaStar"
         ]

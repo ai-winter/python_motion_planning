@@ -32,6 +32,8 @@ class SearchFactory(object):
             return VoronoiPlanner(**config)
         elif planner_name == "theta_star":
             return ThetaStar(**config)
+        elif planner_name == "lazy_theta_star":
+            return LazyThetaStar(**config)
         elif planner_name == "rrt":
             return RRT(**config)
         elif planner_name == "rrt_connect":

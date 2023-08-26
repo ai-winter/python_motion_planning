@@ -1,20 +1,20 @@
 '''
-@file: theta_star.py
-@breif: Theta* motion planning
+@file: lazy_theta_star.py
+@breif: Lazy Theta* motion planning
 @author: Winter
-@update: 2023.8.25
+@update: 2023.8.26
 '''
 import os, sys
 import heapq
 
 sys.path.append(os.path.abspath(os.path.join(__file__, "../../")))
 
-from .a_star import AStar
+from .theta_star import ThetaStar
 from utils import Env, Node
 
-class ThetaStar(AStar):
+class LazyThetaStar(ThetaStar):
     '''
-    Class for Theta* motion planning.
+    Class for Lazy Theta* motion planning.
 
     Parameters
     ----------
@@ -41,13 +41,12 @@ class ThetaStar(AStar):
         super().__init__(start, goal, env, heuristic_type)
 
     def __str__(self) -> str:
-        return "Theta*"
+        return "Lazy Theta*"
 
     def plan(self):
         '''
-        Theta* motion plan function.
-        [1] Theta*: Any-Angle Path Planning on Grids
-        [2] Any-angle path planning on non-uniform costmaps
+        Lazy Theta* motion plan function.
+        [1] Lazy Theta*: Any-Angle Path Planning and Path Length Analysis in 3D
 
         Return
         ----------
@@ -65,6 +64,20 @@ class ThetaStar(AStar):
 
         while OPEN:
             node = heapq.heappop(OPEN)
+
+            # set vertex: path 1
+            try:
+                node_p = CLOSED[CLOSED.index(Node(node.parent))]
+                if self.lineOfSight(node_p, node):
+                    node.g = float("inf")
+                    for node_n in self.getNeighbor(node):
+                        if node_n in CLOSED:
+                            node_n = CLOSED[CLOSED.index(node_n)]
+                            if node.g > node_n.g + self.dist(node_n, node):
+                                node.g = node_n.g + self.dist(node_n, node)
+                                node.parent = node_n.current
+            except:
+                pass
 
             # exists in CLOSED set
             if node in CLOSED:
@@ -91,6 +104,7 @@ class ThetaStar(AStar):
                     node_p = None
 
                 if node_p:
+                    # path2
                     self.updateVertex(node_p, node_n)
 
                 # goal found
@@ -103,8 +117,7 @@ class ThetaStar(AStar):
             
             CLOSED.append(node)
         return ([], []), []
-
-
+    
     def updateVertex(self, node_p: Node, node_c: Node) -> None:
         '''
         Update extend node information with current node's parent node.
@@ -113,69 +126,7 @@ class ThetaStar(AStar):
         ----------
         node_p, node_c: Node
         '''
-        if not self.lineOfSight(node_c, node_p):
-            # path 2
-            if node_p.g + self.dist(node_c, node_p) <= node_c.g:
-                node_c.g = node_p.g + self.dist(node_c, node_p)
-                node_c.parent = node_p.current
-            
-
-    def lineOfSight(self, node1: Node, node2: Node) -> bool:
-        '''
-        Judge collision when moving from node1 to node2 using Bresenham.
-
-        Parameters
-        ----------
-        node1, node2: Node
-
-        Return
-        ----------
-        collision: bool
-            True if collision exists else False
-        '''
-        if node1.current in self.obstacles or node2.current in self.obstacles:
-            return True
-        
-        x1, y1 = node1.current
-        x2, y2 = node2.current
-
-        d_x = abs(x2 - x1)
-        d_y = abs(y2 - y1)
-        s_x = 0 if (x2 - x1) == 0 else (x2 - x1) / d_x
-        s_y = 0 if (y2 - y1) == 0 else (y2 - y1) / d_y
-        x, y, e = x1, y1, 0
-
-        # check if any obstacle exists between node1 and node2
-        if d_x > d_y:
-            tao = (d_y - d_x) / 2
-            while not x == x2:
-                if e > tao:
-                    x = x + s_x
-                    e = e - d_y
-                elif e < tao:
-                    y = y + s_y
-                    e = e + d_x
-                else:
-                    x = x + s_x
-                    y = y + s_y
-                    e = e + d_x - d_y
-                if (x, y) in self.obstacles:
-                    return True
-        # swap x and y
-        else:
-            tao = (d_x - d_y) / 2
-            while not y == y2:
-                if e > tao:
-                    y = y + s_y
-                    e = e - d_x
-                elif e < tao:
-                    x = x + s_x
-                    e = e + d_y
-                else:
-                    x = x + s_x
-                    y = y + s_y
-                    e = e + d_y - d_x
-                if (x, y) in self.obstacles:
-                    return True
-        
-        return False
+        # path 2
+        if node_p.g + self.dist(node_c, node_p) <= node_c.g:
+            node_c.g = node_p.g + self.dist(node_c, node_p)
+            node_c.parent = node_p.current  
