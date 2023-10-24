@@ -51,13 +51,16 @@ class LocalPlanner(Planner):
     def angle(self, start: tuple, end: tuple) -> float:
         return math.atan2(end[1] - start[1], end[0] - start[0])
 
+    def regularizeAngle(self, angle: float):
+        return angle - 2.0 * math.pi * math.floor((angle + math.pi) / (2.0 * math.pi))
+
     @property
     def g_planner(self):
         return str(self.g_planner_)
     
     @g_planner.setter
-    def g_planner(self, **config):
-        if hasattr(config, "planner_name"):
+    def g_planner(self, config):
+        if "planner_name" in config:
             self.g_planner_ = self.search_factory_(**config)
         else:
             raise RuntimeError("Please set planner name!")

@@ -121,7 +121,7 @@ class Plot:
 
         plt.pause(0.01)
 
-    def plotPath(self, path: list) -> None:
+    def plotPath(self, path: list, path_color: str='#13ae00', path_style: str="-") -> None:
         '''
         Plot path in global planning.
 
@@ -131,7 +131,7 @@ class Plot:
         '''
         path_x = [path[i][0] for i in range(len(path))]
         path_y = [path[i][1] for i in range(len(path))]
-        plt.plot(path_x, path_y, linewidth='2', color='#13ae00')
+        plt.plot(path_x, path_y, path_style, linewidth='2', color=path_color)
         plt.plot(self.start.x, self.start.y, marker="s", color="#ff0000")
         plt.plot(self.goal.x, self.goal.y, marker="s", color="#1155cc")
 
@@ -168,15 +168,12 @@ class Plot:
         for pose in history_pose:
             if count < len(history_pose) - 1:
                 plt.plot([history_pose[count][0], history_pose[count + 1][0]],
-                    [history_pose[count][1], history_pose[count + 1][1]], c="r")
+                    [history_pose[count][1], history_pose[count + 1][1]], c="#13ae00")
             count += 1
             self.plotAgent(pose)
             plt.gcf().canvas.mpl_connect('key_release_event',
                                         lambda event: [exit(0) if event.key == 'escape' else None])
-            if count < len(history_pose) / 3:         length = 5
-            elif count < len(history_pose) * 2 / 3:   length = 10
-            else:                                     length = 20
-            if count % length == 0:             plt.pause(0.01)
+            if count % 5 == 0:             plt.pause(0.03)
 
     def plotCostCurve(self, cost_list: list, name: str) -> None:
         '''

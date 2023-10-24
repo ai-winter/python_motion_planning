@@ -79,8 +79,8 @@ class GraphSearcher(Planner):
         if node1.current in self.obstacles or node2.current in self.obstacles:
             return True
 
-        x1, y1 = node1.current
-        x2, y2 = node2.current
+        x1, y1 = node1.x, node1.y
+        x2, y2 = node2.x, node2.y
 
         if x1 != x2 and y1 != y2:
             if x2 - x1 == y1 - y2:

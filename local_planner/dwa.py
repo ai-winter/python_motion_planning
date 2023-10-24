@@ -44,13 +44,14 @@ class DWA(LocalPlanner):
         # robot
         self.robot = Robot(start[0], start[1], start[2], 0, 0, **kinematic)
         # evalution parameters
-        self.eval_param = {"heading": 0.045,
-                           "distance": 0.1,
-                           "velocity": 0.1,
-                           "predict_time": 3.0,
-                           "dt": 0.1,
-                           "R": 2.0
-                        }
+        self.eval_param = {
+            "heading": 0.045,
+            "distance": 0.1,
+            "velocity": 0.1,
+            "predict_time": 3.0,
+            "dt": 0.1,
+            "R": 2.0
+        }
         # threshold
         self.max_iter = 2000
         self.max_dist = 1.0
@@ -97,11 +98,12 @@ class DWA(LocalPlanner):
         # hard margin
         vs = (0, self.robot.V_MAX, -self.robot.W_MAX, self.robot.W_MAX)
         # predict margin
-        vd = (self.robot.v - self.robot.V_ACC * self.eval_param["dt"], 
-              self.robot.v + self.robot.V_ACC * self.eval_param["dt"], 
-              self.robot.w - self.robot.W_ACC * self.eval_param["dt"],
-              self.robot.w + self.robot.W_ACC * self.eval_param["dt"]
-            )
+        vd = (
+            self.robot.v - self.robot.V_ACC * self.eval_param["dt"], 
+            self.robot.v + self.robot.V_ACC * self.eval_param["dt"], 
+            self.robot.w - self.robot.W_ACC * self.eval_param["dt"],
+            self.robot.w + self.robot.W_ACC * self.eval_param["dt"]
+        )
 
         # dynamic window
         v_tmp = np.array([vs, vd])
