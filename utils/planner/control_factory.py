@@ -18,5 +18,7 @@ class ControlFactory(object):
             return DWA(**config)
         elif planner_name == "pid":
             return PID(**config)
+        elif planner_name == "apf":
+            return APF(**config)
         else:
             raise ValueError("The `planner_name` must be set correctly.")

@@ -20,7 +20,7 @@ if __name__ == '__main__':
     env = Grid(51, 31)
 
     # creat planner
-    planner = control_factory("pid", start=start, goal=goal, env=env)
+    planner = control_factory("apf", start=start, goal=goal, env=env)
 
     # animation
     planner.run()

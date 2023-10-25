@@ -99,13 +99,13 @@ class VoronoiPlanner(GraphSearcher):
 
         # calculate shortest path using graph search algorithm
         cost, path = self.getShortestPath(road_map)
-        return cost, path, expand
+        return (cost, path), expand
 
     def run(self):
         '''
         Running both plannig and animation.
         '''
-        cost, path, expand = self.plan()
+        (cost, path), expand = self.plan()
         self.plot.animation(path, str(self), cost, expand)
     
     def getShortestPath(self, road_map: dict, dijkstra: bool = True) -> list:

@@ -30,6 +30,13 @@ class PID(LocalPlanner):
 
     Examples
     ----------
+    >>> from utils import Grid
+    >>> from local_planner import PID
+    >>> start = (5, 5)
+    >>> goal = (45, 25)
+    >>> env = Grid(51, 31)
+    >>> planner = PID(start, goal, env)
+    >>> planner.run()
     '''
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
         super().__init__(start, goal, env, heuristic_type)
