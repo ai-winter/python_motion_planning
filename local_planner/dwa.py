@@ -7,6 +7,7 @@
 import os, sys
 import numpy as np
 from itertools import product
+from scipy.spatial.distance import cdist
 
 sys.path.append(os.path.abspath(os.path.join(__file__, "../../")))
 
@@ -35,12 +36,12 @@ class DWA(LocalPlanner):
         super().__init__(start, goal, env, heuristic_type)
         # kinematic parameters
         kinematic = {}
-        kinematic["V_MAX"]         = 1.0;               #  maximum velocity [m/s]
-        kinematic["W_MAX"]         = 30.0 * np.pi /180; #  maximum rotation speed[rad/s]
-        kinematic["V_ACC"]         = 0.2;               #  acceleration [m/s^2]
-        kinematic["W_ACC"]         = 50.0 * np.pi /180; #  angular acceleration [rad/s^2]
-        kinematic["V_RESOLUTION"]  = 0.01;              #  velocity resolution [m/s]
-        kinematic["W_RESOLUTION"]  = 1.0 * np.pi /180;  #  rotation speed resolution [rad/s]]
+        kinematic["V_MAX"]         = 2.0                #  maximum velocity [m/s]
+        kinematic["W_MAX"]         = 150.0 * np.pi / 180 #  maximum rotation speed[rad/s]
+        kinematic["V_ACC"]         = 0.2                #  acceleration [m/s^2]
+        kinematic["W_ACC"]         = 60.0 * np.pi / 180 #  angular acceleration [rad/s^2]
+        kinematic["V_RESOLUTION"]  = 0.01               #  velocity resolution [m/s]
+        kinematic["W_RESOLUTION"]  = 0.1 * np.pi / 180  #  rotation speed resolution [rad/s]]
         # robot
         self.robot = Robot(start[0], start[1], start[2], 0, 0, **kinematic)
         # evalution parameters
@@ -50,11 +51,11 @@ class DWA(LocalPlanner):
             "velocity": 0.1,
             "predict_time": 3.0,
             "dt": 0.1,
-            "R": 2.0
+            "R": 5.0
         }
         # threshold
         self.max_iter = 2000
-        self.max_dist = 1.0
+        self.max_dist = 1.5
 
     def __str__(self) -> str:
         return "Dynamic Window Approach(DWA)"
@@ -72,19 +73,20 @@ class DWA(LocalPlanner):
         
             # failed
             if not len(eval_win):
-                return
+                break
             
             # update
             max_index = np.argmax(eval_win[:, -1])
             u = np.expand_dims(eval_win[max_index, 0:-1], axis=1)
+
             self.robot.kinematic(u, self.eval_param["dt"])
-            history_traj.append(traj_win)
-            
+            history_traj.append(traj_win[max_index])
+
             # goal found
             if self.dist((self.robot.px, self.robot.py), self.goal) < self.max_dist:
-                return history_traj, self.robot.history_pose
+                return True, history_traj, self.robot.history_pose
 
-        return history_traj, self.robot.history_pose
+        return False, None, None
 
     def calDynamicWin(self) -> list:
         '''
@@ -108,8 +110,10 @@ class DWA(LocalPlanner):
         # dynamic window
         v_tmp = np.array([vs, vd])
         # reference velocity
-        vr = [float(np.max(v_tmp[:, 0])), float(np.min(v_tmp[:, 1])), 
-                float(np.max(v_tmp[:, 2])), float(np.min(v_tmp[:, 3]))]
+        vr = [
+            float(np.max(v_tmp[:, 0])), float(np.min(v_tmp[:, 1])), 
+            float(np.max(v_tmp[:, 2])), float(np.min(v_tmp[:, 3]))
+        ]
         return vr
 
     def evaluation(self, vr):
@@ -140,25 +144,17 @@ class DWA(LocalPlanner):
             
             # heading evaluation
             theta = self.angle((end_state[0], end_state[1]), self.goal)
-            heading = np.pi - abs(end_state[2] - theta)
+            heading = np.pi - abs(theta - end_state[2])
 
             # obstacle evaluation
-            dist_vector = np.array(tuple(self.obstacles)) - np.array([end_state[0], end_state[1]])
-            dist_vector = np.sqrt(np.sum(dist_vector**2, axis=1))
-            distance = np.min(dist_vector)
-            if distance > self.eval_param["R"]:
-                distance = self.eval_param["R"]
+            D = cdist(np.array(tuple(self.obstacles)), traj[:, 0:2])
+            distance = np.min(D) if np.array(D < 1.2).any() else self.eval_param["R"]
 
             # velocity evaluation
             velocity = abs(v_)
             
-            # braking evaluation
-            dist_stop = v_ * v_ / (2 * self.robot.V_ACC)
-
-            # collision check
-            if distance > dist_stop and distance >= 1:
-                eval_win.append((v_, w_, heading, distance, velocity))
-                traj_win.append(traj)
+            eval_win.append((v_, w_, heading, distance, velocity))
+            traj_win.append(traj)
     
         # normalization
         eval_win = np.array(eval_win)
@@ -168,7 +164,7 @@ class DWA(LocalPlanner):
             eval_win[:, 3] = eval_win[:, 3] / np.sum(eval_win[:, 3])
         if np.sum(eval_win[:, 4]) != 0:
             eval_win[:, 4] = eval_win[:, 4] / np.sum(eval_win[:, 4])
-
+        
         # evaluation
         factor = np.array([[1, 0,                          0],
                            [0, 1,                          0],
@@ -177,7 +173,6 @@ class DWA(LocalPlanner):
                            [0, 0, self.eval_param["velocity"]]])
 
         return eval_win @ factor, traj_win
-
 
     def generateTraj(self, v, w):
         '''
@@ -197,22 +192,21 @@ class DWA(LocalPlanner):
             state = self.robot.lookforward(state, u, self.eval_param["dt"])
             traj.append(state)
         
-        return traj
+        return np.array(traj).squeeze()
 
     def run(self):
         '''
         Running both plannig and animation.
         '''
-        history_traj, history_pose = self.plan()
+        _, history_traj, history_pose = self.plan()
 
         if not history_pose:
-            raise ValueError("Path not found!")
+            raise ValueError("Path not found and planning failed!")
 
         path = np.array(history_pose)[:, 0:2]
         cost = np.sum(np.sqrt(np.sum(np.diff(path, axis=0)**2, axis=1, keepdims=True)))
-        # for traj in history_traj[-1]:
-            
-        self.plot.animation(path, str(self), cost, history_pose=history_pose)
+        
+        self.plot.animation(path, str(self), cost, history_pose=history_pose, predict_path=history_traj)
 
 
 

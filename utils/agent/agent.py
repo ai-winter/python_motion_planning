@@ -4,8 +4,9 @@
 @author: Winter
 @update: 2023.3.2
 '''
-from abc import abstractmethod, ABC
+import math
 import numpy as np
+from abc import abstractmethod, ABC
 
 class Agent(ABC):
     '''
@@ -116,8 +117,8 @@ class Robot(Agent):
                       [0, 0, 1, 0, 0],
                       [0, 0, 0, 0, 0],
                       [0, 0, 0, 0, 0]])
-        B = np.array([[dt * np.cos(self.theta),  0],
-                      [dt * np.sin(self.theta),  0],
+        B = np.array([[dt * math.cos(state[2]),  0],
+                      [dt * math.sin(state[2]),  0],
                       [                      0, dt],
                       [                      1,  0],
                       [                      0,  1]])

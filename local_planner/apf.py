@@ -53,7 +53,7 @@ class APF(PID):
     
     def plan(self):
         '''
-        PID motion plan function.
+        APF motion plan function.
 
         Return
         ----------

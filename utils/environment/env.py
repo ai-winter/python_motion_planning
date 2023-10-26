@@ -95,6 +95,7 @@ class Grid(Env):
         # for i in range(15, 18):
         #     obstacles.add((23, i))
         #     obstacles.add((24, i))
+        
         for i in range(10, 21):
             obstacles.add((i, 15))
         for i in range(15):
