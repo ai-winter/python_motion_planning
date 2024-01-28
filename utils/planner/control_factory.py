@@ -22,5 +22,7 @@ class ControlFactory(object):
             return APF(**config)
         elif planner_name == "rpp":
             return RPP(**config)
+        elif planner_name == "lqr":
+            return LQR(**config)
         else:
             raise ValueError("The `planner_name` must be set correctly.")

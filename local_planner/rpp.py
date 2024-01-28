@@ -33,8 +33,8 @@ class RPP(LocalPlanner):
     ----------
     >>> from utils import Grid
     >>> from local_planner import RPP
-    >>> start = (5, 5)
-    >>> goal = (45, 25)
+    >>> start = (5, 5, 0)
+    >>> goal = (45, 25, 0)
     >>> env = Grid(51, 31)
     >>> planner = RPP(start, goal, env)
     >>> planner.run()
@@ -128,7 +128,7 @@ class RPP(LocalPlanner):
         '''
         Applying curvature constraints to regularize the speed of robot turning.
 
-        Return
+        Parameters
         ----------
         raw_linear_vel: float
             the raw linear velocity of robot
@@ -150,7 +150,7 @@ class RPP(LocalPlanner):
         '''
         Applying obstacle constraints to regularize the speed of robot approaching obstacles.
 
-        Return
+        Parameters
         ----------
         raw_linear_vel: float
             the raw linear velocity of robot

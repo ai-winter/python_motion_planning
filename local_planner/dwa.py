@@ -31,6 +31,13 @@ class DWA(LocalPlanner):
 
     Examples
     ----------
+    >>> from utils import Grid
+    >>> from local_planner import DWA
+    >>> start = (5, 5, 0)
+    >>> goal = (45, 25, 0)
+    >>> env = Grid(51, 31)
+    >>> planner = DWA(start, goal, env)
+    >>> planner.run()
     '''
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
         super().__init__(start, goal, env, heuristic_type)

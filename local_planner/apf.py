@@ -33,8 +33,8 @@ class APF(LocalPlanner):
     ----------
     >>> from utils import Grid
     >>> from local_planner import APF
-    >>> start = (5, 5)
-    >>> goal = (45, 25)
+    >>> start = (5, 5, 0)
+    >>> goal = (45, 25, 0)
     >>> env = Grid(51, 31)
     >>> planner = APF(start, goal, env)
     >>> planner.run()
@@ -65,14 +65,12 @@ class APF(LocalPlanner):
             planning successful if true else failed
         pose_list: list
             history poses of robot
-        lookahead_pts: list
-            history lookahead points
         '''
         dt = self.params["TIME_STEP"]
         for _ in range(self.params["MAX_ITERATION"]):
             # break until goal reached
             if self.shouldRotateToGoal(self.robot.position, self.goal):
-                return True, self.robot.history_pose, None
+                return True, self.robot.history_pose
             
             # compute the tatget pose and force at the current step
             lookahead_pt, _, _ = self.getLookaheadPoint()
@@ -105,20 +103,20 @@ class APF(LocalPlanner):
             # feed into robotic kinematic
             self.robot.kinematic(u, dt)
         
-        return False, None, None
+        return False, None
     
     def run(self):
         '''
         Running both plannig and animation.
         '''
-        _, history_pose, lookahead_pts = self.plan()
+        _, history_pose = self.plan()
         if not history_pose:
             raise ValueError("Path not found and planning failed!")
 
         path = np.array(history_pose)[:, 0:2]
         cost = np.sum(np.sqrt(np.sum(np.diff(path, axis=0)**2, axis=1, keepdims=True)))
         self.plot.plotPath(self.path, path_color="r", path_style="--")
-        self.plot.animation(path, str(self), cost, history_pose=history_pose, lookahead_pts=lookahead_pts)
+        self.plot.animation(path, str(self), cost, history_pose=history_pose)
 
     def getRepulsiveForce(self) -> np.ndarray:
         '''
