@@ -18,14 +18,14 @@ class Plot:
         self.fig = plt.figure("planning")
         self.ax = self.fig.add_subplot()
 
-    def animation(self, path, name, cost=None, expand=None, history_pose=None, predict_path=None,
-        cost_curve=None) -> None:
+    def animation(self, path, name, cost=None, expand=None, history_pose=None, predict_path=None, 
+        lookahead_pts=None, cost_curve=None) -> None:
         name = name + "\ncost: " + str(cost) if cost else name
         self.plotEnv(name)
         if expand:
             self.plotExpand(expand)
         if history_pose:
-            self.plotHistoryPose(history_pose, predict_path)
+            self.plotHistoryPose(history_pose, predict_path, lookahead_pts)
         self.plotPath(path)
 
         if cost_curve:
@@ -164,7 +164,8 @@ class Plot:
         circle = plt.Circle((x, y), radius, color="r", fill=False)
         self.ax.add_artist(circle)
 
-    def plotHistoryPose(self, history_pose, predict_path=None) -> None:
+    def plotHistoryPose(self, history_pose, predict_path=None, lookahead_pts=None) -> None:
+        lookahead_handler = None
         for i, pose in enumerate(history_pose):
             if i < len(history_pose) - 1:
                 plt.plot([history_pose[i][0], history_pose[i + 1][0]],
@@ -172,7 +173,19 @@ class Plot:
                 if predict_path is not None:
                     plt.plot(predict_path[i][:, 0], predict_path[i][:, 1], c="#ddd")
             i += 1
+
+            # agent
             self.plotAgent(pose)
+
+            # lookahead
+            if lookahead_handler is not None:
+                lookahead_handler.remove()
+            if lookahead_pts is not None:
+                try:
+                    lookahead_handler = self.ax.scatter(lookahead_pts[i][0], lookahead_pts[i][1], c="b")
+                except:
+                    lookahead_handler = self.ax.scatter(lookahead_pts[-1][0], lookahead_pts[-1][1], c="b")
+
             plt.gcf().canvas.mpl_connect('key_release_event',
                                         lambda event: [exit(0) if event.key == 'escape' else None])
             if i % 5 == 0:             plt.pause(0.03)

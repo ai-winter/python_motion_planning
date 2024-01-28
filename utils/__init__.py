@@ -1,3 +1,4 @@
+from .helper import MathHelper
 from .agent.agent import Robot
 from .environment.env import Env, Grid, Map
 from .environment.node import Node
@@ -8,6 +9,7 @@ from .planner.curve_factory import CurveFactory
 from .planner.control_factory import ControlFactory
 
 __all__ = [
+    "MathHelper",
     "Env", "Grid", "Map", "Node",
     "Plot", 
     "Planner", "SearchFactory", "CurveFactory", "ControlFactory",

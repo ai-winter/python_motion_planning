@@ -11,7 +11,7 @@ import numpy as np
 sys.path.append(os.path.abspath(os.path.join(__file__, "../../")))
 
 from .local_planner import LocalPlanner
-from utils import Env, Robot
+from utils import Env
 
 class PID(LocalPlanner):
     '''
@@ -41,18 +41,8 @@ class PID(LocalPlanner):
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
         super().__init__(start, goal, env, heuristic_type)
         # PID parameters
-        self.dt = 0.1
-        self.p_window = 1.0
-        self.o_window = np.pi / 2
-        self.p_precision = 0.5
-        self.o_precision = np.pi / 4
-        self.max_iter = 1000
-
         self.e_w, self.i_w = 0.0, 0.0
         self.e_v, self.i_v = 0.0, 0.0
-
-        # robot
-        self.robot = Robot(start[0], start[1], start[2], 0, 0)
 
         # global planner
         g_start = (start[0], start[1])
@@ -73,76 +63,62 @@ class PID(LocalPlanner):
             planning successful if true else failed
         pose_list: list
             history poses of robot
+        lookahead_pts: list
+            history lookahead points
         '''
-        plan_idx = 0
-        for _ in range(self.max_iter):
+        dt = self.params["TIME_STEP"]
+        for _ in range(self.params["MAX_ITERATION"]):
             # break until goal reached
-            if math.hypot(self.robot.px - self.goal[0], self.robot.py - self.goal[1]) < self.p_precision:
-                return True, self.robot.history_pose
+            if self.shouldRotateToGoal(self.robot.position, self.goal):
+                return True, self.robot.history_pose, None
             
             # find next tracking point
-            while plan_idx < len(self.path):
-                theta_err = math.atan2(
-                    self.path[plan_idx][1] - self.robot.py, 
-                    self.path[plan_idx][0] - self.robot.px
-                )
+            lookahead_pt, theta_trj, _ = self.getLookaheadPoint()
 
-                if plan_idx < len(self.path) - 1:
-                    theta_trj = math.atan2(
-                        self.path[plan_idx + 1][1] - self.path[plan_idx][1],
-                        self.path[plan_idx + 1][0] - self.path[plan_idx][0]
-                    )
-
-                if abs(theta_err - theta_trj) > np.pi:
-                    if theta_err > theta_trj:
-                        theta_trj += 2 * np.pi
-                    else:
-                        theta_err += 2 * np.pi
-
-                k_theta = 0.5
-                theta_d = k_theta * theta_err + (1 - k_theta) * theta_trj
-                
-                # in body frame
-                b_x_d = self.path[plan_idx][0] - self.robot.px
-                b_y_d = self.path[plan_idx][1] - self.robot.py
-                b_theta_d = theta_d - self.robot.theta
-
-                if math.hypot(b_x_d, b_y_d) > self.p_window or abs(b_theta_d) > self.o_window:
-                    break
-
-                plan_idx += 1
+            # desired angle
+            k_theta = 0.5
+            theta_err = self.angle(self.robot.position, lookahead_pt)
+            if abs(theta_err - theta_trj) > np.pi:
+                if theta_err > theta_trj:
+                    theta_trj += 2 * np.pi
+                else:
+                    theta_err += 2 * np.pi
+            theta_d = k_theta * theta_err + (1 - k_theta) * theta_trj
     
             # calculate velocity command
-            if math.hypot(self.robot.px - self.goal[0], self.robot.py - self.goal[1]) < self.p_precision:
-                if abs(self.robot.theta - self.goal[2]) < self.o_precision:
+            e_theta = self.regularizeAngle(self.robot.theta - self.goal[2]) / 10
+            if self.shouldRotateToGoal(self.robot.position, self.goal):
+                if not self.shouldRotateToPath(abs(e_theta)):
                     u = np.array([[0], [0]])
                 else:
-                    u = np.array([[0], [self.angularController(self.goal[2])]])
-            elif abs(theta_d - self.robot.theta) > np.pi / 2:
-                u = np.array([[0], [self.angularController(theta_d)]])
+                    u = np.array([[0], [self.angularRegularization(e_theta / dt)]])
             else:
-                v_d = math.hypot(b_x_d, b_y_d) / self.dt / 10
-                u = np.array([[self.linearController(v_d)], [self.angularController(theta_d)]])
+                e_theta = self.regularizeAngle(theta_d - self.robot.theta) / 10
+                if self.shouldRotateToPath(abs(e_theta), np.pi / 4):
+                    u = np.array([[0], [self.angularRegularization(e_theta / dt)]])
+                else:
+                    v_d = self.dist(lookahead_pt, self.robot.position) / dt / 10
+                    u = np.array([[self.linearRegularization(v_d)], [self.angularRegularization(e_theta / dt)]])
 
             # feed into robotic kinematic
-            self.robot.kinematic(u, self.dt)
+            self.robot.kinematic(u, dt)
         
-        return False, None
+        return False, None, None
 
     def run(self):
         '''
         Running both plannig and animation.
         '''
-        _, history_pose = self.plan()
+        _, history_pose, lookahead_pts = self.plan()
         if not history_pose:
             raise ValueError("Path not found and planning failed!")
 
         path = np.array(history_pose)[:, 0:2]
         cost = np.sum(np.sqrt(np.sum(np.diff(path, axis=0)**2, axis=1, keepdims=True)))
         self.plot.plotPath(self.path, path_color="r", path_style="--")
-        self.plot.animation(path, str(self), cost, history_pose=history_pose)
+        self.plot.animation(path, str(self), cost, history_pose=history_pose, lookahead_pts=lookahead_pts)
 
-    def linearController(self, v_d: float) -> float:
+    def linearRegularization(self, v_d: float) -> float:
         '''
         Linear velocity controller with pid.
 
@@ -157,8 +133,8 @@ class PID(LocalPlanner):
             control velocity output
         '''
         e_v = v_d - self.robot.v
-        self.i_v += e_v * self.dt
-        d_v = (e_v - self.e_v) / self.dt
+        self.i_v += e_v * self.params["TIME_STEP"]
+        d_v = (e_v - self.e_v) / self.params["TIME_STEP"]
         self.e_v = e_v
 
         k_v_p = 1.00
@@ -170,13 +146,13 @@ class PID(LocalPlanner):
         
         return v
 
-    def angularController(self, theta_d: float) -> float:
+    def angularRegularization(self, w_d: float) -> float:
         '''
         Angular velocity controller with pid.
 
         Parameters
         ----------
-        theta_d: float
+        w_d: float
             reference angular input
 
         Return
@@ -184,12 +160,9 @@ class PID(LocalPlanner):
         w: float
             control angular velocity output
         '''
-        e_theta = self.regularizeAngle(theta_d - self.robot.theta)
-
-        w_d = e_theta / self.dt / 10
         e_w = w_d - self.robot.w
-        self.i_w += e_w * self.dt
-        d_w = (e_w - self.e_w) / self.dt
+        self.i_w += e_w * self.params["TIME_STEP"]
+        d_w = (e_w - self.e_w) / self.params["TIME_STEP"]
         self.e_w = e_w
 
         k_w_p = 1.00

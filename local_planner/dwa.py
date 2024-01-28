@@ -43,7 +43,8 @@ class DWA(LocalPlanner):
         kinematic["V_RESOLUTION"]  = 0.01               #  velocity resolution [m/s]
         kinematic["W_RESOLUTION"]  = 0.1 * np.pi / 180  #  rotation speed resolution [rad/s]]
         # robot
-        self.robot = Robot(start[0], start[1], start[2], 0, 0, **kinematic)
+        self.robot.setParameters(**kinematic)
+        
         # evalution parameters
         self.eval_param = {
             "heading": 0.045,

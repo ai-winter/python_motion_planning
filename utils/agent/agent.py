@@ -25,6 +25,17 @@ class Agent(ABC):
         self.px = px
         self.py = py
         self.theta = theta
+        self.parameters = None
+
+    def setParameters(self, **parameters):
+        # other customer parameters
+        self.parameters = parameters
+        for param, val in parameters.items():
+            setattr(self, param, val)
+
+    @property
+    def position(self):
+        return (self.px, self.py)
 
     @abstractmethod
     def kinematic(self, u, dt):
@@ -52,17 +63,13 @@ class Robot(Agent):
     w: float
         angular velocity
     '''  
-    def __init__(self, px, py, theta, v, w, **parameters) -> None:
+    def __init__(self, px, py, theta, v, w) -> None:
         super().__init__(px, py, theta)
         # velocity
         self.v = v
         self.w = w
         # history
         self.history_pose = []
-        # other parameters
-        self.parameters = parameters
-        for param, val in parameters.items():
-            setattr(self, param, val)
     
     def __str__(self) -> str:
         return "Robot"
@@ -91,8 +98,10 @@ class Robot(Agent):
             self.px, self.py, self.theta = new_state[0], new_state[1], new_state[2]
             self.v, self.w = new_state[3], new_state[4]
         else:
-            return Robot(new_state[0], new_state[1], new_state[2], 
-                new_state[3], new_state[4], **self.parameters)
+            new_robot = Robot(new_state[0], new_state[1], new_state[2], 
+                new_state[3], new_state[4])
+            new_robot.setParameters(self.parameters)
+            return new_robot
     
     def lookforward(self, state: np.ndarray, u: np.ndarray, dt: float) -> np.ndarray:
         '''

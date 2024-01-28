@@ -1,8 +1,8 @@
 '''
-@file: apf.py
-@breif: Artificial Potential Field(APF) motion planning
+@file: rpp.py
+@breif: Regulated Pure Pursuit (RPP) motion planning
 @author: Winter
-@update: 2023.10.24
+@update: 2023.1.25
 '''
 import math
 import os, sys
@@ -12,11 +12,11 @@ from scipy.spatial.distance import cdist
 sys.path.append(os.path.abspath(os.path.join(__file__, "../../")))
 
 from .local_planner import LocalPlanner
-from utils import Env
+from utils import Env, Robot
 
-class APF(LocalPlanner):
+class RPP(LocalPlanner):
     '''
-    Class for Artificial Potential Field(APF) motion planning.
+    Class for RPP motion planning.
 
     Parameters
     ----------
@@ -32,19 +32,19 @@ class APF(LocalPlanner):
     Examples
     ----------
     >>> from utils import Grid
-    >>> from local_planner import APF
+    >>> from local_planner import RPP
     >>> start = (5, 5)
     >>> goal = (45, 25)
     >>> env = Grid(51, 31)
-    >>> planner = APF(start, goal, env)
+    >>> planner = RPP(start, goal, env)
     >>> planner.run()
     '''
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
         super().__init__(start, goal, env, heuristic_type)
-        # APF parameters
-        self.zeta = 1.0
-        self.eta = 1.5
-        self.d_0 = 1.5
+        # RPP parameters
+        self.regulated_radius_min = 0.9
+        self.scaling_dist = 0.6
+        self.scaling_gain = 1.0
 
         # global planner
         g_start = (start[0], start[1])
@@ -53,11 +53,11 @@ class APF(LocalPlanner):
         self.path = self.g_path[::-1]
 
     def __str__(self) -> str:
-        return "Artificial Potential Field(APF)"
-    
+        return "Regulated Pure Pursuit (RPP)"
+
     def plan(self):
         '''
-        APF motion plan function.
+        RPP motion plan function.
 
         Return
         ----------
@@ -68,24 +68,20 @@ class APF(LocalPlanner):
         lookahead_pts: list
             history lookahead points
         '''
+        lookahead_pts = []
         dt = self.params["TIME_STEP"]
         for _ in range(self.params["MAX_ITERATION"]):
             # break until goal reached
             if self.shouldRotateToGoal(self.robot.position, self.goal):
-                return True, self.robot.history_pose, None
-            
-            # compute the tatget pose and force at the current step
+                return True, self.robot.history_pose, lookahead_pts
+
+            # get the particular point on the path at the lookahead distance
             lookahead_pt, _, _ = self.getLookaheadPoint()
-            rep_force = self.getRepulsiveForce()
-            attr_force = self.getAttractiveForce(np.array(self.robot.position), np.array(lookahead_pt))
-            net_force = self.zeta * attr_force + self.eta * rep_force
-            
-            # compute desired velocity
-            v, theta = self.robot.v, self.robot.theta
-            new_v = np.array([v * math.cos(theta), v * math.sin(theta)]) + net_force
-            new_v /= np.linalg.norm(new_v)
-            new_v *= self.params["MAX_V"]
-            theta_d = math.atan2(new_v[1], new_v[0])
+
+            # get the tracking curvature with goalahead point
+            lookahead_k = 2 * math.sin(
+                self.angle(self.robot.position, lookahead_pt) - self.robot.theta
+            ) / self.lookahead_dist
 
             # calculate velocity command
             e_theta = self.regularizeAngle(self.robot.theta - self.goal[2]) / 10
@@ -95,18 +91,26 @@ class APF(LocalPlanner):
                 else:
                     u = np.array([[0], [self.angularRegularization(e_theta / dt)]])
             else:
-                e_theta = self.regularizeAngle(theta_d - self.robot.theta) / 10
+                e_theta = self.regularizeAngle(
+                    self.angle(self.robot.position, lookahead_pt) - self.robot.theta
+                ) / 10
                 if self.shouldRotateToPath(abs(e_theta), np.pi / 4):
                     u = np.array([[0], [self.angularRegularization(e_theta / dt)]])
                 else:
-                    v_d = np.linalg.norm(new_v)
-                    u = np.array([[self.linearRegularization(v_d)], [self.angularRegularization(e_theta / dt)]])
+                    # apply constraints
+                    curv_vel = self.applyCurvatureConstraint(self.params["MAX_V"], lookahead_k)
+                    cost_vel = self.applyObstacleConstraint(self.params["MAX_V"])
+                    v_d = min(curv_vel, cost_vel)
+                    u = np.array([[self.linearRegularization(v_d)], [self.angularRegularization(v_d * lookahead_k)]])
             
+            # update lookahead points
+            lookahead_pts.append(lookahead_pt)
+
             # feed into robotic kinematic
             self.robot.kinematic(u, dt)
         
         return False, None, None
-    
+
     def run(self):
         '''
         Running both plannig and animation.
@@ -120,45 +124,46 @@ class APF(LocalPlanner):
         self.plot.plotPath(self.path, path_color="r", path_style="--")
         self.plot.animation(path, str(self), cost, history_pose=history_pose, lookahead_pts=lookahead_pts)
 
-    def getRepulsiveForce(self) -> np.ndarray:
+    def applyCurvatureConstraint(self, raw_linear_vel: float, curvature: float) -> float:
         '''
-        Get the repulsive  force of APF.
+        Applying curvature constraints to regularize the speed of robot turning.
 
         Return
         ----------
-        rep_force: np.ndarray
-            the repulsive force of APF
+        raw_linear_vel: float
+            the raw linear velocity of robot
+        curvature: float
+            the tracking curvature
+
+        Return
+        ----------
+        reg_vel: float
+            the regulated velocity
+        '''
+        radius = abs(1.0 / curvature)
+        if radius < self.regulated_radius_min:
+            return raw_linear_vel * (radius / self.regulated_radius_min)
+        else:
+            return raw_linear_vel
+    
+    def applyObstacleConstraint(self, raw_linear_vel: float) -> float:
+        '''
+        Applying obstacle constraints to regularize the speed of robot approaching obstacles.
+
+        Return
+        ----------
+        raw_linear_vel: float
+            the raw linear velocity of robot
+
+        Return
+        ----------
+        reg_vel: float
+            the regulated velocity
         '''
         obstacles = np.array(list(self.obstacles))
-        cur_pos = np.array([[self.robot.px, self.robot.py]])
-        D = cdist(obstacles, cur_pos)
-        rep_force = (1 / D - 1 / self.d_0) * (1 / D) ** 2 * (cur_pos - obstacles)
-        valid_mask = np.argwhere((1 / D - 1 / self.d_0) > 0)[:, 0]
-        rep_force = np.sum(rep_force[valid_mask, :], axis=0)
-
-        if not np.all(rep_force == 0):
-            rep_force = rep_force / np.linalg.norm(rep_force)
-        
-        return rep_force
-    
-    def getAttractiveForce(self, cur_pos: np.ndarray, tgt_pos: np.ndarray) -> np.ndarray:
-        '''
-        Get the attractive force of APF.
-
-        Parameters
-        ----------
-        cur_pos: np.ndarray
-            current position of robot
-        tgt_pos: np.ndarray
-            target position of robot
-
-        Return
-        ----------
-        attr_force: np.ndarray
-            the attractive force
-        '''
-        attr_force = tgt_pos - cur_pos
-        if not np.all(attr_force == 0):
-            attr_force = attr_force / np.linalg.norm(attr_force)
-        
-        return attr_force
+        D = cdist(obstacles, np.array([[self.robot.px, self.robot.py]]))
+        obs_dist = np.min(D)
+        if obs_dist < self.scaling_dist:
+            return raw_linear_vel * self.scaling_gain * obs_dist / self.scaling_dist
+        else:
+            return raw_linear_vel

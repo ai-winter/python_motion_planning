@@ -20,5 +20,7 @@ class ControlFactory(object):
             return PID(**config)
         elif planner_name == "apf":
             return APF(**config)
+        elif planner_name == "rpp":
+            return RPP(**config)
         else:
             raise ValueError("The `planner_name` must be set correctly.")

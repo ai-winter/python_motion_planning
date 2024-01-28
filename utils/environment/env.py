@@ -71,31 +71,7 @@ class Grid(Env):
             obstacles.add((0, i))
             obstacles.add((x - 1, i))
 
-        # user-defined obstacles
-        # for i in range(3, 15):
-        #     obstacles.add((i, 10))
-        # for i in range(7, 11):
-        #     obstacles.add((3, i))
-        # for i in range(4, 16):
-        #     obstacles.add((i, 2))
-        # for i in range(3, 7):
-        #     obstacles.add((7, i))
-        # for i in range(19, 27):
-        #     obstacles.add((i, 12))
-        # for i in range(2, 7):
-        #     obstacles.add((20, i))
-        # obstacles.add((21, 2))
-        # obstacles.add((22, 2))
-        # for i in range(14, 18):
-        #     obstacles.add((5, i))
-        #     obstacles.add((13, i))
-        # for i in range(5, 9):
-        #     obstacles.add((25, i))
-        #     obstacles.add((26, i))
-        # for i in range(15, 18):
-        #     obstacles.add((23, i))
-        #     obstacles.add((24, i))
-        
+        # user-defined obstacles        
         for i in range(10, 21):
             obstacles.add((i, 15))
         for i in range(15):
