@@ -89,7 +89,7 @@ Planner      |   Version   | Animation
 |   **RPP**   |     [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/local_planner/rpp.py)     | ![rpp_python.gif](gif/rpp_python.gif)
 | **LQR** | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/local_planner/lqr.py) | ![lqr_python.gif](gif/lqr_python.gif) 
 | **TEB** | ![Status](https://img.shields.io/badge/develop-v1.0-red) | ![Status](https://img.shields.io/badge/gif-none-yellow) 
-| **MPC** | ![Status](https://img.shields.io/badge/develop-v1.0-red) | ![Status](https://img.shields.io/badge/gif-none-yellow) 
+| **MPC** | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/local_planner/mpc.py) | ![mpc_python.gif](gif/mpc_python.gif)
 | **Lattice** | ![Status](https://img.shields.io/badge/develop-v1.0-red) |![Status](https://img.shields.io/badge/gif-none-yellow)
 
 ## Curve Generation

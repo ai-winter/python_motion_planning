@@ -64,8 +64,6 @@ class LQR(LocalPlanner):
             planning successful if true else failed
         pose_list: list
             history poses of robot
-        lookahead_pts: list
-            history lookahead points
         '''
         dt = self.params["TIME_STEP"]
         for _ in range(self.params["MAX_ITERATION"]):
@@ -98,7 +96,7 @@ class LQR(LocalPlanner):
             # feed into robotic kinematic
             self.robot.kinematic(u, dt)
         
-        return True, self.robot.history_pose
+        return False, None
 
     def run(self):
         '''
