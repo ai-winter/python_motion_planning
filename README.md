@@ -33,6 +33,12 @@ python_motion_planning
 * The local planning algorithm implementation is in the folder `local_planner`.
 * The curve generation algorithm implementation is in the folder `curve_generation`.
 
+The code was tested in python=3.10. To install other dependencies, please run the following command in shell.
+
+```shell
+pip install -r requirements.txt
+```
+
 To start simulation, open the folder `example` and select the algorithm, for example
 
 ```python

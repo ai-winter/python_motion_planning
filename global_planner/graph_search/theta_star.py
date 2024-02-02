@@ -2,7 +2,7 @@
 @file: theta_star.py
 @breif: Theta* motion planning
 @author: Winter
-@update: 2023.8.25
+@update: 2024.2.2
 '''
 import os, sys
 import heapq
@@ -113,7 +113,7 @@ class ThetaStar(AStar):
         ----------
         node_p, node_c: Node
         '''
-        if not self.lineOfSight(node_c, node_p):
+        if self.lineOfSight(node_c, node_p):
             # path 2
             if node_p.g + self.dist(node_c, node_p) <= node_c.g:
                 node_c.g = node_p.g + self.dist(node_c, node_p)
@@ -131,10 +131,10 @@ class ThetaStar(AStar):
         Return
         ----------
         collision: bool
-            True if collision exists else False
+            True if line of sight exists ( no collision ) else False
         '''
         if node1.current in self.obstacles or node2.current in self.obstacles:
-            return True
+            return False
         
         x1, y1 = node1.current
         x2, y2 = node2.current
@@ -160,7 +160,7 @@ class ThetaStar(AStar):
                     y = y + s_y
                     e = e + d_x - d_y
                 if (x, y) in self.obstacles:
-                    return True
+                    return False
         # swap x and y
         else:
             tao = (d_x - d_y) / 2
@@ -176,6 +176,6 @@ class ThetaStar(AStar):
                     y = y + s_y
                     e = e + d_y - d_x
                 if (x, y) in self.obstacles:
-                    return True
+                    return False
         
-        return False
+        return True

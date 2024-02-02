@@ -2,7 +2,7 @@
 @file: lazy_theta_star.py
 @breif: Lazy Theta* motion planning
 @author: Winter
-@update: 2023.8.26
+@update: 2024.2.2
 '''
 import os, sys
 import heapq
@@ -68,7 +68,7 @@ class LazyThetaStar(ThetaStar):
             # set vertex: path 1
             try:
                 node_p = CLOSED[CLOSED.index(Node(node.parent))]
-                if self.lineOfSight(node_p, node):
+                if not self.lineOfSight(node_p, node):
                     node.g = float("inf")
                     for node_n in self.getNeighbor(node):
                         if node_n in CLOSED:

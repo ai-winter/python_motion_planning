@@ -1,15 +1,40 @@
 '''
 @file: global_example.py
 @breif: global planner application examples
-@author: Winter
-@update: 2023.3.2
+@author: Winter, Wu Maojia
+@update: 2024.2.2
 '''
 import sys, os
 sys.path.append(os.path.abspath(os.path.join(__file__, "../../")))
 from utils import Grid, Map, SearchFactory
+import argparse
+
+
+def get_args():
+    parser = argparse.ArgumentParser(description='Global Planner Example')
+    parser.add_argument('--algorithm', '-a', type=str, default='a_star', help='global algorithm type')
+    parser.add_argument('--start', '-s', type=tuple, default=(5, 5), help='start point coordinate')
+    parser.add_argument('--goal', '-g', type=tuple, default=(45, 25), help='goal point coordinate')
+    parser.add_argument('--env', '-e', type=tuple, default=(51,31), help='environment size')
+    parser.add_argument('--n-knn', type=int, default=4, help='number of edges from one sampled point, for "voronoi"')
+    parser.add_argument('--max-edge-len', type=float, default=10.0, help='maximum edge length, for "voronoi"')
+    parser.add_argument('--inflation-r', type=float, default=1.0, help='inflation radius, for "voronoi"')
+    parser.add_argument('--max-dist', type=float, default=0.5, help='maximum distance of sample points, '
+                                                                    'for sample algorithms')
+    parser.add_argument('--sample-num', type=int, default=10000, help='sample number, for sample algorithms')
+    parser.add_argument('--optim-r', type=float, default=12, help='optimization radius, for "rrt_star"')
+
+    parsed_args = parser.parse_args()
+    assert parsed_args.algorithm in ["a_star", "dijkstra", "gbfs", "theta_star", "lazy_theta_star", "jps", "d_star",
+                                     "lpa_star", "d_star_lite", "voronoi", "rrt", "rrt_connect", "rrt_star",
+                                     "informed_rrt", "aco"], "Invalid algorithm type"
+
+    return parsed_args
 
 
 if __name__ == '__main__':
+    args = get_args()
+
     '''
     path searcher constructor
     '''
@@ -19,49 +44,25 @@ if __name__ == '__main__':
     graph search
     '''
     # build environment
-    start = (5, 5)
-    goal = (45, 25)
-    env = Grid(51, 31)
+    start = args.start
+    goal = args.goal
+    if args.algorithm in ["a_star", "dijkstra", "gbfs", "theta_star", "lazy_theta_star", "jps", "d_star", "lpa_star",
+                          "d_star_lite", "voronoi"]:    # graph search
+        env = Grid(args.env[0], args.env[1])
+    else:   # sample search and evolutionary search
+        env = Map(args.env[0], args.env[1])
 
     # creat planner
-    planner = search_factory("a_star", start=start, goal=goal, env=env)
-    # planner = search_factory("dijkstra", start=start, goal=goal, env=env)
-    # planner = search_factory("gbfs", start=start, goal=goal, env=env)
-    # planner = search_factory("theta_star", start=start, goal=goal, env=env)
-    # planner = search_factory("lazy_theta_star", start=start, goal=goal, env=env)
-    # planner = search_factory("jps", start=start, goal=goal, env=env)
-    # planner = search_factory("d_star", start=start, goal=goal, env=env)
-    # planner = search_factory("lpa_star", start=start, goal=goal, env=env)
-    # planner = search_factory("d_star_lite", start=start, goal=goal, env=env)
-    # planner = search_factory("voronoi", start=start, goal=goal, env=env, n_knn=4,
-    #                             max_edge_len=10.0, inflation_r=1.0)
+    if args.algorithm == "voronoi":
+        planner = search_factory(args.algorithm, start=start, goal=goal, env=env, n_knn=4, max_edge_len=10.0,
+                                 inflation_r=1.0)
+    elif args.algorithm in ["rrt", "rrt_connect"]:
+        planner = search_factory(args.algorithm, start=start, goal=goal, env=env, max_dist=0.5, sample_num=10000)
+    elif args.algorithm in ["rrt_star", "informed_rrt"]:
+        planner = search_factory(args.algorithm, start=start, goal=goal, env=env, max_dist=0.5, r=12, sample_num=10000)
+    else:   # ["a_star", "dijkstra", "gbfs", "theta_star", "lazy_theta_star", "jps", "d_star", "lpa_star",
+        # "d_star_lite", "aco"]
+        planner = search_factory(args.algorithm, start=start, goal=goal, env=env)
     
     # animation
     planner.run()
-
-    # ========================================================
-
-    '''
-    sample search
-    '''
-    # # build environment
-    # start = (18, 8)
-    # goal = (37, 18)
-    # env = Map(51, 31)
-
-    # # creat planner
-    # planner = search_factory("rrt", start=start, goal=goal, env=env, max_dist=0.5, sample_num=10000)
-    # # planner = search_factory("rrt_connect", start=start, goal=goal, env=env, max_dist=0.5, sample_num=10000)
-    # # planner = search_factory("rrt_star", start=start, goal=goal, env=env, max_dist=0.5, r=10, sample_num=10000)
-    # # planner = search_factory("informed_rrt", start=start, goal=goal, env=env, max_dist=0.5, r=12, sample_num=1500)
-
-    # # animation
-    # planner.run()
-
-    # ========================================================
-
-    '''
-    evolutionary search
-    '''
-    # planner = search_factory("aco", start=start, goal=goal, env=env)
-    # planner.run()
