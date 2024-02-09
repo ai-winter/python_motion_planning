@@ -5,8 +5,8 @@
 @update: 2023.10.24
 '''
 import sys, os
-sys.path.append(os.path.abspath(os.path.join(__file__, "../../")))
-from utils import Grid, Map, ControlFactory
+sys.path.append(os.path.abspath(os.path.join(__file__, "../")))
+from src.utils import Grid, ControlFactory
 
 if __name__ == '__main__':
     '''

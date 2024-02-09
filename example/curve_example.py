@@ -5,8 +5,8 @@
 @update: 2023.7.25
 '''
 import sys, os
-sys.path.append(os.path.abspath(os.path.join(__file__, "../../")))
-from utils import CurveFactory
+sys.path.append(os.path.abspath(os.path.join(__file__, "../")))
+from src.utils import CurveFactory
 
 if __name__ == '__main__':
     # simulation pose
