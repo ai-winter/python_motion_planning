@@ -23,3 +23,6 @@ pnpm-debug.log*
 *.sw?
 *.pyc
 *.log
+
+# auto generated files
+site/

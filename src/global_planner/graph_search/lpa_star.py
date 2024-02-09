@@ -1,32 +1,27 @@
-'''
+"""
 @file: lpa_star.py
 @breif: Lifelong Planning A* motion planning
 @author: Winter
 @update: 2023.1.16
-'''
+"""
 import os, sys
 import heapq
 
-sys.path.append(os.path.abspath(os.path.join(__file__, "../../../")))
+sys.path.append(os.path.abspath(os.path.join(__file__, "../../")))
 
 from .graph_search import GraphSearcher
-from src.utils import Env, Node
+from utils import Env, Node
 
 class LNode(Node):
-    '''
+    """
     Class for LPA* nodes.
 
-    Parameters
-    ----------
-    current: tuple
-        current coordinate
-    g: float
-        minimum cost moving from start(predict)
-    rhs: float
-        minimum cost moving from start(value)
-    key: list
-        priority
-    '''
+    Parameters:
+        current (tuple): current coordinate
+        g (float): minimum cost moving from start(predict)
+        rhs (float): minimum cost moving from start(value)
+        key (list): priority
+    """
     def __init__(self, current: tuple, g: float, rhs: float, key: list) -> None:
         self.current = current
         self.g = g
@@ -45,31 +40,27 @@ class LNode(Node):
             .format(self.current, self.g, self.rhs, self.key)
 
 class LPAStar(GraphSearcher):
-    '''
+    """
     Class for LPA* motion planning.
-    [1] Lifelong Planning A*
 
-    Parameters
-    ----------
-    start: tuple
-        start point coordinate
-    goal: tuple
-        goal point coordinate
-    env: Env
-        environment
-    heuristic_type: str
-        heuristic function type, default is euclidean
+    Parameters:
+        start (tuple): start point coordinate
+        goal (tuple): goal point coordinate
+        env (Env): environment
+        heuristic_type (str): heuristic function type
 
-    Examples
-    ----------
-    >>> from src.utils import Grid
-    >>> from graph_search import LPAStar
-    >>> start = (5, 5)
-    >>> goal = (45, 25)
-    >>> env = Grid(51, 31)
-    >>> planner = LPAStar(start, goal, env)
-    >>> planner.run()
-    '''
+    Examples:
+        >>> from src.utils import Grid
+        >>> from graph_search import LPAStar
+        >>> start = (5, 5)
+        >>> goal = (45, 25)
+        >>> env = Grid(51, 31)
+        >>> planner = LPAStar(start, goal, env)
+        >>> planner.run()
+
+    References:
+        [1] Lifelong Planning A*
+    """
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
         super().__init__(start, goal, env, heuristic_type)
         # start and goal
@@ -90,16 +81,16 @@ class LPAStar(GraphSearcher):
         return "Lifelong Planning A*"
 
     def plan(self):
-        '''
+        """
         LPA* dynamic motion planning function.
-        '''
+        """
         self.computeShortestPath()
         return self.extractPath(), None
 
     def run(self) -> None:
-        '''
+        """
         Running both plannig and animation.
-        '''
+        """
         # static planning
         (cost, path), _ = self.plan()        
         
@@ -108,9 +99,9 @@ class LPAStar(GraphSearcher):
         self.plot.animation(path, str(self), cost=cost)
 
     def OnPress(self, event):
-        '''
+        """
         Mouse button callback function.
-        '''
+        """
         x, y = int(event.xdata), int(event.ydata)
         if x < 0 or x > self.env.x_range - 1 or y < 0 or y > self.env.y_range - 1:
             print("Please choose right area!")
@@ -138,9 +129,9 @@ class LPAStar(GraphSearcher):
             self.plot.update()
 
     def computeShortestPath(self) -> None:
-        '''
+        """
         Perceived dynamic obstacle information to optimize global path.
-        '''
+        """
         while True:
             node = min(self.U, key=lambda node: node.key)
             if node.key >= self.calculateKey(self.goal) and \
@@ -162,9 +153,9 @@ class LPAStar(GraphSearcher):
                 self.updateVertex(node_n)
 
     def updateVertex(self, node: LNode) -> None:
-        '''
+        """
         Update the status and the current cost to node and it's neighbor.
-        '''
+        """
         # greed correction
         if node != self.start:
             node.rhs = min([node_n.g + self.cost(node_n, node)
@@ -179,14 +170,14 @@ class LPAStar(GraphSearcher):
             heapq.heappush(self.U, node)
 
     def calculateKey(self, node: LNode) -> list:
-        '''
+        """
         Calculate priority of node.
-        ''' 
+        """
         return [min(node.g, node.rhs) + self.h(node, self.goal),
                 min(node.g, node.rhs)]
 
     def getNeighbor(self, node: LNode) -> list:
-        '''
+        """
         Find neighbors of node.
 
         Parameters
@@ -198,7 +189,7 @@ class LPAStar(GraphSearcher):
         ----------
         neighbors: list
             neighbors of current node
-        '''
+        """
         neighbors = []
         for motion in self.motions:
             n = self.map[self.map.index(node + motion)]
@@ -207,7 +198,7 @@ class LPAStar(GraphSearcher):
         return neighbors
 
     def extractPath(self):
-        '''
+        """
         Extract the path based on greedy policy.
 
         Return
@@ -216,7 +207,7 @@ class LPAStar(GraphSearcher):
             the cost of planning path
         path: list
             the planning path
-        '''
+        """
         node = self.goal
         path = [node.current]
         cost, count = 0, 0

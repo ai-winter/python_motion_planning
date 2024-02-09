@@ -1,9 +1,9 @@
-'''
+"""
 @file: apf.py
 @breif: Artificial Potential Field(APF) motion planning
 @author: Winter
 @update: 2023.10.24
-'''
+"""
 import math
 import os, sys
 import numpy as np
@@ -15,30 +15,24 @@ from .local_planner import LocalPlanner
 from utils import Env
 
 class APF(LocalPlanner):
-    '''
+    """
     Class for Artificial Potential Field(APF) motion planning.
 
-    Parameters
-    ----------
-    start: tuple
-        start point coordinate
-    goal: tuple
-        goal point coordinate
-    env: Env
-        environment
-    heuristic_type: str
-        heuristic function type, default is euclidean
+    Parameters:
+        start (tuple): start point coordinate
+        goal (tuple): goal point coordinate
+        env (Env): environment
+        heuristic_type (str): heuristic function type
 
-    Examples
-    ----------
-    >>> from src.utils import Grid
-    >>> from src.local_planner import APF
-    >>> start = (5, 5, 0)
-    >>> goal = (45, 25, 0)
-    >>> env = Grid(51, 31)
-    >>> planner = APF(start, goal, env)
-    >>> planner.run()
-    '''
+    Examples:
+        >>> from src.utils import Grid
+        >>> from src.local_planner import APF
+        >>> start = (5, 5, 0)
+        >>> goal = (45, 25, 0)
+        >>> env = Grid(51, 31)
+        >>> planner = APF(start, goal, env)
+        >>> planner.run()
+    """
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
         super().__init__(start, goal, env, heuristic_type)
         # APF parameters
@@ -56,16 +50,13 @@ class APF(LocalPlanner):
         return "Artificial Potential Field(APF)"
     
     def plan(self):
-        '''
+        """
         APF motion plan function.
 
-        Return
-        ----------
-        flag: bool
-            planning successful if true else failed
-        pose_list: list
-            history poses of robot
-        '''
+        Returns:
+            flag (bool): planning successful if true else failed
+            pose_list (list): history poses of robot
+        """
         dt = self.params["TIME_STEP"]
         for _ in range(self.params["MAX_ITERATION"]):
             # break until goal reached
@@ -106,9 +97,9 @@ class APF(LocalPlanner):
         return False, None
     
     def run(self):
-        '''
+        """
         Running both plannig and animation.
-        '''
+        """
         _, history_pose = self.plan()
         if not history_pose:
             raise ValueError("Path not found and planning failed!")
@@ -119,14 +110,12 @@ class APF(LocalPlanner):
         self.plot.animation(path, str(self), cost, history_pose=history_pose)
 
     def getRepulsiveForce(self) -> np.ndarray:
-        '''
-        Get the repulsive  force of APF.
+        """
+        Get the repulsive force of APF.
 
-        Return
-        ----------
-        rep_force: np.ndarray
-            the repulsive force of APF
-        '''
+        Returns:
+            rep_force (np.ndarray): repulsive force of APF
+        """
         obstacles = np.array(list(self.obstacles))
         cur_pos = np.array([[self.robot.px, self.robot.py]])
         D = cdist(obstacles, cur_pos)
@@ -140,21 +129,16 @@ class APF(LocalPlanner):
         return rep_force
     
     def getAttractiveForce(self, cur_pos: np.ndarray, tgt_pos: np.ndarray) -> np.ndarray:
-        '''
+        """
         Get the attractive force of APF.
 
-        Parameters
-        ----------
-        cur_pos: np.ndarray
-            current position of robot
-        tgt_pos: np.ndarray
-            target position of robot
+        Parameters:
+            cur_pos (np.ndarray): current position of robot
+            tgt_pos (np.ndarray): target position of robot
 
-        Return
-        ----------
-        attr_force: np.ndarray
-            the attractive force
-        '''
+        Returns
+            attr_force (np.ndarray): attractive force
+        """
         attr_force = tgt_pos - cur_pos
         if not np.all(attr_force == 0):
             attr_force = attr_force / np.linalg.norm(attr_force)

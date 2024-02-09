@@ -1,42 +1,39 @@
-'''
+"""
 @file: jps.py
 @breif: Jump Point Search motion planning
 @author: Winter
 @update: 2023.1.14
-'''
+"""
 import os, sys
 import heapq
 
-sys.path.append(os.path.abspath(os.path.join(__file__, "../../../")))
+sys.path.append(os.path.abspath(os.path.join(__file__, "../../")))
 
 from .a_star import AStar
-from src.utils import Env, Node
+from utils import Env, Node
 
 class JPS(AStar):
-    '''
+    """
     Class for JPS motion planning.
 
-    Parameters
-    ----------
-    start: tuple
-        start point coordinate
-    goal: tuple
-        goal point coordinate
-    env: Env
-        environment
-    heuristic_type: str
-        heuristic function type, default is euclidean
+    Parameters:
+        start (tuple): start point coordinate
+        goal (tuple): goal point coordinate
+        env (Env): environment
+        heuristic_type (str): heuristic function type
 
-    Examples
-    ----------
-    >>> from src.utils import Grid
-    >>> from graph_search import JPS
-    >>> start = (5, 5)
-    >>> goal = (45, 25)
-    >>> env = Grid(51, 31)
-    >>> planner = JPS(start, goal, env)
-    >>> planner.run()
-    '''
+    Examples:
+        >>> from src.utils import Grid
+        >>> from graph_search import JPS
+        >>> start = (5, 5)
+        >>> goal = (45, 25)
+        >>> env = Grid(51, 31)
+        >>> planner = JPS(start, goal, env)
+        >>> planner.run()
+
+    References:
+        [1] Online Graph Pruning for Pathfinding On Grid Maps
+    """
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
         super().__init__(start, goal, env, heuristic_type)
     
@@ -44,17 +41,13 @@ class JPS(AStar):
         return "Jump Point Search(JPS)"
 
     def plan(self):
-        '''
+        """
         JPS motion plan function.
-        [1] Online Graph Pruning for Pathfinding On Grid Maps
 
-        Return
-        ----------
-        path: list
-            planning path
-        expand: list
-            all nodes that planner has searched
-        '''
+        Returns:
+            path (list): planning path
+            expand (list): all nodes that planner has searched
+        """
         # OPEN set with priority and CLOSED set
         OPEN = []
         heapq.heappush(OPEN, self.start)
@@ -93,21 +86,16 @@ class JPS(AStar):
         return [], []
 
     def jump(self, node: Node, motion: Node):
-        '''
+        """
         Jumping search recursively.
 
-        Parameters
-        ----------
-        node: Node
-            current node
-        motion: Node
-            the motion that current node executes
+        Parameters:
+            node (Node): current node
+            motion (Node): the motion that current node executes
 
-        Return
-        ----------
-        jump_point: Node
-            jump point or None if searching fails
-        '''
+        Returns:
+            jump_point (Node): jump point or None if searching fails
+        """
         # explore a new node
         new_node = node + motion
         new_node.parent = node.current
@@ -136,21 +124,16 @@ class JPS(AStar):
             return self.jump(new_node, motion)
 
     def detectForceNeighbor(self, node, motion):
-        '''
+        """
         Detect forced neighbor of node.
 
-        Parameters
-        ----------
-        node: Node
-            current node
-        motion: Node
-            the motion that current node executes
+        Parameters:
+            node (Node): current node
+            motion (Node): the motion that current node executes
 
-        Return
-        ----------
-        flag: bool
-            True if current node has forced neighbor else Flase
-        '''
+        Returns:
+            flag (bool): True if current node has forced neighbor else Flase
+        """
         x, y = node.current
         x_dir, y_dir = motion.current
 

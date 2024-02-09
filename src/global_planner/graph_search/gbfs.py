@@ -1,16 +1,16 @@
-'''
+"""
 @file: gbfs.py
 @breif: Greedy Best First Search motion planning
 @author: Winter
 @update: 2023.1.13
-'''
+"""
 import os, sys
 import heapq
 
-sys.path.append(os.path.abspath(os.path.join(__file__, "../../../")))
+sys.path.append(os.path.abspath(os.path.join(__file__, "../../")))
 
 from .a_star import AStar
-from src.utils import Env
+from utils import Env
 
 class GBFS(AStar):
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
@@ -20,30 +20,24 @@ class GBFS(AStar):
         return "Greedy Best First Search(GBFS)"
 
     def plan(self):
-        '''
+        """
         Class for Greedy Best First Search.
 
-        Parameters
-        ----------
-        start: tuple
-            start point coordinate
-        goal: tuple
-            goal point coordinate
-        env: Env
-            environment
-        heuristic_type: str
-            heuristic function type, default is euclidean
+        Parameters:
+            start (tuple): start point coordinate
+            goal (tuple): goal point coordinate
+            env (Env): environment
+            heuristic_type (str): heuristic function type
 
-        Examples
-        ----------
-        >>> from src.utils import Grid
-        >>> from graph_search import GBFS
-        >>> start = (5, 5)
-        >>> goal = (45, 25)
-        >>> env = Grid(51, 31)
-        >>> planner = GBFS(start, goal, env)
-        >>> planner.run()
-        '''
+        Examples:
+            >>> from src.utils import Grid
+            >>> from graph_search import GBFS
+            >>> start = (5, 5)
+            >>> goal = (45, 25)
+            >>> env = Grid(51, 31)
+            >>> planner = GBFS(start, goal, env)
+            >>> planner.run()
+        """
         # OPEN set with priority and CLOSED set
         OPEN = []
         heapq.heappush(OPEN, self.start)

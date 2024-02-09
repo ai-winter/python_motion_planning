@@ -1,9 +1,9 @@
-'''
+"""
 @file: dwa.py
 @breif: Dynamic Window Approach(DWA) motion planning
 @author: Winter
 @update: 2023.3.2
-'''
+"""
 import os, sys
 import numpy as np
 from itertools import product
@@ -16,30 +16,27 @@ from utils import Env
 
 
 class DWA(LocalPlanner):
-    '''
+    """
     Class for Dynamic Window Approach(DWA) motion planning.
 
-    Parameters
-    ----------
-    start: tuple
-        start point coordinate
-    goal: tuple
-        goal point coordinate
-    env: Env
-        environment
-    heuristic_type: str
-        heuristic function type, default is euclidean
+    Parameters:
+        start (tuple): start point coordinate
+        goal (tuple): goal point coordinate
+        env (Env): environment
+        heuristic_type (str): heuristic function type
 
-    Examples
-    ----------
-    >>> from src.utils import Grid
-    >>> from src.local_planner import DWA
-    >>> start = (5, 5, 0)
-    >>> goal = (45, 25, 0)
-    >>> env = Grid(51, 31)
-    >>> planner = DWA(start, goal, env)
-    >>> planner.run()
-    '''
+    Examples:
+        >>> from src.utils import Grid
+        >>> from src.local_planner import DWA
+        >>> start = (5, 5, 0)
+        >>> goal = (45, 25, 0)
+        >>> env = Grid(51, 31)
+        >>> planner = DWA(start, goal, env)
+        >>> planner.run()
+
+    References:
+        [1] The Dynamic Window Approach to Collision Avoidance.
+    """
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
         super().__init__(start, goal, env, heuristic_type)
         # kinematic parameters
@@ -70,10 +67,9 @@ class DWA(LocalPlanner):
         return "Dynamic Window Approach(DWA)"
 
     def plan(self):
-        '''
+        """
         Dynamic Window Approach(DWA) motion plan function.
-        [1] The Dynamic Window Approach to Collision Avoidance.
-        '''
+        """
         history_traj = []
         for _ in range(self.max_iter):
             # dynamic configure
@@ -98,14 +94,12 @@ class DWA(LocalPlanner):
         return False, None, None
 
     def calDynamicWin(self) -> list:
-        '''
+        """
         Calculate dynamic window.
 
-        Return
-        ----------
-        v_reference: list
-            reference velocity
-        '''
+        Returns:
+            v_reference (list): reference velocity
+        """
         # hard margin
         vs = (0, self.robot.V_MAX, -self.robot.W_MAX, self.robot.W_MAX)
         # predict margin
@@ -126,21 +120,16 @@ class DWA(LocalPlanner):
         return vr
 
     def evaluation(self, vr):
-        '''
+        """
         Extract the path based on the CLOSED set.
 
-        Parameters
-        ----------
-        closed_set: list
-            CLOSED set
+        Parameters:
+            closed_set (list): CLOSED set
 
-        Return
-        ----------
-        cost: float
-            the cost of planning path
-        path: list
-            the planning path
-        '''
+        Returns:
+            cost (float): the cost of planning path
+            path (list): the planning path
+        """
         v_start, v_end, w_start, w_end = vr
         v = np.linspace(v_start, v_end, num=int((v_end - v_start) / self.robot.V_RESOLUTION)).tolist()
         w = np.linspace(w_start, w_end, num=int((w_end - w_start) / self.robot.W_RESOLUTION)).tolist()
@@ -184,14 +173,12 @@ class DWA(LocalPlanner):
         return eval_win @ factor, traj_win
 
     def generateTraj(self, v, w):
-        '''
+        """
         Generate predict trajectory.
 
-        Return
-        ----------
-        v_reference: list
-            reference velocity
-        '''
+        Returns:
+            v_reference (list): reference velocity
+        """
         u = np.array([[v], [w]])
         state = self.robot.state
         time_steps = int(self.eval_param["predict_time"] / self.eval_param["dt"])
@@ -204,9 +191,9 @@ class DWA(LocalPlanner):
         return np.array(traj).squeeze()
 
     def run(self):
-        '''
+        """
         Running both plannig and animation.
-        '''
+        """
         _, history_traj, history_pose = self.plan()
 
         if not history_pose:

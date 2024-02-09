@@ -1,9 +1,9 @@
-'''
+"""
 @file: mpc.py
 @breif: Model Predicted Control (MPC) motion planning
 @author: Winter
 @update: 2024.1.30
-'''
+"""
 import os, sys
 import cvxopt
 import numpy as np
@@ -14,30 +14,24 @@ from .local_planner import LocalPlanner
 from utils import Env
 
 class MPC(LocalPlanner):
-    '''
+    """
     Class for Model Predicted Control (MPC) motion planning.
 
-    Parameters
-    ----------
-    start: tuple
-        start point coordinate
-    goal: tuple
-        goal point coordinate
-    env: Env
-        environment
-    heuristic_type: str
-        heuristic function type, default is euclidean
+    Parameters:
+        start (tuple): start point coordinate
+        goal (tuple): goal point coordinate
+        env (Env): environment
+        heuristic_type (str): heuristic function type
 
-    Examples
-    ----------
-    >>> from src.utils import Grid
-    >>> from src.local_planner import LQR
-    >>> start = (5, 5, 0)
-    >>> goal = (45, 25, 0)
-    >>> env = Grid(51, 31)
-    >>> planner = LQR(start, goal, env)
-    >>> planner.run()
-    '''
+    Examples:
+        >>> from src.utils import Grid
+        >>> from src.local_planner import LQR
+        >>> start = (5, 5, 0)
+        >>> goal = (45, 25, 0)
+        >>> env = Grid(51, 31)
+        >>> planner = LQR(start, goal, env)
+        >>> planner.run()
+    """
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
         super().__init__(start, goal, env, heuristic_type, MIN_LOOKAHEAD_DIST=1.0, MAX_V=2.0, MAX_ITERATION=2000)
         # MPC parameters
@@ -60,16 +54,13 @@ class MPC(LocalPlanner):
         return "Model Predicted Control (MPC)"
 
     def plan(self):
-        '''
+        """
         MPC motion plan function.
 
-        Return
-        ----------
-        flag: bool
-            planning successful if true else failed
-        pose_list: list
-            history poses of robot
-        '''
+        Returns:
+            flag (bool): planning successful if true else failed
+            pose_list (list): history poses of robot
+        """
         dt = self.params["TIME_STEP"]
         u_p = (0, 0)
         for _ in range(self.params["MAX_ITERATION"]):
@@ -106,9 +97,9 @@ class MPC(LocalPlanner):
         return False, None
 
     def run(self):
-        '''
+        """
         Running both plannig and animation.
-        '''
+        """
         _, history_pose = self.plan()
         if not history_pose:
             raise ValueError("Path not found and planning failed!")
@@ -119,25 +110,18 @@ class MPC(LocalPlanner):
         self.plot.animation(path, str(self), cost, history_pose=history_pose)
 
     def mpcControl(self, s: tuple, s_d: tuple, u_r: tuple, u_p: tuple) -> np.ndarray:
-        '''
+        """
         Execute MPC control process.
 
-        Parameters
-        ----------
-        s: tuple
-            current state
-        s_d: tuple
-            desired state
-        u_r: tuple
-            refered control
-        u_p: tuple
-            previous control error
+        Parameters:
+            s (tuple): current state
+            s_d (tuple): desired state
+            u_r (tuple): refered control
+            u_p (tuple): previous control error
 
-        Return
-        ----------
-        u: np.ndarray
-            control vector
-        '''
+        Returns:
+            u (np.ndarray): control vector
+        """
         dim_u, dim_x = 2, 3
         dt = self.params["TIME_STEP"]
 

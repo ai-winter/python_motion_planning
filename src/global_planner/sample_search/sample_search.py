@@ -1,48 +1,42 @@
-'''
+"""
 @file: graph_search.py
 @breif: Base class for planner based on graph searching
 @author: Winter
 @update: 2023.1.17
-'''
+"""
 import numpy as np
 from itertools import combinations
 import math
 import sys, os
-sys.path.append(os.path.abspath(os.path.join(__file__, "../../../")))
+sys.path.append(os.path.abspath(os.path.join(__file__, "../../")))
 
-from src.utils import Env, Node, Planner
+from utils import Env, Node, Planner
 
 class SampleSearcher(Planner):
-    '''
+    """
     Base class for planner based on sample searching.
 
-    Parameters
-    ----------
-    start: tuple
-        start point coordinate
-    goal: tuple
-        goal point coordinate
-    env: Env
-        environment
-    '''
+    Parameters:
+        start (tuple): start point coordinate
+        goal (tuple): goal point coordinate
+        env (Env): environment
+    """
     def __init__(self, start: tuple, goal: tuple, env: Env, delta: float=0.5) -> None:
         super().__init__(start, goal, env)
         # inflation bias
         self.delta = delta
 
     def isCollision(self, node1: Node, node2: Node) -> bool:
-        '''
+        """
         Judge collision when moving from node1 to node2.
 
-        Parameters
-        ----------
-        node1, node2: Node
+        Parameters:
+            node1 (Node): node 1
+            node2 (Node): node 2
 
-        Return
-        ----------
-        collision: bool
-            True if collision exists else False
-        '''
+        Returns:
+            collision (bool): True if collision exists else False
+        """
         if self.isInsideObs(node1) or self.isInsideObs(node2):
             return True
 
@@ -57,18 +51,15 @@ class SampleSearcher(Planner):
         return False
 
     def isInsideObs(self, node: Node) -> bool:
-        '''
+        """
         Judge whether a node inside tht obstacles or not.
 
-        Parameters
-        ----------
-        node1, node2: Node
+        Parameters:
+            node (Node): node
 
-        Return
-        ----------
-        inside: bool
-            True if inside the obstacles else False
-        '''
+        Returns:
+            inside (bool): True if inside the obstacles else False
+        """
         x, y = node.current
 
         for (ox, oy, r) in self.env.obs_circ:

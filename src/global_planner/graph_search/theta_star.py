@@ -1,42 +1,44 @@
-'''
+"""
 @file: theta_star.py
 @breif: Theta* motion planning
 @author: Winter
 @update: 2024.2.2
-'''
+"""
 import os, sys
 import heapq
 
-sys.path.append(os.path.abspath(os.path.join(__file__, "../../../")))
+sys.path.append(os.path.abspath(os.path.join(__file__, "../../")))
 
 from .a_star import AStar
-from src.utils import Env, Node
+from utils import Env, Node
 
 class ThetaStar(AStar):
-    '''
+    """
     Class for Theta* motion planning.
 
-    Parameters
-    ----------
-    start: tuple
-        start point coordinate
-    goal: tuple
-        goal point coordinate
-    env: Env
-        environment
-    heuristic_type: str
-        heuristic function type, default is euclidean
+    Parameters:
+        start (tuple):
+            start point coordinate
+        goal (tuple):
+            goal point coordinate
+        env (Env):
+            environment
+        heuristic_type (str):
+            heuristic function type
 
-    Examples
-    ----------
-    >>> from src.utils import Grid
-    >>> from graph_search import ThetaStar
-    >>> start = (5, 5)
-    >>> goal = (45, 25)
-    >>> env = Grid(51, 31)
-    >>> planner = ThetaStar(start, goal, env)
-    >>> planner.run()
-    '''
+    Examples:
+        >>> from src.utils import Grid
+        >>> from graph_search import ThetaStar
+        >>> start = (5, 5)
+        >>> goal = (45, 25)
+        >>> env = Grid(51, 31)
+        >>> planner = ThetaStar(start, goal, env)
+        >>> planner.run()
+
+    References:
+        [1] Theta*: Any-Angle Path Planning on Grids
+        [2] Any-angle path planning on non-uniform costmaps
+    """
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
         super().__init__(start, goal, env, heuristic_type)
 
@@ -44,20 +46,14 @@ class ThetaStar(AStar):
         return "Theta*"
 
     def plan(self):
-        '''
+        """
         Theta* motion plan function.
-        [1] Theta*: Any-Angle Path Planning on Grids
-        [2] Any-angle path planning on non-uniform costmaps
 
-        Return
-        ----------
-        cost: float
-            path cost
-        path: list
-            planning path
-        expand: list
-            all nodes that planner has searched
-        '''
+        Returns:
+            cost (float): path cost
+            path (list): planning path
+            expand (list): all nodes that planner has searched
+        """
         # OPEN set with priority and CLOSED set
         OPEN = []
         heapq.heappush(OPEN, self.start)
@@ -106,13 +102,13 @@ class ThetaStar(AStar):
 
 
     def updateVertex(self, node_p: Node, node_c: Node) -> None:
-        '''
+        """
         Update extend node information with current node's parent node.
 
-        Parameters
-        ----------
-        node_p, node_c: Node
-        '''
+        Parameters:
+            node_p (Node): parent node
+            node_c (Node): current node
+        """
         if self.lineOfSight(node_c, node_p):
             # path 2
             if node_p.g + self.dist(node_c, node_p) <= node_c.g:
@@ -121,18 +117,16 @@ class ThetaStar(AStar):
             
 
     def lineOfSight(self, node1: Node, node2: Node) -> bool:
-        '''
+        """
         Judge collision when moving from node1 to node2 using Bresenham.
 
-        Parameters
-        ----------
-        node1, node2: Node
+        Parameters:
+            node1 (Node): start node
+            node2 (Node): end node
 
-        Return
-        ----------
-        collision: bool
-            True if line of sight exists ( no collision ) else False
-        '''
+        Returns:
+            collision (bool): True if line of sight exists ( no collision ) else False
+        """
         if node1.current in self.obstacles or node2.current in self.obstacles:
             return False
         

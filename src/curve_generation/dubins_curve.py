@@ -1,9 +1,9 @@
-'''
+"""
 @file: dubins_curve.py
 @breif: Dubins curve generation
 @author: Winter
 @update: 2023.5.31
-'''
+"""
 import math
 import numpy as np
 import os, sys
@@ -15,25 +15,22 @@ from utils import Plot
 from .curve import Curve
 
 class Dubins(Curve):
-	'''
+	"""
 	Class for Dubins curve generation.
-	[1] On curves of minimal length with a constraint on average curvature,
-		and with prescribed initial and terminal positions and tangents
 
-	Parameters
-	----------
-	step: float
-		Simulation or interpolation size
-	max_curv: float
-		The maximum curvature of the curve
+	Parameters:
+		step (float): Simulation or interpolation size
+		max_curv (float): The maximum curvature of the curve
 
-	Examples
-	----------
-	>>> from src.curve_generation import Dubins
-	>>>	points = [(0, 0, 0), (10, 10, -90), (20, 5, 60)]
-	>>> generator = Dubins(step, max_curv)
-	>>> generator.run(points)
-	'''
+	Examples:
+		>>> from src.curve_generation import Dubins
+		>>>	points = [(0, 0, 0), (10, 10, -90), (20, 5, 60)]
+		>>> generator = Dubins(step, max_curv)
+		>>> generator.run(points)
+
+	References:
+		[1] On curves of minimal length with a constraint on average curvature, and with prescribed initial and terminal positions and tangents
+	"""
 	def __init__(self, step: float, max_curv: float) -> None:
 		super().__init__(step)
 		self.max_curv = max_curv
@@ -42,23 +39,20 @@ class Dubins(Curve):
 		return "Dubins Curve"
 
 	def LSL(self, alpha: float, beta: float, dist: float):
-		'''
+		"""
 		Left-Straight-Left generation mode.
 
-		Parameters
-		----------
-		alpha: float
-			Initial pose of (0, 0, alpha)
-		beta/dist: float
-			Goal pose of (dist, 0, beta)
+		Parameters:
+			alpha (float): Initial pose of (0, 0, alpha)
+			beta (float): Goal pose of (dist, 0, beta)
+			dist (float): The distance between the initial and goal pose
 
-		Return
-		----------
-		t/s/p: float
-			Moving lenght of segments
-		mode: list
-			Motion mode
-		'''             
+		Returns:
+			t (float): Moving lenght of segments
+			p (float): Moving lenght of segments
+			q (float): Moving lenght of segments
+			mode (list): Motion mode
+		"""
 		sin_a, sin_b, cos_a, cos_b, _, cos_a_b  = self.trigonometric(alpha, beta)
 
 		p_lsl = 2 + dist ** 2 - 2 * cos_a_b + 2 * dist * (sin_a - sin_b)
@@ -73,23 +67,19 @@ class Dubins(Curve):
 		return t_lsl, p_lsl, q_lsl, ["L", "S", "L"]
 
 	def RSR(self, alpha: float, beta: float, dist: float):
-		'''
+		"""
 		Right-Straight-Right generation mode.
 
-		Parameters
-		----------
-		alpha: float
-			Initial pose of (0, 0, alpha)
-		beta/dist: float
-			Goal pose of (dist, 0, beta)
+		Parameters:
+			alpha (float): Initial pose of (0, 0, alpha)
+			beta (float): Goal pose of (dist, 0, beta)
 
-		Return
-		----------
-		t/s/p: float
-			Moving lenght of segments
-		mode: list
-			Motion mode
-		''' 
+		Returns:
+			t (float): Moving lenght of segments
+			p (float): Moving lenght of segments
+			q (float): Moving lenght of segments
+			mode (list): Motion mode
+		"""
 		sin_a, sin_b, cos_a, cos_b, _, cos_a_b  = self.trigonometric(alpha, beta)
 
 		p_rsr = 2 + dist ** 2 - 2 * cos_a_b + 2 * dist * (sin_b - sin_a)
@@ -104,23 +94,20 @@ class Dubins(Curve):
 		return t_rsr, p_rsr, q_rsr, ["R", "S", "R"]
 
 	def LSR(self, alpha: float, beta: float, dist: float):
-		'''
+		"""
 		Left-Straight-Right generation mode.
 
-		Parameters
-		----------
-		alpha: float
-			Initial pose of (0, 0, alpha)
-		beta/dist: float
-			Goal pose of (dist, 0, beta)
+		Parameters:
+			alpha (float): Initial pose of (0, 0, alpha)
+			beta (float): Goal pose of (dist, 0, beta)
+			dist (float): The distance between the initial and goal pose
 
-		Return
-		----------
-		t/s/p: float
-			Moving lenght of segments
-		mode: list
-			Motion mode
-		''' 
+		Returns:
+			t (float): Moving lenght of segments
+			p (float): Moving lenght of segments
+			q (float): Moving lenght of segments
+			mode (list): Motion mode
+		"""
 		sin_a, sin_b, cos_a, cos_b, _, cos_a_b  = self.trigonometric(alpha, beta)
 
 		p_lsr = -2 + dist ** 2 + 2 * cos_a_b + 2 * dist * (sin_a + sin_b)
@@ -136,23 +123,20 @@ class Dubins(Curve):
 
 
 	def RSL(self, alpha: float, beta: float, dist: float):
-		'''
+		"""
 		Right-Straight-Left generation mode.
 
-		Parameters
-		----------
-		alpha: float
-			Initial pose of (0, 0, alpha)
-		beta/dist: float
-			Goal pose of (dist, 0, beta)
+		Parameters:
+			alpha (float): Initial pose of (0, 0, alpha)
+			beta (float): Goal pose of (dist, 0, beta)
+			dist (float): The distance between the initial and goal pose
 
-		Return
-		----------
-		t/s/p: float
-			Moving lenght of segments
-		mode: list
-			Motion mode
-		''' 
+		Returns:
+			t (float): Moving lenght of segments
+			p (float): Moving lenght of segments
+			q (float): Moving lenght of segments
+			mode (list): Motion mode
+		"""
 		sin_a, sin_b, cos_a, cos_b, _, cos_a_b  = self.trigonometric(alpha, beta)
 
 		p_rsl = -2 + dist ** 2 + 2 * cos_a_b - 2 * dist * (sin_a + sin_b)
@@ -168,23 +152,20 @@ class Dubins(Curve):
 
 
 	def RLR(self, alpha: float, beta: float, dist: float):
-		'''
+		"""
 		Right-Left-Right generation mode.
 
-		Parameters
-		----------
-		alpha: float
-			Initial pose of (0, 0, alpha)
-		beta/dist: float
-			Goal pose of (dist, 0, beta)
+		Parameters:
+			alpha (float): Initial pose of (0, 0, alpha)
+			beta (float): Goal pose of (dist, 0, beta)
+			dist (float): The distance between the initial and goal pose
 
-		Return
-		----------
-		t/s/p: float
-			Moving lenght of segments
-		mode: list
-			Motion mode
-		''' 
+		Returns:
+			t (float): Moving lenght of segments
+			p (float): Moving lenght of segments
+			q (float): Moving lenght of segments
+			mode (list): Motion mode
+		"""
 		sin_a, sin_b, cos_a, cos_b, _, cos_a_b  = self.trigonometric(alpha, beta)
 
 		p_rlr = (6.0 - dist ** 2 + 2.0 * cos_a_b + 2.0 * dist * (sin_a - sin_b)) / 8.0
@@ -199,23 +180,20 @@ class Dubins(Curve):
 		return t_rlr, p_rlr, q_rlr, ["R", "L", "R"]
 
 	def LRL(self, alpha: float, beta: float, dist: float):
-		'''
+		"""
 		Left-Right-Left generation mode.
 
-		Parameters
-		----------
-		alpha: float
-			Initial pose of (0, 0, alpha)
-		beta/dist: float
-			Goal pose of (dist, 0, beta)
+		Parameters:
+			alpha (float): Initial pose of (0, 0, alpha)
+			beta (float): Goal pose of (dist, 0, beta)
+			dist (float): The distance between the initial and goal pose
 
-		Return
-		----------
-		t/s/p: float
-			Moving lenght of segments
-		mode: list
-			Motion mode
-		''' 
+		Returns:
+			t (float): Moving lenght of segments
+			p (float): Moving lenght of segments
+			q (float): Moving lenght of segments
+			mode (list): Motion mode
+		"""
 		sin_a, sin_b, cos_a, cos_b, _, cos_a_b  = self.trigonometric(alpha, beta)
 
 		p_lrl = (6.0 - dist ** 2 + 2.0 * cos_a_b + 2.0 * dist * (sin_a - sin_b)) / 8.0
@@ -230,23 +208,17 @@ class Dubins(Curve):
 		return t_lrl, p_lrl, q_lrl, ["L", "R", "L"]    
 
 	def interpolate(self, mode: str, length: float, init_pose: tuple):
-		'''
+		"""
 		Planning path interpolation.
 
-		Parameters
-		----------
-		mode: str
-			motion, e.g., L, S, R
-		length: float
-			Single step motion path length
-		init_pose: tuple
-			Initial pose (x, y, yaw)
+		Parameters:
+			mode (str): motion, e.g., L, S, R
+			length (float): Single step motion path length
+			init_pose (tuple): Initial pose (x, y, yaw)
 
-		Return
-		----------
-		new_pose: tuple
-			New pose (new_x, new_y, new_yaw) after moving
-		''' 	 
+		Returns:
+			new_pose (tuple): New pose (new_x, new_y, new_yaw) after moving
+		"""
 		x, y, yaw = init_pose
 
 		if mode == "S":
@@ -267,25 +239,20 @@ class Dubins(Curve):
 		return new_x, new_y, new_yaw
 
 	def generation(self, start_pose: tuple, goal_pose: tuple):
-		'''
+		"""
 		Generate the Dubins Curve.
 
-		Parameters
-		----------
-		start_pose: tuple
-			Initial pose (x, y, yaw)
-		goal_pose: tuple
-			Target pose (x, y, yaw)
+		Parameters:
+			start_pose (tuple): Initial pose (x, y, yaw)
+			goal_pose (tuple): Target pose (x, y, yaw)
 
-		Return
-		----------
-		best_cost: float
-			Best planning path length
-		best_mode:
-			Best motion modes
-		x_list/y_list/yaw_list: list
-			Trajectory
-		'''
+		Returns:
+			best_cost (float): Best planning path length
+			best_mode (list): Best motion modes
+			x_list (list): Trajectory of x
+			y_list (list): Trajectory of y
+			yaw_list (list): Trajectory of yaw
+		"""
 		sx, sy, syaw = start_pose
 		gx, gy, gyaw = goal_pose
 
@@ -349,14 +316,12 @@ class Dubins(Curve):
 		return best_cost, best_mode, x_list, y_list, yaw_list
 
 	def run(self, points: list):
-		'''
-        Running both generation and animation.
+		"""
+		Running both generation and animation.
 
-		Parameters
-		----------
-		points: list[tuple]
-			path points
-        '''
+		Parameters:
+			points (list[tuple]): path points
+		"""
 		assert len(points) >= 2, "Number of points should be at least 2."
 		import matplotlib.pyplot as plt
 

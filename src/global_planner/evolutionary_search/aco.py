@@ -1,53 +1,46 @@
-'''
+"""
 @file: aco.py
 @breif: Ant Colony Optimization(ACO) motion planning
 @author: Winter
 @update: 2023.1.13
-'''
+"""
 import os, sys
 import random
 from bisect import bisect_left
 
-sys.path.append(os.path.abspath(os.path.join(__file__, "../../../")))
+sys.path.append(os.path.abspath(os.path.join(__file__, "../../")))
 
 from .evolutionary_search import EvolutionarySearcher
-from src.utils import Env, Node
+from utils import Env, Node
 
 class ACO(EvolutionarySearcher):
-    '''
+    """
     Class for Ant Colony Optimization(ACO) motion planning.
 
-    Parameters
-    ----------
-    start: tuple
-        start point coordinate
-    goal: tuple
-        goal point coordinate
-    env: Env
-        environment
-    heuristic_type: str
-        heuristic function type, default is euclidean
-    n_ants: int
-        number of ants
-    alpha, beta: float
-        pheromone and heuristic factor weight coefficient
-    rho: float
-        evaporation coefficient
-    Q: float
-        pheromone gain
-    max_iter: int
-        maximum iterations
+    Parameters:
+        start (tuple): start point coordinate
+        goal (tuple): goal point coordinate
+        env (Env): environment
+        heuristic_type (str): heuristic function type, default is euclidean
+        n_ants (int): number of ants
+        alpha (float): pheromone and heuristic factor weight coefficient
+        beta (float): pheromone and heuristic factor weight coefficient
+        rho (float): evaporation coefficient
+        Q (float): pheromone gain
+        max_iter (int): maximum iterations
 
-    Examples
-    ----------
-    >>> from src.utils import Grid
-    >>> from evolutionary_search import ACO
-    >>> start = (5, 5)
-    >>> goal = (45, 25)
-    >>> env = Grid(51, 31)
-    >>> planner = ACO(start, goal, env)
-    >>> planner.run()
-    '''
+    Examples:
+        >>> from src.utils import Grid
+        >>> from evolutionary_search import ACO
+        >>> start = (5, 5)
+        >>> goal = (45, 25)
+        >>> env = Grid(51, 31)
+        >>> planner = ACO(start, goal, env)
+        >>> planner.run()
+
+    References:
+        [1] Ant Colony Optimization: A New Meta-Heuristic
+    """
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean", 
         n_ants: int = 50, alpha: float = 1.0, beta: float = 5.0, rho: float = 0.1, Q: float = 1.0,
         max_iter: int = 100) -> None:
@@ -73,17 +66,13 @@ class ACO(EvolutionarySearcher):
             self.steps = 0
 
     def plan(self):
-        '''
+        """
         Ant Colony Optimization(ACO) motion plan function.
-        [1] Ant Colony Optimization: A New Meta-Heuristic
 
-        Return
-        ----------
-        cost: float
-            path cost
-        path: list
-            planning path
-        '''
+        Returns:
+            cost (float): path cost
+            path (list): planning path
+        """
         best_length_list, best_path = [], None
 
         # pheromone initialization
@@ -174,38 +163,29 @@ class ACO(EvolutionarySearcher):
 
 
     def getNeighbor(self, node: Node) -> list:
-        '''
+        """
         Find neighbors of node.
 
-        Parameters
-        ----------
-        node: Node
-            current node
+        Parameters:
+            node (Node): current node
 
-        Return
-        ----------
-        neighbors: list
-            neighbors of current node
-        '''
+        Returns:
+            neighbors (list): neighbors of current node
+        """
         return [node + motion for motion in self.motions
                 if not self.isCollision(node, node + motion)]
 
     def extractPath(self, closed_set):
-        '''
+        """
         Extract the path based on the CLOSED set.
 
-        Parameters
-        ----------
-        closed_set: list
-            CLOSED set
+        Parameters:
+            closed_set (list): CLOSED set
 
-        Return
-        ----------
-        cost: float
-            the cost of planning path
-        path: list
-            the planning path
-        '''
+        Returns:
+            cost (float): path cost
+            path (list): planning path
+        """
         cost = 0
         node = closed_set[closed_set.index(self.goal)]
         path = [node.current]
@@ -217,8 +197,8 @@ class ACO(EvolutionarySearcher):
         return cost, path
 
     def run(self):
-        '''
+        """
         Running both plannig and animation.
-        '''
+        """
         (cost, path), cost_list = self.plan()
         self.plot.animation(path, str(self), cost, cost_curve=cost_list)

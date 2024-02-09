@@ -1,9 +1,9 @@
-'''
+"""
 @file: lqr.py
 @breif: Linear Quadratic Regulator(LQR) motion planning
 @author: Winter
 @update: 2024.1.12
-'''
+"""
 import os, sys
 import numpy as np
 
@@ -13,30 +13,24 @@ from .local_planner import LocalPlanner
 from utils import Env
 
 class LQR(LocalPlanner):
-    '''
+    """
     Class for Linear Quadratic Regulator(LQR) motion planning.
 
-    Parameters
-    ----------
-    start: tuple
-        start point coordinate
-    goal: tuple
-        goal point coordinate
-    env: Env
-        environment
-    heuristic_type: str
-        heuristic function type, default is euclidean
+    Parameters:
+        start (tuple): start point coordinate
+        goal (tuple): goal point coordinate
+        env (Env): environment
+        heuristic_type (str): heuristic function type
 
-    Examples
-    ----------
-    >>> from src.utils import Grid
-    >>> from src.local_planner import LQR
-    >>> start = (5, 5, 0)
-    >>> goal = (45, 25, 0)
-    >>> env = Grid(51, 31)
-    >>> planner = LQR(start, goal, env)
-    >>> planner.run()
-    '''
+    Examples:
+        >>> from src.utils import Grid
+        >>> from src.local_planner import LQR
+        >>> start = (5, 5, 0)
+        >>> goal = (45, 25, 0)
+        >>> env = Grid(51, 31)
+        >>> planner = LQR(start, goal, env)
+        >>> planner.run()
+    """
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
         super().__init__(start, goal, env, heuristic_type, MIN_LOOKAHEAD_DIST=1.0)
         # LQR parameters
@@ -55,16 +49,13 @@ class LQR(LocalPlanner):
         return "Linear Quadratic Regulator (LQR)"
 
     def plan(self):
-        '''
+        """
         LQR motion plan function.
 
-        Return
-        ----------
-        flag: bool
-            planning successful if true else failed
-        pose_list: list
-            history poses of robot
-        '''
+        Returns:
+            flag (bool): planning successful if true else failed
+            pose_list (list): history poses of robot
+        """
         dt = self.params["TIME_STEP"]
         for _ in range(self.params["MAX_ITERATION"]):
             # break until goal reached
@@ -99,9 +90,9 @@ class LQR(LocalPlanner):
         return False, None
 
     def run(self):
-        '''
+        """
         Running both plannig and animation.
-        '''
+        """
         _, history_pose = self.plan()
         if not history_pose:
             raise ValueError("Path not found and planning failed!")
@@ -112,23 +103,17 @@ class LQR(LocalPlanner):
         self.plot.animation(path, str(self), cost, history_pose=history_pose)
 
     def lqrControl(self, s: tuple, s_d: tuple, u_r: tuple) -> np.ndarray:
-        '''
+        """
         Execute LQR control process.
 
-        Parameters
-        ----------
-        s: tuple
-            current state
-        s_d: tuple
-            desired state
-        u_r: tuple
-            refered control
+        Parameters:
+            s (tuple): current state
+            s_d (tuple): desired state
+            u_r (tuple): refered control
 
-        Return
-        ----------
-        u: np.ndarray
-            control vector
-        '''
+        Returns:
+            u (np.ndarray): control vector
+        """
         dt = self.params["TIME_STEP"]
 
         # state equation on error

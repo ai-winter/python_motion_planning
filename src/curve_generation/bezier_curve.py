@@ -1,9 +1,9 @@
-'''
+"""
 @file: bezier_curve.py
 @breif: Bezier curve generation
 @author: Winter
 @update: 2023.7.25
-'''
+"""
 import numpy as np
 import os, sys
 
@@ -14,23 +14,19 @@ from utils import Plot
 from .curve import Curve
 
 class Bezier(Curve):
-	'''
+	"""
 	Class for Bezier curve generation.
 
-	Parameters
-	----------
-	step: float
-		Simulation or interpolation size
-	offset: float
-		The offset of control points
+	Parameters:
+		step (float): Simulation or interpolation size
+		offset (float): The offset of control points
 
-	Examples
-	----------
-	>>> from src.curve_generation import Bezier
-	>>>	points = [(0, 0, 0), (10, 10, -90), (20, 5, 60)]
-	>>> generator = Bezier(step, offset)
-	>>> generator.run(points)
-	'''
+	Examples:
+		>>> from src.curve_generation import Bezier
+		>>>	points = [(0, 0, 0), (10, 10, -90), (20, 5, 60)]
+		>>> generator = Bezier(step, offset)
+		>>> generator.run(points)
+	"""
 	def __init__(self, step: float, offset: float) -> None:
 		super().__init__(step)
 		self.offset = offset
@@ -39,21 +35,18 @@ class Bezier(Curve):
 		return "Bezier Curve"
 
 	def generation(self, start_pose: tuple, goal_pose: tuple):
-		'''
+		"""
 		Generate the Bezier Curve.
 
-		Parameters
-		----------
-		start_pose: tuple
-			Initial pose (x, y, yaw)
-		goal_pose: tuple
-			Target pose (x, y, yaw)
+		Parameters:
+			start_pose (tuple): Initial pose (x, y, yaw)
+			goal_pose (tuple): Target pose (x, y, yaw)
 
-		Return
-		----------
-		x_list/y_list/yaw_list: list
-			Trajectory
-		'''
+		Returns:
+			x_list (list): x of the trajectory
+			y_list (list): y of the trajectory
+			yaw_list (list): yaw of the trajectory
+		"""
 		sx, sy, _ = start_pose
 		gx, gy, _ = goal_pose
 		n_points = int(np.hypot(sx - gx, sy - gy) / self.step)
@@ -63,42 +56,32 @@ class Bezier(Curve):
 			   control_points
 
 	def bezier(self, t: float, control_points: list) ->np.ndarray:
-		'''
+		"""
 		Calculate the Bezier curve point.
 
-		Parameters
-		----------
-		t: float
-			scale factor
-		control_points: list[tuple]
-			control points
+		Parameters:
+			t (float): scale factor
+			control_points (list[tuple]): control points
 
-		Return
-		----------
-		point: np.array
-			point in Bezier curve with t
-		'''
+		Returns:
+			point (np.array): point in Bezier curve with t
+		"""
 		n = len(control_points) - 1
 		control_points = np.array(control_points)
 		return np.sum([comb(n, i) * t ** i * (1 - t) ** (n - i) *
 			control_points[i] for i in range(n + 1)], axis=0)
 
 	def getControlPoints(self, start_pose: tuple, goal_pose: tuple):
-		'''
+		"""
 		Calculate control points heuristically.
 
-		Parameters
-		----------
-		start_pose: tuple
-			Initial pose (x, y, yaw)
-		goal_pose: tuple
-			Target pose (x, y, yaw)
+		Parameters:
+			start_pose (tuple): Initial pose (x, y, yaw)
+			goal_pose (tuple): Target pose (x, y, yaw)
 
-		Return
-		----------
-		control_points: list[tuple]
-			control points
-		'''
+		Returns:
+			control_points (list[tuple]): Control points
+		"""
 		sx, sy, syaw = start_pose
 		gx, gy, gyaw = goal_pose
 
@@ -109,14 +92,12 @@ class Bezier(Curve):
 				(gx, gy)]
 
 	def run(self, points: list):
-		'''
+		"""
         Running both generation and animation.
 
-		Parameters
-		----------
-		points: list[tuple]
-			path points
-        '''
+		Parameters:
+			points (list[tuple]): path points
+        """
 		assert len(points) >= 2, "Number of points should be at least 2."
 		import matplotlib.pyplot as plt
 

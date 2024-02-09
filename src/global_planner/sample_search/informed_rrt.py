@@ -1,23 +1,23 @@
-'''
+"""
 @file: informed_rrt.py
 @breif: Informed RRT* motion planning
 @author: Winter
 @update: 2023.1.18
-'''
+"""
 import os, sys
 import numpy as np
 from functools import partial
 import matplotlib.pyplot as plt
 
-sys.path.append(os.path.abspath(os.path.join(__file__, "../../../")))
+sys.path.append(os.path.abspath(os.path.join(__file__, "../../")))
 
 from .rrt_star import RRTStar
-from src.utils import Env, Node
+from utils import Env, Node
 
 class ellipse:
-    '''
+    """
     Ellipse sampling.
-    '''    
+    """
     @staticmethod
     def transform(a: float, c: float, p1: tuple, p2: tuple) -> np.ndarray:
         # center
@@ -35,38 +35,30 @@ class ellipse:
         return T
 
 class InformedRRT(RRTStar):
-    '''
+    """
     Class for Informed RRT* motion planning.
-    [1] Optimal Sampling-based Path Planning Focused via Direct
-        Sampling of an Admissible Ellipsoidal heuristic
 
-    Parameters
-    ----------
-    start: tuple
-        start point coordinate
-    goal: tuple
-        goal point coordinate
-    env: Env
-        environment
-    max_dist: float
-        Maximum expansion distance one step
-    sample_num: int
-        Maximum number of sample points
-    r: float
-        optimization radius
-    goal_sample_rate: float
-        heuristic sample
+    Parameters:
+        start (tuple): start point coordinate
+        goal (tuple): goal point coordinate
+        env (Env): environment
+        max_dist (float): Maximum expansion distance one step
+        sample_num (int): Maximum number of sample points
+        r (float): optimization radius
+        goal_sample_rate (float): heuristic sample
 
-    Examples
-    ----------
-    >>> from src.utils import Map
-    >>> from sample_search import InformedRRT
-    >>> start = (5, 5)
-    >>> goal = (45, 25)
-    >>> env = Map(51, 31)
-    >>> planner = InformedRRT(start, goal, env)
-    >>> planner.run()
-    '''
+    Examples:
+        >>> from src.utils import Map
+        >>> from sample_search import InformedRRT
+        >>> start = (5, 5)
+        >>> goal = (45, 25)
+        >>> env = Map(51, 31)
+        >>> planner = InformedRRT(start, goal, env)
+        >>> planner.run()
+
+    References:
+        [1] Optimal Sampling-based Path Planning Focused via Direct Sampling of an Admissible Ellipsoidal heuristic
+    """
     def __init__(self, start: tuple, goal: tuple, env: Env, max_dist: float,
                  sample_num: int, r: float, goal_sample_rate: float = 0.05) -> None:
         super().__init__(start, goal, env, max_dist, sample_num, goal_sample_rate)
@@ -83,16 +75,13 @@ class InformedRRT(RRTStar):
         return "Informed RRT*"
 
     def plan(self):
-        '''
+        """
         Informed-RRT* motion plan function.
 
-        Return
-        ----------
-        cost: float
-            path cost
-        path: list
-            planning path
-        '''
+        Returns:
+            cost (float): path cost
+            path (list): planning path
+        """
         # generate a random node in the map
         node_rand = self.generateRandomNode()
 
@@ -114,9 +103,9 @@ class InformedRRT(RRTStar):
         return 0, None
 
     def run(self) -> None:
-        '''
+        """
         Running both plannig and animation.
-        '''
+        """
         best_cost, best_path = float("inf"), None
 
         # main loop
@@ -132,14 +121,12 @@ class InformedRRT(RRTStar):
         plt.show()
 
     def generateRandomNode(self) -> Node:
-        '''
+        """
         Generate a random node to extend exploring tree.
 
-        Return
-        ----------
-        node: Node
-            a random node based on sampling
-        '''
+        Returns:
+            node (Node): a random node based on sampling
+        """
         # ellipse sample
         if self.c_best < float("inf"):
             while True:

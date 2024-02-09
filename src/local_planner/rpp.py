@@ -1,9 +1,9 @@
-'''
+"""
 @file: rpp.py
 @breif: Regulated Pure Pursuit (RPP) motion planning
 @author: Winter
 @update: 2023.1.25
-'''
+"""
 import math
 import os, sys
 import numpy as np
@@ -16,30 +16,24 @@ from utils import Env
 
 
 class RPP(LocalPlanner):
-    '''
+    """
     Class for RPP motion planning.
 
-    Parameters
-    ----------
-    start: tuple
-        start point coordinate
-    goal: tuple
-        goal point coordinate
-    env: Env
-        environment
-    heuristic_type: str
-        heuristic function type, default is euclidean
+    Parameters:
+        start (tuple): start point coordinate
+        goal (tuple): goal point coordinate
+        env (Env): environment
+        heuristic_type (str): heuristic function type
 
-    Examples
-    ----------
-    >>> from src.utils import Grid
-    >>> from src.local_planner import RPP
-    >>> start = (5, 5, 0)
-    >>> goal = (45, 25, 0)
-    >>> env = Grid(51, 31)
-    >>> planner = RPP(start, goal, env)
-    >>> planner.run()
-    '''
+    Examples:
+        >>> from src.utils import Grid
+        >>> from src.local_planner import RPP
+        >>> start = (5, 5, 0)
+        >>> goal = (45, 25, 0)
+        >>> env = Grid(51, 31)
+        >>> planner = RPP(start, goal, env)
+        >>> planner.run()
+    """
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
         super().__init__(start, goal, env, heuristic_type)
         # RPP parameters
@@ -57,18 +51,14 @@ class RPP(LocalPlanner):
         return "Regulated Pure Pursuit (RPP)"
 
     def plan(self):
-        '''
+        """
         RPP motion plan function.
 
-        Return
-        ----------
-        flag: bool
-            planning successful if true else failed
-        pose_list: list
-            history poses of robot
-        lookahead_pts: list
-            history lookahead points
-        '''
+        Returns:
+            flag (bool): planning successful if true else failed
+            pose_list (list): history poses of robot
+            lookahead_pts (list): history lookahead points
+        """
         lookahead_pts = []
         dt = self.params["TIME_STEP"]
         for _ in range(self.params["MAX_ITERATION"]):
@@ -113,9 +103,9 @@ class RPP(LocalPlanner):
         return False, None, None
 
     def run(self):
-        '''
+        """
         Running both plannig and animation.
-        '''
+        """
         _, history_pose, lookahead_pts = self.plan()
         if not history_pose:
             raise ValueError("Path not found and planning failed!")
@@ -126,21 +116,16 @@ class RPP(LocalPlanner):
         self.plot.animation(path, str(self), cost, history_pose=history_pose, lookahead_pts=lookahead_pts)
 
     def applyCurvatureConstraint(self, raw_linear_vel: float, curvature: float) -> float:
-        '''
+        """
         Applying curvature constraints to regularize the speed of robot turning.
 
-        Parameters
-        ----------
-        raw_linear_vel: float
-            the raw linear velocity of robot
-        curvature: float
-            the tracking curvature
+        Parameters:
+            raw_linear_vel (float): the raw linear velocity of robot
+            curvature (float): the tracking curvature
 
-        Return
-        ----------
-        reg_vel: float
-            the regulated velocity
-        '''
+        Returns:
+            reg_vel (float): the regulated velocity
+        """
         radius = abs(1.0 / curvature)
         if radius < self.regulated_radius_min:
             return raw_linear_vel * (radius / self.regulated_radius_min)
@@ -148,19 +133,15 @@ class RPP(LocalPlanner):
             return raw_linear_vel
     
     def applyObstacleConstraint(self, raw_linear_vel: float) -> float:
-        '''
+        """
         Applying obstacle constraints to regularize the speed of robot approaching obstacles.
 
-        Parameters
-        ----------
-        raw_linear_vel: float
-            the raw linear velocity of robot
+        Parameters:
+            raw_linear_vel (float): the raw linear velocity of robot
 
-        Return
-        ----------
-        reg_vel: float
-            the regulated velocity
-        '''
+        Returns:
+            reg_vel (float): the regulated velocity
+        """
         obstacles = np.array(list(self.obstacles))
         D = cdist(obstacles, np.array([[self.robot.px, self.robot.py]]))
         obs_dist = np.min(D)

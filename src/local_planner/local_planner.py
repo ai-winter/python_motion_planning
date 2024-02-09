@@ -1,9 +1,9 @@
-'''
+"""
 @file: local_planner.py
 @breif: Base class for local planner.
 @author: Winter
 @update: 2023.3.2
-'''
+"""
 import math
 import sys, os
 sys.path.append(os.path.abspath(os.path.join(__file__, "../")))
@@ -11,20 +11,15 @@ sys.path.append(os.path.abspath(os.path.join(__file__, "../")))
 from utils import Env, Planner, SearchFactory, Plot, Robot, MathHelper
 
 class LocalPlanner(Planner):
-    '''
+    """
     Base class for local planner.
 
-    Parameters
-    ----------
-    start: tuple
-        start point coordinate
-    goal: tuple
-        goal point coordinate
-    env: Env
-        environment
-    heuristic_type: str
-        heuristic function type, default is euclidean
-    '''
+    Parameters:
+        start (tuple): start point coordinate
+        goal (tuple): goal point coordinate
+        env (Env): environment
+        heuristic_type (str): heuristic function type
+    """
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str="euclidean", **params) -> None:
         # start and goal pose
         assert len(start) == 3 and len(goal) == 3, \
@@ -77,9 +72,9 @@ class LocalPlanner(Planner):
     
     @property
     def g_path(self):
-        '''
+        """
         [property]Global path.
-        '''        
+        """
         if self.g_planner_ is None:
             raise AttributeError("Global path searcher is None, please set it first!")
         
@@ -104,18 +99,14 @@ class LocalPlanner(Planner):
         return angle - 2.0 * math.pi * math.floor((angle + math.pi) / (2.0 * math.pi))
 
     def getLookaheadPoint(self):
-        '''
+        """
         Find the point on the path that is exactly the lookahead distance away from the robot
 
-        Return
-        ----------
-        lookahead_pt: tuple
-            lookahead point
-        theta: float
-            the angle on trajectory
-        kappa: float
-            the curvature on trajectory
-        '''
+        Returns:
+            lookahead_pt (tuple): lookahead point
+            theta (float): the angle on trajectory
+            kappa (float): the curvature on trajectory
+        """
         if self.path is None:
             assert RuntimeError("Please plan the path using g_planner!")
 
@@ -173,19 +164,15 @@ class LocalPlanner(Planner):
         return (pt_x, pt_y), theta, kappa
 
     def linearRegularization(self, v_d: float) -> float:
-        '''
+        """
         Linear velocity regularization
 
-        Parameters
-        ----------
-        v_d: float
-            reference velocity input
+        Parameters:
+            v_d (float): reference velocity input
 
-        Return
-        ----------
-        v: float
-            control velocity output
-        '''
+        Returns:
+            v (float): control velocity output
+        """
         v_inc = v_d - self.robot.v
         if abs(v_inc) > self.params["MAX_V_INC"]:
             v_inc = math.copysign(self.params["MAX_V_INC"], v_inc)
@@ -200,19 +187,15 @@ class LocalPlanner(Planner):
         return v
 
     def angularRegularization(self, w_d: float) -> float:
-        '''
+        """
         Angular velocity regularization
 
-        Parameters
-        ----------
-        w_d: float
-            reference angular velocity input
+        Parameters:
+            w_d (float): reference angular velocity input
 
-        Return
-        ----------
-        w: float
-            control angular velocity output
-        '''
+        Returns:
+            w (float): control angular velocity output
+        """
         w_inc = w_d - self.robot.w
         if abs(w_inc) > self.params["MAX_W_INC"]:
             w_inc = math.copysign(self.params["MAX_W_INC"], w_inc)
@@ -227,37 +210,27 @@ class LocalPlanner(Planner):
         return w
 
     def shouldRotateToGoal(self, cur: tuple, goal: tuple) -> bool:
-        '''
+        """
         Whether to reach the target pose through rotation operation
 
-        Parameters
-        ----------
-        cur: tuple
-            current pose of robot
-        goal: tuple
-            goal pose of robot
+        Parameters:
+            cur (tuple): current pose of robot
+            goal (tuple): goal pose of robot
 
-        Return
-        ----------
-        flag: bool
-            true if robot should perform rotation
-        '''
+        Returns:
+            flag (bool): true if robot should perform rotation
+        """
         return self.dist(cur, goal) < self.params["GOAL_DIST_TOL"]
     
     def shouldRotateToPath(self, angle_to_path: float, tol: float=None) -> bool:
-        '''
+        """
         Whether to correct the tracking path with rotation operation
 
-        Parameters
-        ----------
-        angle_to_path: float 
-            the angle deviation
-        tol: float[None]
-            the angle deviation tolerence
+        Parameters:
+            angle_to_path (float): the angle deviation
+            tol (float): the angle deviation tolerence
 
-        Return
-        ----------
-        flag: bool
-            true if robot should perform rotation
-        '''
+        Returns:
+            flag (bool): true if robot should perform rotation
+        """
         return ((tol is not None) and (angle_to_path > tol)) or (angle_to_path > self.params["ROTATE_TOL"])

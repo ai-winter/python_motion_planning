@@ -1,9 +1,9 @@
-'''
+"""
 @file: polynomial_curve.py
 @breif: Polynomial curve generation
 @author: Winter
 @update: 2023.7.25
-'''
+"""
 import math
 import numpy as np
 import os, sys
@@ -14,25 +14,20 @@ from utils import Plot
 from .curve import Curve
 
 class Polynomial(Curve):
-    '''
+    """
     Class for polynomial curve generation(Quintic).
 
-    Parameters
-    ----------
-    step: float
-        Simulation or interpolation size
-    max_acc: float
-        Maximum acceleration
-    max_jerk: float
-        Maximum jerk
+    Parameters:
+        step (float): Simulation or interpolation size
+        max_acc (float): Maximum acceleration
+        max_jerk (float): Maximum jerk
 
-    Examples
-    ----------
-    >>> from src.curve_generation import Polynomial
-    >>>	points = [(0, 0, 0), (10, 10, -90), (20, 5, 60)]
-    >>> generator = Polynomial(step, max_acc, max_jerk)
-    >>> generator.run(points)
-    '''
+    Examples:
+        >>> from src.curve_generation import Polynomial
+        >>>	points = [(0, 0, 0), (10, 10, -90), (20, 5, 60)]
+        >>> generator = Polynomial(step, max_acc, max_jerk)
+        >>> generator.run(points)
+    """
     def __init__(self, step: float, max_acc: float, max_jerk: float) -> None:
         super().__init__(step)
         self.max_acc = max_acc
@@ -45,9 +40,9 @@ class Polynomial(Curve):
         return "Quintic Polynomial Curve"
     
     class Poly:
-        '''
+        """
         Polynomial interpolation solver
-        '''
+        """
         def __init__(self, state0: tuple, state1: tuple, t: float) -> None:
             x0, v0, a0 = state0
             xt, vt, at = state1
@@ -83,9 +78,9 @@ class Polynomial(Curve):
             return 6 * self.p3 + 24 * self.p4 * t + 60 * self.p5 * t ** 2
     
     class Trajectory:
-        '''
+        """
         Polynomial interpolation solver
-        '''
+        """
         def __init__(self):
             self.clear()
         
@@ -110,21 +105,16 @@ class Polynomial(Curve):
             return len(self.time)
 
     def generation(self, start_pose: tuple, goal_pose: tuple):
-        '''
+        """
         Generate the polynomial Curve.
 
-        Parameters
-        ----------
-        start_pose: tuple
-            Initial pose (x, y, yaw)
-        goal_pose: tuple
-            Target pose (x, y, yaw)
+        Parameters:
+            start_pose (tuple): Initial pose (x, y, yaw)
+            goal_pose (tuple): Target pose (x, y, yaw)
 
-        Return
-        ----------
-        traj: Traj
-            The first trajectory that satisfies the acceleration and jerk constraint
-        '''
+        Returns:
+            traj (Traj): The first trajectory that satisfies the acceleration and jerk constraint
+        """
         sx, sy, syaw, sv, sa = start_pose
         gx, gy, gyaw, gv, ga = goal_pose
         
@@ -177,14 +167,12 @@ class Polynomial(Curve):
         return traj
 
     def run(self, points: list):
-        '''
+        """
         Running both generation and animation.
 
-        Parameters
-        ----------
-        points: list[tuple]
-            path points
-        '''
+        Parameters:
+            points (list[tuple]): path points
+        """
         assert len(points) >= 2, "Number of points should be at least 2."
         import matplotlib.pyplot as plt
 

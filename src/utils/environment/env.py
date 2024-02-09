@@ -1,9 +1,9 @@
-'''
+"""
 @file: env.py
 @breif: 2-dimension environment
 @author: Winter
 @update: 2023.1.13
-'''
+"""
 from math import sqrt
 from abc import ABC, abstractmethod
 from scipy.spatial import cKDTree
@@ -12,21 +12,17 @@ import numpy as np
 from .node import Node
 
 class Env(ABC):
-    '''
+    """
     Class for building 2-d workspace of robots.
 
-    Parameters
-    ----------
-    x_range: int
-        x-axis range of enviroment
-    y_range: int
-        y-axis range of environmet
+    Parameters:
+        x_range (int): x-axis range of enviroment
+        y_range (int): y-axis range of environmet
 
-    Examples
-    ----------
-    >>> from src.utils import Env
-    >>> env = Env(30, 40)
-    '''
+    Examples:
+        >>> from src.utils import Env
+        >>> env = Env(30, 40)
+    """
     def __init__(self, x_range: int, y_range: int) -> None:
         # size of environment
         self.x_range = x_range  
@@ -41,9 +37,9 @@ class Env(ABC):
         pass
 
 class Grid(Env):
-    '''
+    """
     Class for discrete 2-d grid map.
-    '''
+    """
     def __init__(self, x_range: int, y_range: int) -> None:
         super().__init__(x_range, y_range)
         # allowed motions
@@ -57,9 +53,9 @@ class Grid(Env):
         self.init()
     
     def init(self) -> None:
-        '''
+        """
         Initialize grid map.
-        '''
+        """
         x, y = self.x_range, self.y_range
         obstacles = set()
 
@@ -90,9 +86,9 @@ class Grid(Env):
 
 
 class Map(Env):
-    '''
+    """
     Class for continuous 2-d map.
-    '''
+    """
     def __init__(self, x_range: int, y_range: int) -> None:
         super().__init__(x_range, y_range)
         self.boundary = None
@@ -101,9 +97,9 @@ class Map(Env):
         self.init()
 
     def init(self):
-        '''
+        """
         Initialize map.
-        '''
+        """
         x, y = self.x_range, self.y_range
 
         # boundary of environment

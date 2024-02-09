@@ -1,42 +1,39 @@
-'''
+"""
 @file: lazy_theta_star.py
 @breif: Lazy Theta* motion planning
 @author: Winter
 @update: 2024.2.2
-'''
+"""
 import os, sys
 import heapq
 
-sys.path.append(os.path.abspath(os.path.join(__file__, "../../../")))
+sys.path.append(os.path.abspath(os.path.join(__file__, "../../")))
 
 from .theta_star import ThetaStar
-from src.utils import Env, Node
+from utils import Env, Node
 
 class LazyThetaStar(ThetaStar):
-    '''
+    """
     Class for Lazy Theta* motion planning.
 
-    Parameters
-    ----------
-    start: tuple
-        start point coordinate
-    goal: tuple
-        goal point coordinate
-    env: Env
-        environment
-    heuristic_type: str
-        heuristic function type, default is euclidean
+    Parameters:
+        start (tuple): start point coordinate
+        goal (tuple): goal point coordinate
+        env (Env): environment
+        heuristic_type (str): heuristic function type
 
-    Examples
-    ----------
-    >>> from src.utils import Grid
-    >>> from graph_search import ThetaStar
-    >>> start = (5, 5)
-    >>> goal = (45, 25)
-    >>> env = Grid(51, 31)
-    >>> planner = ThetaStar(start, goal, env)
-    >>> planner.run()
-    '''
+    Examples:
+        >>> from src.utils import Grid
+        >>> from graph_search import ThetaStar
+        >>> start = (5, 5)
+        >>> goal = (45, 25)
+        >>> env = Grid(51, 31)
+        >>> planner = ThetaStar(start, goal, env)
+        >>> planner.run()
+
+    References:
+        [1] Lazy Theta*: Any-Angle Path Planning and Path Length Analysis in 3D
+    """
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
         super().__init__(start, goal, env, heuristic_type)
 
@@ -44,19 +41,14 @@ class LazyThetaStar(ThetaStar):
         return "Lazy Theta*"
 
     def plan(self):
-        '''
+        """
         Lazy Theta* motion plan function.
-        [1] Lazy Theta*: Any-Angle Path Planning and Path Length Analysis in 3D
 
-        Return
-        ----------
-        cost: float
-            path cost
-        path: list
-            planning path
-        expand: list
-            all nodes that planner has searched
-        '''
+        Returns
+            cost (float): path cost
+            path (list): planning path
+            expand (list): all nodes that planner has searched
+        """
         # OPEN set with priority and CLOSED set
         OPEN = []
         heapq.heappush(OPEN, self.start)
@@ -119,13 +111,13 @@ class LazyThetaStar(ThetaStar):
         return ([], []), []
     
     def updateVertex(self, node_p: Node, node_c: Node) -> None:
-        '''
+        """
         Update extend node information with current node's parent node.
 
-        Parameters
-        ----------
-        node_p, node_c: Node
-        '''
+        Parameters:
+            node_p (Node): parent node
+            node_c (Node): current node
+        """
         # path 2
         if node_p.g + self.dist(node_c, node_p) <= node_c.g:
             node_c.g = node_p.g + self.dist(node_c, node_p)

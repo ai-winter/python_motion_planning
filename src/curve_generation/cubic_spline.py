@@ -1,9 +1,9 @@
-'''
+"""
 @file: cubic_spline.py
 @breif: Cubic spline generation
 @author: Winter
 @update: 2023.7.28
-'''
+"""
 import math
 import bisect
 import numpy as np
@@ -14,21 +14,18 @@ sys.path.append(os.path.abspath(os.path.join(__file__, "../")))
 from .curve import Curve
 
 class CubicSpline(Curve):
-	'''
+	"""
 	Class for cubic spline generation.
 
-	Parameters
-	----------
-	step: float
-		Simulation or interpolation size
+	Parameters:
+		step (float): Simulation or interpolation size
 
-	Examples
-	----------
-	>>> from src.curve_generation import CubicSpline
-	>>>	points = [(0, 0, 0), (10, 10, -90), (20, 5, 60)]
-	>>> generator = CubicSpline(step)
-	>>> generator.run(points)
-	'''
+	Examples:
+		>>> from src.curve_generation import CubicSpline
+		>>>	points = [(0, 0, 0), (10, 10, -90), (20, 5, 60)]
+		>>> generator = CubicSpline(step)
+		>>> generator.run(points)
+	"""
 	def __init__(self, step: float) -> None:
 		super().__init__(step)
 	
@@ -36,25 +33,18 @@ class CubicSpline(Curve):
 		return "Cubic Spline"
 
 	def spline(self, x_list: list, y_list: list, t: list):
-		'''
+		"""
 		Running both generation and animation.
 
-		Parameters
-		----------
-		x_list: list[tuple]
-			path points x-direction
-		y_list: list[tuple]
-			path points y-direction
-		t: list
-			parameter
+		Parameters:
+			x_list (list[tuple]): path points x-direction
+			y_list (list[tuple]): path points y-direction
+			t (list): parameter
 		
-		Return
-        ----------
-        p: list
-            The (x, y) of curve with given t
-		dp: list
-			The derivative (dx, dy) of curve with given t
-		'''
+		Returns:
+			p (list): The (x, y) of curve with given t
+			dp (list): The derivative (dx, dy) of curve with given t
+		"""
 		# cubic polynomial functions
 		a, b, c, d = y_list, [], [], []
 		h = np.diff(x_list)
@@ -95,14 +85,12 @@ class CubicSpline(Curve):
 		pass
 
 	def run(self, points: list):
-		'''
+		"""
 		Running both generation and animation.
 
-		Parameters
-		----------
-		points: list[tuple]
-			path points
-		'''
+		Parameters:
+			points (list[tuple]): path points
+		"""
 		assert len(points) >= 2, "Number of points should be at least 2."
 		import matplotlib.pyplot as plt
 

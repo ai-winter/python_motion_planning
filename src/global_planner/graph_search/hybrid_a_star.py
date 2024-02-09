@@ -1,40 +1,38 @@
-'''
+"""
 @file: hybrid_a_star.py
 @breif: Hybrid A* motion planning
 @author: Winter
 @update: 2024.1.4
-'''
+"""
 import math
 import os, sys
 
-sys.path.append(os.path.abspath(os.path.join(__file__, "../../../")))
+sys.path.append(os.path.abspath(os.path.join(__file__, "../../")))
 
 from .graph_search import GraphSearcher
-from src.utils import Env, Node
+from utils import Env, Node
 
 class HybridAStar(GraphSearcher):
-    '''
+    """
     Class for Hybrid A* motion planning.
 
-    Parameters
-    ----------
-    start: tuple
-        start point coordinate
-    goal: tuple
-        goal point coordinate
-    env: Env
-        environment
+    Parameters:
+        start (tuple): start point coordinate
+        goal (tuple): goal point coordinate
+        env (Env): environment
 
-    Examples
-    ----------
-    >>> from src.utils import Grid
-    >>> from graph_search import HybridAStar
-    >>> start = (5, 5)
-    >>> goal = (45, 25)
-    >>> env = Grid(51, 31)
-    >>> planner = HybridAStar(start, goal, env)
-    >>> planner.run()
-    '''
+    Examples:
+        >>> from src.utils import Grid
+        >>> from graph_search import HybridAStar
+        >>> start = (5, 5)
+        >>> goal = (45, 25)
+        >>> env = Grid(51, 31)
+        >>> planner = HybridAStar(start, goal, env)
+        >>> planner.run()
+
+    References:
+        [1] Practical Search Techniques in Path Planning for Autonomous Driving
+    """
     def __init__(self, start: tuple, goal: tuple, env: Env, penalty_turn: float,
         penalty_cod: float, penalty_reverse: float, headings: int) -> None:
         super().__init__(start, goal, env, "euclidean")
@@ -48,22 +46,16 @@ class HybridAStar(GraphSearcher):
         return "A*"
 
     class HybridNode(Node):
-        '''
+        """
         Class for Hybrid A* nodes.
 
-        Parameters
-        ----------
-        current: tuple
-            current coordinate
-        parent: tuple
-            coordinate of parent node
-        g: float
-            path cost
-        h: float
-            heuristic cost
-        reverse: bool
-            whether reverse is allowed or not
-        '''
+        Parameters:
+            current (tuple): current coordinate
+            parent (tuple): coordinate of parent node
+            g (float): path cost
+            h (float): heuristic cost
+            reverse (bool): whether reverse is allowed or not
+        """
         def __init__(self, current: tuple, parent: tuple=None, g: float=0, h: float=0,
             reverse: bool=False) -> None:
             assert len(current) == 3
@@ -102,36 +94,30 @@ class HybridAStar(GraphSearcher):
             return self.parrent[2]
 
     def plan(self):
-        '''
+        """
         Hybrid A* motion plan function.
-        [1] Practical Search Techniques in Path Planning for Autonomous Driving
 
-        Return
-        ----------
-        cost: float
-            path cost
-        path: list
-            planning path
-        expand: list
-            all nodes that planner has searched
-        '''
+        Returns:
+            cost (float):
+                path cost
+            path (list):
+                planning path
+            expand (list):
+                all nodes that planner has searched
+        """
         pass
 
     
     def getNeighbor(self, node: Node) -> list:
-        '''
+        """
         Find neighbors of node.
 
-        Parameters
-        ----------
-        node: Node
-            current node
+        Parameters:
+            node (Node): current node
 
-        Return
-        ----------
-        neighbors: list
-            neighbors of current node
-        '''
+        Returns:
+            neighbors (list): neighbors of current node
+        """
         dy = [0,        -0.0415893,  0.0415893]
         dx = [0.7068582,   0.705224,   0.705224]
         dt = [0,         0.1178097,   -0.1178097]

@@ -1,9 +1,9 @@
-'''
+"""
 @file: math_helper.py
 @breif: Contains common/commonly used math function
 @author: Winter
 @update: 2023.1.26
-'''
+"""
 import math 
 
 class MathHelper:

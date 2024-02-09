@@ -1,43 +1,40 @@
-'''
+"""
 @file: a_star.py
 @breif: A* motion planning
 @author: Winter
 @update: 2023.1.13
-'''
+"""
 import os, sys
 import heapq
 
-sys.path.append(os.path.abspath(os.path.join(__file__, "../../../")))
+sys.path.append(os.path.abspath(os.path.join(__file__, "../../")))
 
 from .graph_search import GraphSearcher
-from src.utils import Env, Node
+from utils import Env, Node
 
 
 class AStar(GraphSearcher):
-    '''
+    """
     Class for A* motion planning.
 
-    Parameters
-    ----------
-    start: tuple
-        start point coordinate
-    goal: tuple
-        goal point coordinate
-    env: Env
-        environment
-    heuristic_type: str
-        heuristic function type, default is euclidean
+    Parameters:
+        start (tuple): start point coordinate
+        goal (tuple): goal point coordinate
+        env (Env): environment
+        heuristic_type (str): heuristic function type
 
-    Examples
-    ----------
-    >>> from src.utils import Grid
-    >>> from graph_search import AStar
-    >>> start = (5, 5)
-    >>> goal = (45, 25)
-    >>> env = Grid(51, 31)
-    >>> planner = AStar(start, goal, env)
-    >>> planner.run()
-    '''
+    Examples:
+        >>> from src.utils import Grid
+        >>> from graph_search import AStar
+        >>> start = (5, 5)
+        >>> goal = (45, 25)
+        >>> env = Grid(51, 31)
+        >>> planner = AStar(start, goal, env)
+        >>> planner.run()
+
+    References:
+        [1] A Formal Basis for the heuristic Determination of Minimum Cost Paths
+    """
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
         super().__init__(start, goal, env, heuristic_type)
 
@@ -45,19 +42,14 @@ class AStar(GraphSearcher):
         return "A*"
 
     def plan(self):
-        '''
+        """
         A* motion plan function.
-        [1] A Formal Basis for the heuristic Determination of Minimum Cost Paths
 
-        Return
-        ----------
-        cost: float
-            path cost
-        path: list
-            planning path
-        expand: list
-            all nodes that planner has searched
-        '''
+        Returns:
+            cost (float): path cost
+            path (list): planning path
+            expand (list): all nodes that planner has searched
+        """
         # OPEN set with priority and CLOSED set
         OPEN = []
         heapq.heappush(OPEN, self.start)
@@ -95,38 +87,29 @@ class AStar(GraphSearcher):
         return ([], []), []
 
     def getNeighbor(self, node: Node) -> list:
-        '''
+        """
         Find neighbors of node.
 
-        Parameters
-        ----------
-        node: Node
-            current node
+        Parameters:
+            node (Node): current node
 
-        Return
-        ----------
-        neighbors: list
-            neighbors of current node
-        '''
+        Returns:
+            neighbors (list): neighbors of current node
+        """
         return [node + motion for motion in self.motions
                 if not self.isCollision(node, node + motion)]
 
     def extractPath(self, closed_set):
-        '''
+        """
         Extract the path based on the CLOSED set.
 
-        Parameters
-        ----------
-        closed_set: list
-            CLOSED set
+        Parameters:
+            closed_set (list): CLOSED set
 
-        Return
-        ----------
-        cost: float
-            the cost of planning path
-        path: list
-            the planning path
-        '''
+        Returns:
+            cost (float): the cost of planning path
+            path (list): the planning path
+        """
         cost = 0
         node = closed_set[closed_set.index(self.goal)]
         path = [node.current]
@@ -138,8 +121,8 @@ class AStar(GraphSearcher):
         return cost, path
 
     def run(self):
-        '''
+        """
         Running both plannig and animation.
-        '''
+        """
         (cost, path), expand = self.plan()
         self.plot.animation(path, str(self), cost, expand)

@@ -1,9 +1,9 @@
-'''
+"""
 @file: pid.py
 @breif: PID motion planning
 @author: Winter
 @update: 2023.10.24
-'''
+"""
 import os, sys
 import numpy as np
 
@@ -13,30 +13,24 @@ from .local_planner import LocalPlanner
 from utils import Env
 
 class PID(LocalPlanner):
-    '''
+    """
     Class for PID motion planning.
 
-    Parameters
-    ----------
-    start: tuple
-        start point coordinate
-    goal: tuple
-        goal point coordinate
-    env: Env
-        environment
-    heuristic_type: str
-        heuristic function type, default is euclidean
+    Parameters:
+        start (tuple): start point coordinate
+        goal (tuple): goal point coordinate
+        env (Env): environment
+        heuristic_type (str): heuristic function type
 
-    Examples
-    ----------
-    >>> from src.utils import Grid
-    >>> from src.local_planner import PID
-    >>> start = (5, 5, 0)
-    >>> goal = (45, 25, 0)
-    >>> env = Grid(51, 31)
-    >>> planner = PID(start, goal, env)
-    >>> planner.run()
-    '''
+    Examples:
+        >>> from src.utils import Grid
+        >>> from src.local_planner import PID
+        >>> start = (5, 5, 0)
+        >>> goal = (45, 25, 0)
+        >>> env = Grid(51, 31)
+        >>> planner = PID(start, goal, env)
+        >>> planner.run()
+    """
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
         super().__init__(start, goal, env, heuristic_type)
         # PID parameters
@@ -53,16 +47,13 @@ class PID(LocalPlanner):
         return "PID Planner"
 
     def plan(self):
-        '''
+        """
         PID motion plan function.
 
-        Return
-        ----------
-        flag: bool
-            planning successful if true else failed
-        pose_list: list
-            history poses of robot
-        '''
+        Returns:
+            flag (bool): planning successful if true else failed
+            pose_list (list): history poses of robot
+        """
         dt = self.params["TIME_STEP"]
         for _ in range(self.params["MAX_ITERATION"]):
             # break until goal reached
@@ -103,9 +94,9 @@ class PID(LocalPlanner):
         return False, None
 
     def run(self):
-        '''
+        """
         Running both plannig and animation.
-        '''
+        """
         _, history_pose = self.plan()
         if not history_pose:
             raise ValueError("Path not found and planning failed!")
@@ -116,19 +107,15 @@ class PID(LocalPlanner):
         self.plot.animation(path, str(self), cost, history_pose=history_pose)
 
     def linearRegularization(self, v_d: float) -> float:
-        '''
+        """
         Linear velocity controller with pid.
 
-        Parameters
-        ----------
-        v_d: float
-            reference velocity input
+        Parameters:
+            v_d (float): reference velocity input
 
-        Return
-        ----------
-        v: float
-            control velocity output
-        '''
+        Returns:
+            v (float): control velocity output
+        """
         e_v = v_d - self.robot.v
         self.i_v += e_v * self.params["TIME_STEP"]
         d_v = (e_v - self.e_v) / self.params["TIME_STEP"]
@@ -144,19 +131,15 @@ class PID(LocalPlanner):
         return v
 
     def angularRegularization(self, w_d: float) -> float:
-        '''
+        """
         Angular velocity controller with pid.
 
-        Parameters
-        ----------
-        w_d: float
-            reference angular input
+        Parameters:
+            w_d (float): reference angular input
 
-        Return
-        ----------
-        w: float
-            control angular velocity output
-        '''
+        Returns:
+            w (float): control angular velocity output
+        """
         e_w = w_d - self.robot.w
         self.i_w += e_w * self.params["TIME_STEP"]
         d_w = (e_w - self.e_w) / self.params["TIME_STEP"]

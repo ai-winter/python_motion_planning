@@ -1,44 +1,40 @@
-'''
+"""
 @file: d_star_lite.py
 @breif: D* Lite motion planning
 @author: Winter
 @update: 2023.1.17
-'''
+"""
 import os, sys
 import heapq
 
-sys.path.append(os.path.abspath(os.path.join(__file__, "../../../")))
+sys.path.append(os.path.abspath(os.path.join(__file__, "../../")))
 
 from .graph_search import GraphSearcher
 from .lpa_star import LPAStar, LNode
-from src.utils import Env
+from utils import Env
 
 class DStarLite(LPAStar):
-    '''
+    """
     Class for D* Lite motion planning.
-    [1] D* Lite
 
-    Parameters
-    ----------
-    start: tuple
-        start point coordinate
-    goal: tuple
-        goal point coordinate
-    env: Env
-        environment
-    heuristic_type: str
-        heuristic function type, default is euclidean
+    Parameters:
+        start (tuple): start point coordinate
+        goal (tuple): goal point coordinate
+        env (Env): environment
+        heuristic_type (str): heuristic function type
 
-    Examples
-    ----------
-    >>> from src.utils import Grid
-    >>> from graph_search import DStarLite
-    >>> start = (5, 5)
-    >>> goal = (45, 25)
-    >>> env = Grid(51, 31)
-    >>> planner = DStarLite(start, goal, env)
-    >>> planner.run()
-    '''
+    Examples:
+        >>> from src.utils import Grid
+        >>> from graph_search import DStarLite
+        >>> start = (5, 5)
+        >>> goal = (45, 25)
+        >>> env = Grid(51, 31)
+        >>> planner = DStarLite(start, goal, env)
+        >>> planner.run()
+
+    References:
+        [1] D* Lite
+    """
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
         GraphSearcher.__init__(self, start, goal, env, heuristic_type)
         # start and goal
@@ -61,9 +57,12 @@ class DStarLite(LPAStar):
         return "D* Lite"
 
     def OnPress(self, event):
-        '''
+        """
         Mouse button callback function.
-        '''
+
+        Parameters:
+            event (Event): mouse event
+        """
         x, y = int(event.xdata), int(event.ydata)
         if x < 0 or x > self.env.x_range - 1 or y < 0 or y > self.env.y_range - 1:
             print("Please choose right area!")
@@ -109,9 +108,9 @@ class DStarLite(LPAStar):
             self.plot.update()
 
     def computeShortestPath(self) -> None:
-        '''
+        """
         Perceived dynamic obstacle information to optimize global path.
-        '''
+        """
         while True:
             node = min(self.U, key=lambda node: node.key)
             if node.key >= self.calculateKey(self.start) and \
@@ -138,9 +137,12 @@ class DStarLite(LPAStar):
                     self.updateVertex(node_n)
 
     def updateVertex(self, node: LNode) -> None:
-        '''
+        """
         Update the status and the current cost to node and it's neighbor.
-        '''
+
+        Parameters:
+            node (LNode): the node to be updated
+        """
         # greed correction(reverse searching)
         if node != self.goal:
             node.rhs = min([node_n.g + self.cost(node_n, node)
@@ -155,23 +157,26 @@ class DStarLite(LPAStar):
             heapq.heappush(self.U, node)
 
     def calculateKey(self, node: LNode) -> list:
-        '''
+        """
         Calculate priority of node.
-        ''' 
+
+        Parameters:
+            node (LNode): the node to be calculated
+
+        Returns:
+            key (list): the priority of node
+        """
         return [min(node.g, node.rhs) + self.h(node, self.start) + self.km,
                 min(node.g, node.rhs)]
 
     def extractPath(self):
-        '''
+        """
         Extract the path based on greedy policy.
 
-        Return
-        ----------
-        cost: float
-            the cost of planning path
-        path: list
-            the planning path
-        '''
+        Returns:
+            cost (float): the cost of planning path
+            path (list): the planning path
+        """
         node = self.start
         path = [node.current]
         cost, count = 0, 0

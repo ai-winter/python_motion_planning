@@ -1,9 +1,9 @@
-'''
+"""
 @file: curve_factory.py
 @breif: Facotry class for curve generation.
 @author: Winter
 @update: 2023.7.25
-'''
+"""
 import sys, os
 sys.path.append(os.path.abspath(os.path.join(__file__, "../../")))
 

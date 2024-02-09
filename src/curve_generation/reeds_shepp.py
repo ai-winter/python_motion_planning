@@ -1,9 +1,9 @@
-'''
+"""
 @file: reeds_shepp.py
 @breif: Reeds shepp curve generation
 @author: Winter
 @update: 2023.7.26
-'''
+"""
 import math
 import numpy as np
 import os, sys
@@ -14,24 +14,22 @@ from utils import Plot
 from .curve import Curve
 
 class ReedsShepp(Curve):
-	'''
+	"""
 	Class for Reeds shepp curve generation.
-	[1] Optimal paths for a car that goes both forwards and backwards
 
-	Parameters
-	----------
-	step: float
-		Simulation or interpolation size
-	max_curv: float
-		The maximum curvature of the curve
+	Parameters:
+		step (float): Simulation or interpolation size
+		max_curv (float): The maximum curvature of the curve
 
-	Examples
-	----------
-	>>> from src.curve_generation import ReedsShepp
-	>>>	points = [(0, 0, 0), (10, 10, -90), (20, 5, 60)]
-	>>> generator = ReedsShepp(step, max_curv)
-	>>> generator.run(points)
-	'''
+	Examples:
+		>>> from src.curve_generation import ReedsShepp
+		>>>	points = [(0, 0, 0), (10, 10, -90), (20, 5, 60)]
+		>>> generator = ReedsShepp(step, max_curv)
+		>>> generator.run(points)
+
+	References:
+		[1] Optimal paths for a car that goes both forwards and backwards
+	"""
 	def __init__(self, step: float, max_curv: float) -> None:
 		super().__init__(step)
 		self.max_curv = max_curv
@@ -40,25 +38,39 @@ class ReedsShepp(Curve):
 		return "Reeds Shepp Curve"
 
 	def R(self, x, y):
-		'''
+		"""
 		Return the polar coordinates (r, theta) of the point (x, y)
 		i.e. rcos(theta) = x; rsin(theta) = y
-		'''
+
+		Parameters:
+			x (float): x-coordinate value
+			y (float): y-coordinate value
+
+		Returns:
+			r, theta (float): Polar coordinates
+
+		"""
 		r = math.hypot(x, y)
 		theta = math.atan2(y, x)
 
 		return r, theta
 
 	def M(self, theta):
-		'''
+		"""
 		Truncate the angle to the interval of -π to π.
-		'''  
+
+		Parameters:
+			theta (float): Angle value
+
+		Returns:
+			theta (float): Truncated angle value
+		"""
 		return self.pi2pi(theta)
 
 	class Path:
-		'''
+		"""
 		class for Path element
-		'''
+		"""
 		def __init__(self, lengths: list = [], ctypes: list = [], x: list = [],
 			y: list = [], yaw: list = [], dirs: list = []):
 			self.lengths = lengths  	# lengths of each part of path (+: forward, -: backward)
@@ -70,9 +82,9 @@ class ReedsShepp(Curve):
 			self.dirs = dirs 			# direction value of curve (1: forward, -1: backward)
 
 	def SLS(self, x: float, y: float, phi: float):
-		'''
+		"""
 		Straight-Left-Straight generation mode.
-		'''
+		"""
 		phi = self.M(phi)
 
 		if y > 0.0 and 0.0 < phi < math.pi * 0.99:
@@ -91,9 +103,9 @@ class ReedsShepp(Curve):
 		return False, 0.0, 0.0, 0.0
 
 	def LRL(self, x: float, y: float, phi: float):
-		'''
+		"""
 		Left-Right-Left generation mode. (L+R-L-)
-		'''
+		"""
 		r, theta = self.R(x - math.sin(phi), y - 1.0 + math.cos(phi))
 
 		if r <= 4.0:
@@ -107,9 +119,9 @@ class ReedsShepp(Curve):
 		return False, 0.0, 0.0, 0.0
 
 	def LSL(self, x: float, y: float, phi: float):
-		'''
+		"""
 		Left-Straight-Left generation mode. (L+S+L+)
-		'''
+		"""
 		u, t = self.R(x - math.sin(phi), y - 1.0 + math.cos(phi))
 
 		if t >= 0.0:
@@ -120,9 +132,9 @@ class ReedsShepp(Curve):
 		return False, 0.0, 0.0, 0.0
 
 	def LSR(self, x: float, y: float, phi: float):
-		'''
+		"""
 		Left-Straight-Right generation mode. (L+S+R+)
-		'''
+		"""
 		r, theta = self.R(x + math.sin(phi), y - 1.0 - math.cos(phi))
 		r = r ** 2
 
@@ -137,9 +149,9 @@ class ReedsShepp(Curve):
 		return False, 0.0, 0.0, 0.0
 
 	def LRLRn(self, x: float, y: float, phi: float):
-		'''
+		"""
 		Left-Right(beta)-Left(beta)-Right generation mode. (L+R+L-R-)
-		'''
+		"""
 		xi = x + math.sin(phi)
 		eta = y - 1.0 - math.cos(phi)
 		rho = 0.25 * (2.0 + math.sqrt(xi * xi + eta * eta))
@@ -153,9 +165,9 @@ class ReedsShepp(Curve):
 		return False, 0.0, 0.0, 0.0
 
 	def LRLRp(self, x: float, y: float, phi: float):
-		'''
+		"""
 		Left-Right(beta)-Left(beta)-Right generation mode. (L+R-L-R+)
-		'''
+		"""
 		xi = x + math.sin(phi)
 		eta = y - 1.0 - math.cos(phi)
 		rho = (20.0 - xi * xi - eta * eta) / 16.0
@@ -170,9 +182,9 @@ class ReedsShepp(Curve):
 		return False, 0.0, 0.0, 0.0
 
 	def LRSR(self, x: float, y: float, phi: float):
-		'''
+		"""
 		Left-Right(pi/2)-Straight-Right generation mode. (L+R-S-R-)
-		'''
+		"""
 		xi = x + math.sin(phi)
 		eta = y - 1.0 - math.cos(phi)
 		rho, theta = self.R(-eta, xi)
@@ -187,9 +199,9 @@ class ReedsShepp(Curve):
 		return False, 0.0, 0.0, 0.0
 
 	def LRSL(self, x: float, y: float, phi: float):
-		'''
+		"""
 		Left-Right(pi/2)-Straight-Left generation mode. (L+R-S-L-)
-		'''
+		"""
 		xi = x - math.sin(phi)
 		eta = y - 1.0 + math.cos(phi)
 		rho, theta = self.R(xi, eta)
@@ -205,9 +217,9 @@ class ReedsShepp(Curve):
 		return False, 0.0, 0.0, 0.0
 
 	def LRSLR(self, x: float, y: float, phi: float):
-		'''
+		"""
 		Left-Right(pi/2)-Straight-Left(pi/2)-Right generation mode. (L+R-S-L-R+)
-		'''
+		"""
 		xi = x + math.sin(phi)
 		eta = y - 1.0 - math.cos(phi)
 		r, _ = self.R(xi, eta)
@@ -224,22 +236,18 @@ class ReedsShepp(Curve):
 		return False, 0.0, 0.0, 0.0
 
 	def SCS(self, x: float, y: float, phi: float):
-		'''
+		"""
 		# 2
 		Straight-Circle-Straight generation mode(using reflect).
 
-		Parameters
-		----------
-		x/y: float
-			Goal position
-		phi: float
-			Goal pose
+		Parameters:
+			x (float): x of goal position
+			y (float): y of goal position
+			phi (float): goal orientation
 
-		Return
-		----------
-		paths: list
-			Available paths
-		'''
+		Returns:
+			paths (list): Available paths
+		"""
 		paths = []
 
 		flag, t, u, v = self.SLS(x, y, phi)
@@ -253,22 +261,18 @@ class ReedsShepp(Curve):
 		return paths
 
 	def CCC(self, x: float, y: float, phi: float):
-		'''
+		"""
 		# 8
 		Circle-Circle-Circle generation mode(using reflect, timeflip and backwards).
 
-		Parameters
-		----------
-		x/y: float
-			Goal position
-		phi: float
-			Goal pose
+		Parameters:
+			x (float): x of goal position
+			y (float): y of goal position
+			phi (float): goal orientation
 
-		Return
-		----------
-		paths: list
-			Available paths
-		'''
+		Returns:
+			paths (list): Available paths
+		"""
 		paths = []
 
 		# L+R-L-
@@ -318,22 +322,18 @@ class ReedsShepp(Curve):
 		return paths
 
 	def CSC(self, x: float, y: float, phi: float):
-		'''
+		"""
 		# 8
 		Circle-Straight-Circle generation mode(using reflect, timeflip and backwards).
 
-		Parameters
-		----------
-		x/y: float
-			Goal position
-		phi: float
-			Goal pose
+		Parameters:
+			x (float): x of goal position
+			y (float): y of goal position
+			phi (float): goal orientation
 
-		Return
-		----------
-		paths: list
-			Available paths
-		'''
+		Returns:
+			paths (list): Available paths
+		"""
 		paths = []
 
 		# L+S+L+
@@ -379,23 +379,19 @@ class ReedsShepp(Curve):
 		return paths
 
 	def CCCC(self, x: float, y: float, phi: float):
-		'''
+		"""
 		# 8
 		Circle-Circle(beta)-Circle(beta)-Circle generation mode
 		(using reflect, timeflip and backwards).
 
-		Parameters
-		----------
-		x/y: float
-			Goal position
-		phi: float
-			Goal pose
+		Parameters:
+			x (float): x of goal position
+			y (float): y of goal position
+			phi (float): goal orientation
 
-		Return
-		----------
-		paths: list
-			Available paths
-		'''
+		Returns:
+			paths (list): Available paths
+		"""
 		paths = []
 
 		# L+R+L-R-
@@ -441,23 +437,19 @@ class ReedsShepp(Curve):
 		return paths
 
 	def CCSC(self, x: float, y: float, phi: float):
-		'''
+		"""
 		# 16
 		Circle-Circle(pi/2)-Straight-Circle and Circle-Straight-Circle(pi/2)-Circle
 		generation mode (using reflect, timeflip and backwards).
 
-		Parameters
-		----------
-		x/y: float
-			Goal position
-		phi: float
-			Goal pose
+		Parameters:
+			x (float): x of goal position
+			y (float): y of goal position
+			phi (float): goal orientation
 
-		Return
-		----------
-		paths: list
-			Available paths
-		'''
+		Returns:
+			paths (list): Available paths
+		"""
 		paths = []
 
 		# L+R-(pi/2)S-L-
@@ -547,22 +539,18 @@ class ReedsShepp(Curve):
 		return paths
 
 	def CCSCC(self, x: float, y: float, phi: float):
-		'''
+		"""
 		# 4
 		Circle-Circle(pi/2)-Straight--Circle(pi/2)-Circle generation mode (using reflect, timeflip and backwards).
 
-		Parameters
-		----------
-		x/y: float
-			Goal position
-		phi: float
-			Goal pose
+		Parameters:
+			x (float): x of goal position
+			y (float): y of goal position
+			phi (float): goal orientation
 
-		Return
-		----------
-		paths: list
-			Available paths
-		'''
+		Returns:
+			paths (list): Available paths
+		"""
 		paths = []
 
 		# L+R-(pi/2)S-L-(pi/2)R+
@@ -588,36 +576,30 @@ class ReedsShepp(Curve):
 		return paths
 
 	def interpolate(self, mode: str, length: float, init_pose: tuple):
-		'''
+		"""
 		Planning path interpolation.
 
-		Parameters
-		----------
-		mode: str
-			motion, e.g., L, S, R
-		length: float
-			Single step motion path length
-		init_pose: tuple
-			Initial pose (x, y, yaw)
+		Parameters:
+			mode (str): motion, e.g., L, S, R
+			length (float): Single step motion path length
+			init_pose (tuple): Initial pose (x, y, yaw)
 
-		Return
-		----------
-		new_pose: tuple
-			New pose (new_x, new_y, new_yaw) after moving
-		''' 	 
+		Returns:
+			new_pose (tuple): New pose (new_x, new_y, new_yaw) after moving
+		"""
 		x, y, yaw = init_pose
 
 		if mode == "S":
-			new_x   = x + length / self.max_curv * math.cos(yaw)
-			new_y   = y + length / self.max_curv * math.sin(yaw)
+			new_x = x + length / self.max_curv * math.cos(yaw)
+			new_y = y + length / self.max_curv * math.sin(yaw)
 			new_yaw = yaw
 		elif mode == "L":
-			new_x   = x + (math.sin(yaw + length) - math.sin(yaw)) / self.max_curv
-			new_y   = y - (math.cos(yaw + length) - math.cos(yaw)) / self.max_curv
+			new_x = x + (math.sin(yaw + length) - math.sin(yaw)) / self.max_curv
+			new_y = y - (math.cos(yaw + length) - math.cos(yaw)) / self.max_curv
 			new_yaw = yaw + length
 		elif mode == "R":
-			new_x   = x - (math.sin(yaw - length) - math.sin(yaw)) / self.max_curv
-			new_y   = y + (math.cos(yaw - length) - math.cos(yaw)) / self.max_curv
+			new_x = x - (math.sin(yaw - length) - math.sin(yaw)) / self.max_curv
+			new_y = y + (math.cos(yaw - length) - math.cos(yaw)) / self.max_curv
 			new_yaw = yaw - length
 		else:
 			raise NotImplementedError
@@ -625,25 +607,20 @@ class ReedsShepp(Curve):
 		return new_x, new_y, new_yaw
 
 	def generation(self, start_pose: tuple, goal_pose: tuple):
-		'''
+		"""
 		Generate the Reeds Shepp Curve.
 
-		Parameters
-		----------
-		start_pose: tuple
-			Initial pose (x, y, yaw)
-		goal_pose: tuple
-			Target pose (x, y, yaw)
+		Parameters:
+			start_pose (tuple): Initial pose (x, y, yaw)
+			goal_pose (tuple): Target pose (x, y, yaw)
 
-		Return
-		----------
-		best_cost: float
-			Best planning path length
-		best_mode:
-			Best motion modes
-		x_list/y_list/yaw_list: list
-			Trajectory
-		'''
+		Returns:
+			best_cost (float): Best planning path length
+			best_mode: Best motion modes
+			x_list (list): Trajectory of x
+			y_list (list): Trajectory of y
+			yaw_list (list): Trajectory of yaw
+		"""
 		sx, sy, syaw = start_pose
 		gx, gy, gyaw = goal_pose
 
@@ -700,14 +677,12 @@ class ReedsShepp(Curve):
 		return best_cost / self.max_curv, best_path.ctypes, x_list_, y_list_, yaw_list_
 
 	def run(self, points: list):
-		'''
-        Running both generation and animation.
+		"""
+		Running both generation and animation.
 
-		Parameters
-		----------
-		points: list[tuple]
-			path points
-        '''
+		Parameters:
+			points (list[tuple]): path points
+		"""
 		assert len(points) >= 2, "Number of points should be at least 2."
 		import matplotlib.pyplot as plt
 

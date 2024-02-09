@@ -1,48 +1,41 @@
-'''
+"""
 @file: rrt_star.py
 @breif: RRT-Star motion planning
 @author: Winter
 @update: 2023.1.18
-'''
+"""
 import os, sys
 
-sys.path.append(os.path.abspath(os.path.join(__file__, "../../../")))
+sys.path.append(os.path.abspath(os.path.join(__file__, "../../")))
 
 from .rrt import RRT
-from src.utils import Env, Node
+from utils import Env, Node
 
 class RRTStar(RRT):
-    '''
+    """
     Class for RRT-Star motion planning.
-    [1] Sampling-based algorithms for optimal motion planning
 
-    Parameters
-    ----------
-    start: tuple
-        start point coordinate
-    goal: tuple
-        goal point coordinate
-    env: Env
-        environment
-    max_dist: float
-        Maximum expansion distance one step
-    sample_num: int
-        Maximum number of sample points
-    r: float
-        optimization radius
-    goal_sample_rate: float
-        heuristic sample
+    Parameters:
+        start (tuple): start point coordinate
+        goal (tuple): goal point coordinate
+        env (Env): environment
+        max_dist (float): Maximum expansion distance one step
+        sample_num (int): Maximum number of sample points
+        r (float): optimization radius
+        goal_sample_rate (float): heuristic sample
 
-    Examples
-    ----------
-    >>> from src.utils import Map
-    >>> from sample_search import RRTStar
-    >>> start = (5, 5)
-    >>> goal = (45, 25)
-    >>> env = Map(51, 31)
-    >>> planner = RRTStar(start, goal, env)
-    >>> planner.run()
-    '''
+    Examples:
+        >>> from src.utils import Map
+        >>> from sample_search import RRTStar
+        >>> start = (5, 5)
+        >>> goal = (45, 25)
+        >>> env = Map(51, 31)
+        >>> planner = RRTStar(start, goal, env)
+        >>> planner.run()
+
+    References:
+        [1] Sampling-based algorithms for optimal motion planning
+    """
     def __init__(self, start: tuple, goal: tuple, env: Env, max_dist: float,
                  sample_num: int, r: float, goal_sample_rate: float = 0.05) -> None:
         super().__init__(start, goal, env, max_dist, sample_num, goal_sample_rate)
@@ -53,21 +46,16 @@ class RRTStar(RRT):
         return "RRT*"
     
     def getNearest(self, node_list: list, node: Node) -> Node:
-        '''
+        """
         Get the node from `node_list` that is nearest to `node` with optimization.
 
-        Parameters
-        ----------
-        node_list: list
-            exploring list
-        node: Node
-            currently generated node
+        Parameters:
+            node_list (list): exploring list
+            node (Node): currently generated node
 
-        Return
-        ----------
-        node: Node
-            nearest node 
-        '''
+        Returns:
+            node (Node): nearest node
+        """
         node_new = super().getNearest(node_list, node)
         if node_new:
             #  rewire optimization

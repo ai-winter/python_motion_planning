@@ -1,9 +1,9 @@
-'''
+"""
 @file: bspline_curve.py
 @breif: B-Spline curve generation
 @author: Winter
 @update: 2023.7.29
-'''
+"""
 import math
 import numpy as np
 import os, sys
@@ -13,23 +13,19 @@ sys.path.append(os.path.abspath(os.path.join(__file__, "../")))
 from .curve import Curve
 
 class BSpline(Curve):
-    '''
+    """
     Class for B-Spline curve generation.
 
-    Parameters
-    ----------
-    step: float
-        Simulation or interpolation size
-    k: float
-        Degree of curve
+    Parameters:
+        step (float): Simulation or interpolation size
+        k (int): Degree of curve
 
-    Examples
-    ----------
-    >>> from src.curve_generation import BSpline
-    >>>	points = [(0, 0, 0), (10, 10, -90), (20, 5, 60)]
-    >>> generator = BSpline(step, k)
-    >>> generator.run(points)
-    '''
+    Examples:
+        >>> from src.curve_generation import BSpline
+        >>>	points = [(0, 0, 0), (10, 10, -90), (20, 5, 60)]
+        >>> generator = BSpline(step, k)
+        >>> generator.run(points)
+    """
     def __init__(self, step: float, k: int, param_mode: str="centripetal", 
                  spline_mode: str="interpolation") -> None:
         super().__init__(step)
@@ -47,25 +43,18 @@ class BSpline(Curve):
         return "B-Spline Curve"
     
     def baseFunction(self, i: int, k: int, t: float, knot: list):
-        '''
+        """
         Calculate base function using Cox-deBoor function.
 
-        Parameters
-		----------
-		i: int
-			The index of base function
-		k: int
-			The degree of curve
-		t: float
-			parameter
-        knot: list[float]
-            knot vector
-		
-		Return
-        ----------
-        Nik_t: float
-            The value of base function Nik(t)
-        '''
+        Parameters:
+            i (int): The index of base function
+            k (int): The degree of curve
+            t (float): parameter
+            knot (list[float]): knot vector
+
+        Returns:
+            Nik_t (float): The value of base function Nik(t)
+        """
         Nik_t = 0
         if k == 0:
             Nik_t = 1.0 if t >= knot[i] and t < knot[i + 1] else 0.0
@@ -84,20 +73,16 @@ class BSpline(Curve):
         return Nik_t
 
     def paramSelection(self, points: list):
-        '''
+        """
         Calculate parameters using the `uniform spaced` or `chrod length`
         or `centripetal` method.
 
-        Parameters
-		----------
-        points: list[tuple]
-            path points
-		
-		Return
-        ----------
-        parameters: list[float]
-            The parameters of given points
-        '''
+        Parameters:
+            points (list[tuple]): path points
+
+		Returns:
+		    Parameters (list[float]): The parameters of given points
+        """
         n = len(points)
         x_list = [pt[0] for pt in points]
         y_list = [pt[1] for pt in points]
@@ -122,21 +107,16 @@ class BSpline(Curve):
             return parameters.tolist()
 
     def knotGeneration(self, param: list, n: int):
-        '''
+        """
         Generate knot vector.
 
-        Parameters
-		----------
-        param: list[float]
-            The parameters of given points
-        n: int
-            The number of data points
+        Parameters:
+            param (list[float]): The parameters of given points
+            n (int): The number of data points
 		
-		Return
-        ----------
-        knot: list[float]
-            The knot vector
-        '''
+		Returns:
+		    knot (list[float]): The knot vector
+        """
         m = n + self.k + 1
         knot = np.zeros(m)
         for i in range(self.k + 1):
@@ -150,25 +130,19 @@ class BSpline(Curve):
         return knot.tolist()
     
     def interpolation(self, points: list, param: list, knot: list):
-        '''
+        """
         Given a set of N data points, D0, D1, ..., Dn and a degree k,
         find a B-spline curve of degree k defined by N control points
         that passes all data points in the given order.
 
-        Parameters
-		----------
-        points: list[tuple]
-            path points
-        param: list[float]
-            The parameters of given points
-        knot: list[float]
-            The knot vector
+        Parameters:
+            points (list[tuple]): path points
+            param (list[float]): The parameters of given points
+            knot (list[float]): The knot vector
         
-		Return
-        ----------
-        control_points: np.ndarray
-            The control points
-        '''
+        Returns:
+            control_points (np.ndarray): The control points
+        """
         n = len(points)
         N = np.zeros((n, n))
 
@@ -183,7 +157,7 @@ class BSpline(Curve):
         return N_inv @ D
 
     def approximation(self, points: list, param: list, knot: list):
-        '''
+        """
         Given a set of N data points, D0, D1, ..., Dn, a degree k,
         and a number H, where N > H > k >= 1, find a B-spline curve
         of degree k defined by H control points that satisfies the
@@ -192,20 +166,14 @@ class BSpline(Curve):
             2. this curve approximates the data polygon in the sense
             of least square
         
-        Parameters
-		----------
-        points: list[tuple]
-            path points
-        param: list[float]
-            The parameters of given points
-        knot: list[float]
-            The knot vector
+        Parameters:
+            points (list[tuple]): path points
+            param (list[float]): The parameters of given points
+            knot (list[float]): The knot vector
         
-		Return
-        ----------
-        control_points: np.ndarray
-            The control points
-        '''
+		Returns:
+		    control_points (np.ndarray): The control points
+        """
         n = len(points)
         D = np.array(points)
 
@@ -230,6 +198,18 @@ class BSpline(Curve):
         return P
 
     def generation(self, t, k, knot, control_pts):
+        """
+        Generate the B-spline curve.
+
+        Parameters:
+            t (np.ndarray): The parameter values
+            k (int): The degree of the B-spline curve
+            knot (list[float]): The knot vector
+            control_pts (np.ndarray): The control points
+
+        Returns:
+            curve (np.ndarray): The B-spline curve
+        """
         N = np.zeros((len(t), len(control_pts)))
 
         for i in range(len(t)):
@@ -240,14 +220,12 @@ class BSpline(Curve):
         return N @ control_pts
 
     def run(self, points: list, display: bool = True):
-        '''
+        """
         Running both generation and animation.
 
-        Parameters
-        ----------
-        points: list[tuple]
-            path points
-        '''
+        Parameters:
+            points (list[tuple]): path points
+        """
         assert len(points) >= 2, "Number of points should be at least 2."
         import matplotlib.pyplot as plt
 

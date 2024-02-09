@@ -1,47 +1,41 @@
-'''
+"""
 @file: rrt_connected.py
 @breif: RRT-Connected motion planning
 @author: Winter
 @update: 2023.1.17
-'''
+"""
 import os, sys
 import math
 
-sys.path.append(os.path.abspath(os.path.join(__file__, "../../../")))
+sys.path.append(os.path.abspath(os.path.join(__file__, "../../")))
 
 from .rrt import RRT
-from src.utils import Env, Node
+from utils import Env, Node
 
 class RRTConnect(RRT):
-    '''
+    """
     Class for RRT-Connect motion planning.
-    [1] RRT-Connect: An Efficient Approach to Single-Query Path Planning
 
-    Parameters
-    ----------
-    start: tuple
-        start point coordinate
-    goal: tuple
-        goal point coordinate
-    env: Env
-        environment
-    max_dist: float
-        Maximum expansion distance one step
-    sample_num: int
-        Maximum number of sample points
-    goal_sample_rate: float
-        heuristic sample
+    Parameters:
+        start (tuple): start point coordinate
+        goal (tuple): goal point coordinate
+        env (Env): environment
+        max_dist (float): Maximum expansion distance one step
+        sample_num (int): Maximum number of sample points
+        goal_sample_rate (float): heuristic sample
 
-    Examples
-    ----------
-    >>> from src.utils import Map
-    >>> from sample_search import RRTConnect
-    >>> start = (5, 5)
-    >>> goal = (45, 25)
-    >>> env = Map(51, 31)
-    >>> planner = RRTConnect(start, goal, env)
-    >>> planner.run()
-    '''
+    Examples:
+        >>> from src.utils import Map
+        >>> from sample_search import RRTConnect
+        >>> start = (5, 5)
+        >>> goal = (45, 25)
+        >>> env = Map(51, 31)
+        >>> planner = RRTConnect(start, goal, env)
+        >>> planner.run()
+
+    References:
+        [1] RRT-Connect: An Efficient Approach to Single-Query Path Planning
+    """
     def __init__(self, start: tuple, goal: tuple, env: Env, max_dist: float, 
         sample_num: int, goal_sample_rate: float = 0.05) -> None:
         super().__init__(start, goal, env, max_dist, sample_num, goal_sample_rate)
@@ -54,16 +48,13 @@ class RRTConnect(RRT):
         return "RRT-Connect"
 
     def plan(self):
-        '''
+        """
         RRT-Connected motion plan function.
 
-        Return
-        ----------
-        cost: float
-            path cost
-        path: list
-            planning path
-        '''
+        Returns:
+            cost (float): path cost
+            path (list): planning path
+        """
         for _ in range(self.sample_num):
             # generate a random node in the map
             node_rand = self.generateRandomNode()            
@@ -97,10 +88,9 @@ class RRTConnect(RRT):
         return 0, None
 
     def run(self):
-        '''
+        """
         Running both plannig and animation.
-
-        '''
+        """
         cost, path = self.plan()
 
         expand = []
@@ -114,21 +104,16 @@ class RRTConnect(RRT):
         self.plot.animation(path, str(self), cost, expand)
 
     def extractPath(self, boundary: Node):
-        '''
+        """
         Extract the path based on the CLOSED set.
 
-        Parameters
-        ----------
-        closed_set: list
-            CLOSED set
+        Parameters:
+            closed_set (list): CLOSED set
 
-        Return
-        ----------
-        cost: float
-            the cost of planning path
-        path: list
-            the planning path
-        '''
+        Returns:
+            cost (float): the cost of planning path
+            path (list): the planning path
+        """
         if self.start in self.sample_list_b:
             self.sample_list_f, self.sample_list_b = self.sample_list_b, self.sample_list_f
 

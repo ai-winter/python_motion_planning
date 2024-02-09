@@ -1,9 +1,9 @@
-'''
+"""
 @file: pso.py
 @breif: Particle Swarm Optimization (PSO) motion planning
 @author: Winter
 @update: 2024.2.8
-'''
+"""
 import os, sys
 import random, math
 
@@ -17,42 +17,32 @@ GEN_MODE_CIRCLE = 0
 GEN_MODE_RANDOM = 1
 
 class PSO(EvolutionarySearcher):
-    '''
+    """
     Class for Particle Swarm Optimization (PSO) motion planning.
 
-    Parameters
-    ----------
-    start: tuple
-        start point coordinate
-    goal: tuple
-        goal point coordinate
-    env: Env
-        environment
-    heuristic_type: str
-        heuristic function type, default is euclidean
-    n_particles: int
-        number of particles
-    w_inertial, w_social, w_cognitive: float
-        inertial, social and cognitive weight
-    point_num: int
-        number of position points contained in each particle
-    max_speed: int
-        The maximum velocity of particle motion
-    max_iter: int
-        maximum iterations
-    init_mode: int
-        Set the generation mode for the initial position points of the particle swarm
+    Parameters:
+        start (tuple): start point coordinate
+        goal (tuple): goal point coordinate
+        env (Env): environment
+        heuristic_type (str): heuristic function type
+        n_particles (int): number of particles
+        w_inertial (float): inertial weight
+        w_social (float): social weight
+        w_cognitive (float): cognitive weight
+        point_num (int): number of position points contained in each particle
+        max_speed (int): The maximum velocity of particle motion
+        max_iter (int): maximum iterations
+        init_mode (int): Set the generation mode for the initial position points of the particle swarm
 
-    Examples
-    ----------
-    >>> from utils import Grid
-    >>> from evolutionary_search import PSO
-    >>> start = (5, 5)
-    >>> goal = (45, 25)
-    >>> env = Grid(51, 31)
-    >>> planner = PSO(start, goal, env)
-    >>> planner.run()
-    '''
+    Examples:
+        >>> from utils import Grid
+        >>> from evolutionary_search import PSO
+        >>> start = (5, 5)
+        >>> goal = (45, 25)
+        >>> env = Grid(51, 31)
+        >>> planner = PSO(start, goal, env)
+        >>> planner.run()
+    """
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean", 
         n_particles: int = 30, point_num: int = 6, w_inertial: float = 0.5,
         w_social: float = 1.0, w_cognitive: float = 0.6, max_speed: int = 8,
@@ -87,16 +77,13 @@ class PSO(EvolutionarySearcher):
             self.best_fitness = -1
         
     def plan(self):
-        '''
+        """
         Particle Swarm Optimization (PSO) motion plan function.
 
-        Return
-        ----------
-        cost: float
-            path cost
-        path: list
-            planning path
-        '''
+        Returns:
+            cost (float): path cost
+            path (list): planning path
+        """
         # Generate initial position of particle swarm
         init_positions = self.initializePositions()
 
@@ -131,14 +118,12 @@ class PSO(EvolutionarySearcher):
 
 
     def initializePositions(self) -> list:
-        '''
+        """
         Generate n particles with pointNum_ positions each within the map range.
 
-        Return
-        ----------
-        init_positions: list
-            The initial position sequence of particle swarm
-        '''
+        Returns:
+            init_positions (list): initial position sequence of particle swarm
+        """
         init_positions = []
 
         # Calculate sequence direction
@@ -194,19 +179,15 @@ class PSO(EvolutionarySearcher):
         return init_positions
 
     def calFitnessValue(self, position: list) -> float:
-        '''
+        """
         Calculate the value of fitness function.
 
-        Parameters
-        ----------
-        position: list
-            the control points calculated by PSO
+        Parameters:
+            position (list): control points calculated by PSO
 
-        Return
-        ----------
-        fitness: float
-            the value of fitness function
-        '''
+        Returns:
+            fitness (float): the value of fitness function
+        """
         points = [self.start.current] + position + [self.goal.current]
         points = sorted(set(points), key=points.index)
         try:
@@ -226,14 +207,12 @@ class PSO(EvolutionarySearcher):
         return 100000.0 / (self.b_spline_gen.length(points) + 50000 * obs_cost)
 
     def updateParticleVelocity(self, particle):
-        '''
+        """
         A function to update the particle velocity
 
-        Parameters
-        ----------
-        particle: Particle
-            the particle
-        '''
+        Parameters:
+            particle (Particle): the particle
+        """
         # update Velocity
         for i in range(self.point_num):
             rand1, rand2 = random.random(), random.random()
@@ -255,14 +234,12 @@ class PSO(EvolutionarySearcher):
             particle.velocity[i] = (vx_new, vy_new)
 
     def updateParticlePosition(self, particle):
-        '''
+        """
         A function to update the particle position
 
-        Parameters
-        ----------
-        particle: Particle
-            the particle
-        '''
+        Parameters:
+            particle (Particle): the particle
+        """
         # update Position
         for i in range(self.point_num):
             px = particle.position[i][0] + int(particle.velocity[i][0])
@@ -278,14 +255,12 @@ class PSO(EvolutionarySearcher):
         particle.position.sort(key=lambda p: p[0])
 
     def optimizeParticle(self, particle):
-        '''
+        """
         Particle update optimization iteration
 
-        Parameters
-        ----------
-        particle: Particle
-            the particle
-        '''
+        Parameters:
+            particle (Particle): the particle
+        """
         # update speed
         self.updateParticleVelocity(particle)
         # update position
@@ -305,8 +280,8 @@ class PSO(EvolutionarySearcher):
             self.best_particle.position = particle.position
 
     def run(self):
-        '''
+        """
         Running both plannig and animation.
-        '''
+        """
         cost, path = self.plan()
         self.plot.animation(path, str(self), cost)

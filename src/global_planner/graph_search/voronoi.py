@@ -1,50 +1,41 @@
-'''
+"""
 @file: voronoi.py
 @breif: Voronoi-based motion planning
 @author: Winter
 @update: 2023.7.22
-'''
+"""
 import os, sys
 import heapq, math
 import numpy as np
 from scipy.spatial import cKDTree, Voronoi
 
-sys.path.append(os.path.abspath(os.path.join(__file__, "../../../")))
+sys.path.append(os.path.abspath(os.path.join(__file__, "../../")))
 
 from .graph_search import GraphSearcher
-from src.utils import Env, Node
+from utils import Env, Node
 
 class VoronoiPlanner(GraphSearcher):
-    '''
+    """
     Class for Voronoi-based motion planning.
 
-    Parameters
-    ----------
-    start: tuple
-        start point coordinate
-    goal: tuple
-        goal point coordinate
-    env: Env
-        environment
-    heuristic_type: str
-        heuristic function type, default is euclidean
-    n_knn: int
-        number of edges from one sampled point
-    max_edge_len: float
-        maximum edge length
-    inflation_r: float
-        inflation range
+    Parameters:
+        start (tuple): start point coordinate
+        goal (tuple): goal point coordinate
+        env (Env): environment
+        heuristic_type (str): heuristic function type, default is euclidean
+        n_knn (int): number of edges from one sampled point
+        max_edge_len (float): maximum edge length
+        inflation_r (float): inflation range
 
-    Examples
-    ----------
-    >>> from src.utils import Grid
-    >>> from graph_search import VoronoiPlanner
-    >>> start = (5, 5)
-    >>> goal = (45, 25)
-    >>> env = Grid(51, 31)
-    >>> planner = VoronoiPlanner(start, goal, env)
-    >>> planner.run()
-    '''
+    Examples:
+        >>> from src.utils import Grid
+        >>> from graph_search import VoronoiPlanner
+        >>> start = (5, 5)
+        >>> goal = (45, 25)
+        >>> env = Grid(51, 31)
+        >>> planner = VoronoiPlanner(start, goal, env)
+        >>> planner.run()
+    """
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean", \
                  n_knn: int = 10, max_edge_len: float = 10.0, inflation_r: float = 1.0) -> None:
         super().__init__(start, goal, env, heuristic_type)
@@ -59,18 +50,14 @@ class VoronoiPlanner(GraphSearcher):
         return "Voronoi-based Planner"
 
     def plan(self):
-        '''
+        """
         Voronoi-based motion plan function.
 
-        Return
-        ----------
-        cost: float
-            path cost
-        path: list
-            planning path
-        expand: list
-            voronoi sampled nodes
-        '''
+        Returns:
+            cost (float): path cost
+            path (list): planning path
+            expand (list): voronoi sampled nodes
+        """
         # sampling voronoi diagram
         vor = Voronoi(np.array(list(self.env.obstacles)))
         vx_list = [ix for [ix, _] in vor.vertices] + [self.start.x, self.goal.x]
@@ -102,30 +89,24 @@ class VoronoiPlanner(GraphSearcher):
         return (cost, path), expand
 
     def run(self):
-        '''
+        """
         Running both plannig and animation.
-        '''
+        """
         (cost, path), expand = self.plan()
         self.plot.animation(path, str(self), cost, expand)
     
     def getShortestPath(self, road_map: dict, dijkstra: bool = True) -> list:
-        '''
+        """
         Calculate shortest path using graph search algorithm(A*, Dijkstra, etc).
 
-        Parameters
-        ----------
-        road_map: dict
-            road map for voronoi diagram, which store KNN for one voronoi node 
-        dijkstra: bool
-            using Dijkstra if true, else A*
+        Parameters:
+            road_map (dict): road map for voronoi diagram, which store KNN for one voronoi node
+            dijkstra (bool): using Dijkstra if true, else A*
 
-        Return
-        ----------
-        cost: float
-            path cost
-        path: list
-            planning path
-        '''
+        Returns:
+            cost (float): path cost
+            path (list): planning path
+        """
         # OPEN set with priority and CLOSED set
         OPEN = []
         heapq.heappush(OPEN, self.start)
@@ -165,21 +146,16 @@ class VoronoiPlanner(GraphSearcher):
         return ([], [])
 
     def extractPath(self, closed_set):
-        '''
+        """
         Extract the path based on the CLOSED set.
 
-        Parameters
-        ----------
-        closed_set: list
-            CLOSED set
+        Parameters:
+            closed_set (list): CLOSED set
 
-        Return
-        ----------
-        cost: float
-            the cost of planning path
-        path: list
-            the planning path
-        '''
+        Returns:
+            cost (float): the cost of planning path
+            path (list): the planning path
+        """
         cost = 0
         node = closed_set[closed_set.index(self.goal)]
         path = [node.current]
@@ -191,18 +167,16 @@ class VoronoiPlanner(GraphSearcher):
         return cost, path
 
     def isCollision(self, node1: Node, node2: Node) -> bool:
-        '''
+        """
         Judge collision when moving from node1 to node2.
 
-        Parameters
-        ----------
-        node1, node2: Node
+        Parameters:
+            node1 (Node): start node
+            node2 (Node): end node
 
-        Return
-        ----------
-        collision: bool
-            True if collision exists else False
-        '''
+        Returns:
+            collision (bool): True if collision exists else False
+        """
         if node1.current in self.obstacles or node2.current in self.obstacles:
             return True
         

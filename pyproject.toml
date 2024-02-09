@@ -1,5 +1,5 @@
 [project]
-name = "motion-planning"
+name = "python-motion-planning"
 version = "0.28.0"
 description = "Motion planning algorithms for Python"
 maintainers = [

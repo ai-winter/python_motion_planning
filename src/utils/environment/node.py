@@ -1,41 +1,35 @@
-'''
+"""
 @file: node.py
 @breif: 2-dimension node data stucture
 @author: Winter
 @update: 2023.1.13
-'''
+"""
 
 class Node(object):
-    '''
+    """
     Class for searching nodes.
 
-    Parameters
-    ----------
-    current: tuple
-        current coordinate
-    parent: tuple
-        coordinate of parent node
-    g: float
-        path cost
-    h: float
-        heuristic cost
+    Parameters:
+        current (tuple): current coordinate
+        parent (tuple): coordinate of parent node
+        g (float): path cost
+        h (float): heuristic cost
 
-    Examples
-    ----------
-    >>> from env import Node
-    >>> node1 = Node((1, 0), (2, 3), 1, 2)
-    >>> node2 = Node((1, 0), (2, 5), 2, 8)
-    >>> node3 = Node((2, 0), (1, 6), 3, 1)
-    ...
-    >>> node1 + node2
-    >>> Node((2, 0), (2, 3), 3, 2)
-    ...
-    >>> node1 == node2
-    >>> True
-    ...
-    >>> node1 != node3
-    >>> True
-    '''
+    Examples:
+        >>> from env import Node
+        >>> node1 = Node((1, 0), (2, 3), 1, 2)
+        >>> node2 = Node((1, 0), (2, 5), 2, 8)
+        >>> node3 = Node((2, 0), (1, 6), 3, 1)
+        ...
+        >>> node1 + node2
+        >>> Node((2, 0), (2, 3), 3, 2)
+        ...
+        >>> node1 == node2
+        >>> True
+        ...
+        >>> node1 != node3
+        >>> True
+    """
     def __init__(self, current: tuple, parent: tuple=None, g: float=0, h: float=0) -> None:
         self.current = current
         self.parent = parent
