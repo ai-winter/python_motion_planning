@@ -1,12 +1,10 @@
-'''
+"""
 @file: global_example.py
 @breif: global planner application examples
 @author: Winter
 @update: 2023.3.2
-'''
-import sys, os
-sys.path.append(os.path.abspath(os.path.join(__file__, "../")))
-from src.utils import Grid, SearchFactory
+"""
+from python_motion_planning.utils import Grid, Map, SearchFactory
 
 
 if __name__ == '__main__':
