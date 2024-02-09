@@ -33,14 +33,14 @@ class Curve(ABC):
 		'''
 		pass
 
-	def trigonometric(self, alpha, beta):
+	def trigonometric(self, alpha: float, beta: float):
 		'''
 		Calculate some useful trigonometric value with angles.
 		'''        
 		return math.sin(alpha), math.sin(beta), math.cos(alpha), math.cos(beta), \
 			math.sin(alpha - beta), math.cos(alpha - beta)
 
-	def pi2pi(self, theta):
+	def pi2pi(self, theta: float) -> float:
 		'''
 		Truncate the angle to the interval of -π to π.
 		'''        
@@ -50,8 +50,17 @@ class Curve(ABC):
 			theta += 2.0 * math.pi
 		return theta
 
-	def mod2pi(self, theta):
+	def mod2pi(self, theta: float) -> float:
 		'''
 		Perform modulus operation on 2π.
 		'''        
 		return theta - 2.0 * math.pi * math.floor(theta / math.pi / 2.0)
+	
+	def length(self, path: list) -> float:
+		'''
+		Calculate path or trajectory length with `path` format [(ix, iy)] (i from 0 to N)
+		'''
+		dist = 0
+		for i in range(len(path) - 1):
+			dist = dist + math.hypot(path[i + 1][0] - path[i][0], path[i + 1][1] - path[i][1])
+		return dist

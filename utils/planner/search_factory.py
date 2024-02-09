@@ -44,5 +44,7 @@ class SearchFactory(object):
             return InformedRRT(**config)
         elif planner_name == "aco":
             return ACO(**config)
+        elif planner_name == "pso":
+            return PSO(**config)
         else:
             raise ValueError("The `planner_name` must be set correctly.")
