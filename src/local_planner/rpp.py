@@ -9,10 +9,10 @@ import os, sys
 import numpy as np
 from scipy.spatial.distance import cdist
 
-sys.path.append(os.path.abspath(os.path.join(__file__, "../../../")))
+sys.path.append(os.path.abspath(os.path.join(__file__, "../")))
 
 from .local_planner import LocalPlanner
-from src.utils import Env
+from utils import Env
 
 
 class RPP(LocalPlanner):

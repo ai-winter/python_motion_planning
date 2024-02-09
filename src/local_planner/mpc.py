@@ -8,10 +8,10 @@ import os, sys
 import cvxopt
 import numpy as np
 
-sys.path.append(os.path.abspath(os.path.join(__file__, "../../../")))
+sys.path.append(os.path.abspath(os.path.join(__file__, "../")))
 
 from .local_planner import LocalPlanner
-from src.utils import Env
+from utils import Env
 
 class MPC(LocalPlanner):
     '''
@@ -98,6 +98,7 @@ class MPC(LocalPlanner):
                     s_d = (lookahead_pt[0], lookahead_pt[1], theta_trj)  # desired state
                     u_r = (self.robot.v, self.robot.v * kappa)           # refered input
                     u, u_p = self.mpcControl(s, s_d, u_r, u_p)
+                    print("!!!")
 
             # feed into robotic kinematic
             self.robot.kinematic(u, dt)

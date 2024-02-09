@@ -8,7 +8,7 @@ import math
 import numpy as np
 import os, sys
 
-sys.path.append(os.path.abspath(os.path.join(__file__, "../../../")))
+sys.path.append(os.path.abspath(os.path.join(__file__, "../")))
 
 from .curve import Curve
 
@@ -239,7 +239,7 @@ class BSpline(Curve):
 
         return N @ control_pts
 
-    def run(self, points: list):
+    def run(self, points: list, display: bool = True):
         '''
         Running both generation and animation.
 
@@ -277,17 +277,20 @@ class BSpline(Curve):
         path_x = path[:, 0].tolist()
         path_y = path[:, 1].tolist()
 
-        # animation
-        plt.figure("curve generation")
+        if display:
+            # animation
+            plt.figure("curve generation")
 
-        # static
-        plt.figure("curve generation")
-        plt.plot(path_x, path_y, linewidth=2, c="#1f77b4")
-        plt.plot(control_x, control_y, '--o', c='#dddddd', label="Control Points")
-        for x, y in points:
-            plt.plot(x, y, "xr", linewidth=2)
-        plt.axis("equal")
-        plt.legend()
-        plt.title(str(self))
+            # static
+            plt.figure("curve generation")
+            plt.plot(path_x, path_y, linewidth=2, c="#1f77b4")
+            plt.plot(control_x, control_y, '--o', c='#dddddd', label="Control Points")
+            for x, y in points:
+                plt.plot(x, y, "xr", linewidth=2)
+            plt.axis("equal")
+            plt.legend()
+            plt.title(str(self))
 
-        plt.show()
+            plt.show()
+        
+        return [(ix, iy) for (ix, iy) in zip(path_x, path_y)]

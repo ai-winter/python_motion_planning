@@ -1,3 +1,4 @@
 from .aco import ACO
+from .pso import PSO
 
-__all__ = ["ACO"]
+__all__ = ["ACO", "PSO"]

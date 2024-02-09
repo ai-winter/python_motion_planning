@@ -6,9 +6,9 @@
 '''
 import math
 import sys, os
-sys.path.append(os.path.abspath(os.path.join(__file__, "../../../")))
+sys.path.append(os.path.abspath(os.path.join(__file__, "../")))
 
-from src.utils import Env, Planner, SearchFactory, Plot, Robot, MathHelper
+from utils import Env, Planner, SearchFactory, Plot, Robot, MathHelper
 
 class LocalPlanner(Planner):
     '''

@@ -7,10 +7,10 @@
 import numpy as np
 import os, sys
 
-sys.path.append(os.path.abspath(os.path.join(__file__, "../../../")))
+sys.path.append(os.path.abspath(os.path.join(__file__, "../")))
 
 from scipy.special import comb
-from src.utils import Plot
+from utils import Plot
 from .curve import Curve
 
 class Bezier(Curve):
