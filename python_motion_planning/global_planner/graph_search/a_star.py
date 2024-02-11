@@ -2,7 +2,7 @@
 @file: a_star.py
 @breif: A* motion planning
 @author: Yang Haodong, Wu Maojia
-@update: 2024.2.9
+@update: 2024.2.11
 """
 import heapq
 

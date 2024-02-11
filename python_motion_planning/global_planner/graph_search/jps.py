@@ -1,8 +1,8 @@
 """
 @file: jps.py
 @breif: Jump Point Search motion planning
-@author: Winter
-@update: 2023.1.14
+@author: Yang Haodong, Wu Maojia
+@update: 2024.2.11
 """
 import heapq
 
@@ -42,6 +42,7 @@ class JPS(AStar):
         JPS motion plan function.
 
         Returns:
+            cost (float): path cost
             path (list): planning path
             expand (list): all nodes that planner has searched
         """
@@ -60,7 +61,8 @@ class JPS(AStar):
             # goal found
             if node == self.goal:
                 CLOSED.append(node)
-                return self.extractPath(CLOSED), CLOSED
+                cost, path = self.extractPath(CLOSED)
+                return cost, path, CLOSED
 
             jp_list = []
             for motion in self.motions:
@@ -80,7 +82,7 @@ class JPS(AStar):
                     break
             
             CLOSED.append(node)
-        return [], []
+        return [], [], []
 
     def jump(self, node: Node, motion: Node):
         """

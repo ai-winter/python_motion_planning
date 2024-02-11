@@ -4,7 +4,14 @@
 @author: Winter
 @update: 2023.3.2
 """
-from python_motion_planning.global_planner import *
+from python_motion_planning.global_planner.graph_search.a_star import AStar
+# import sys, os
+# sys.path.append(os.path.abspath(os.path.join(__file__, "../../../")))
+# print(sys.path)  # 输出当前目录
+# from global_planner import *
+# from global_planner import AStar
+# from python_motion_planning.global_planner import *
+
 
 
 class SearchFactory(object):

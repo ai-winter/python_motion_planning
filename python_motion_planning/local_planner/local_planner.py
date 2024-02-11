@@ -77,7 +77,7 @@ class LocalPlanner(Planner):
         if self.g_planner_ is None:
             raise AttributeError("Global path searcher is None, please set it first!")
         
-        (cost, path), _ = self.g_planner_.plan()
+        cost, path, _ = self.g_planner_.plan()
         return path
 
     @property

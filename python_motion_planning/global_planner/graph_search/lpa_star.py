@@ -1,8 +1,8 @@
 """
 @file: lpa_star.py
 @breif: Lifelong Planning A* motion planning
-@author: Winter
-@update: 2023.1.16
+@author: Yang Haodong, Wu Maojia
+@update: 2024.2.11
 """
 import heapq
 
@@ -82,14 +82,15 @@ class LPAStar(GraphSearcher):
         LPA* dynamic motion planning function.
         """
         self.computeShortestPath()
-        return self.extractPath(), None
+        cost, path = self.extractPath()
+        return cost, path, None
 
     def run(self) -> None:
         """
         Running both plannig and animation.
         """
         # static planning
-        (cost, path), _ = self.plan()        
+        cost, path, _ = self.plan()
         
         # animation
         self.plot.connect('button_press_event', self.OnPress)

@@ -1,8 +1,8 @@
 """
 @file: d_star.py
 @breif: Dynamic A* motion planning
-@author: Winter
-@update: 2023.1.15
+@author: Yang Haodong, Wu Maojia
+@update: 2024.2.11
 """
 from .graph_search import GraphSearcher
 from python_motion_planning.utils import Env, Node
@@ -83,7 +83,8 @@ class DStar(GraphSearcher):
             self.processState()
             if self.start.t == 'CLOSED':
                 break
-        return self.extractPath(self.map), None
+        cost, path = self.extractPath(self.map)
+        return cost, path, None
 
     def run(self):
         """
@@ -98,7 +99,7 @@ class DStar(GraphSearcher):
         self.insert(self.goal, 0)
 
         # static planning
-        (cost, path), _ = self.plan()
+        cost, path, _ = self.plan()
 
         # animation
         self.plot.connect('button_press_event', self.OnPress)

@@ -1,8 +1,8 @@
 """
 @file: dijkstra.py
 @breif: Dijkstra motion planning
-@author: Winter
-@update: 2023.1.13
+@author: Yang Haodong, Wu Maojia
+@update: 2024.2.11
 """
 import heapq
 
@@ -51,7 +51,8 @@ class Dijkstra(AStar):
             # goal found
             if node == self.goal:
                 CLOSED.append(node)
-                return self.extractPath(CLOSED), CLOSED
+                cost, path = self.extractPath(CLOSED)
+                return cost, path, CLOSED
 
             for node_n in self.getNeighbor(node):
              
@@ -75,4 +76,4 @@ class Dijkstra(AStar):
                 heapq.heappush(OPEN, node_n)
             
             CLOSED.append(node)
-        return ([], []), []
+        return [], [], []

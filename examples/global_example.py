@@ -4,6 +4,7 @@
 @author: Winter
 @update: 2023.3.2
 """
+
 from python_motion_planning.utils import Grid, Map, SearchFactory
 
 
@@ -12,6 +13,7 @@ if __name__ == '__main__':
     path searcher constructor
     '''
     search_factory = SearchFactory()
+
 
     '''
     graph search
