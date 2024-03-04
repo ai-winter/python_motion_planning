@@ -4,10 +4,7 @@
 @author: Winter
 @update: 2023.10.24
 """
-import sys, os
-sys.path.append(os.path.abspath(os.path.join(__file__, "../../")))
-
-from local_planner import *
+from python_motion_planning.local_planner import *
 
 class ControlFactory(object):
     def __init__(self) -> None:
