@@ -1,17 +1,19 @@
-"""
-@file: lazy_theta_star.py
-@breif: Lazy Theta* motion planning
-@author: Yang Haodong, Wu Maojia
-@update: 2024.2.11
-"""
+'''
+@file: s_theta_star.py
+@breif: S-Theta* motion planning
+@author: Wu Maojia
+@update: 2024.3.6
+'''
 import heapq
+from math import acos
 
 from .theta_star import ThetaStar
 from python_motion_planning.utils import Env, Node
 
-class LazyThetaStar(ThetaStar):
+
+class SThetaStar(ThetaStar):
     """
-    Class for Lazy Theta* motion planning.
+    Class for S-Theta* motion planning.
 
     Parameters:
         start (tuple): start point coordinate
@@ -21,25 +23,26 @@ class LazyThetaStar(ThetaStar):
 
     Examples:
         >>> from python_motion_planning.utils import Grid
-        >>> from graph_search import LazyThetaStar
+        >>> from graph_search import SThetaStar
         >>> start = (5, 5)
         >>> goal = (45, 25)
         >>> env = Grid(51, 31)
-        >>> planner = LazyThetaStar(start, goal, env)
+        >>> planner = SThetaStar(start, goal, env)
         >>> planner.run()
 
     References:
-        [1] Lazy Theta*: Any-Angle Path Planning and Path Length Analysis in 3D
+        [1] S-Theta*: low steering path-planning algorithm
     """
+
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
         super().__init__(start, goal, env, heuristic_type)
 
     def __str__(self) -> str:
-        return "Lazy Theta*"
+        return "S-Theta*"
 
     def plan(self):
         """
-        Lazy Theta* motion plan function.
+        S-Theta* motion plan function.
 
         Returns:
             cost (float): path cost
@@ -54,20 +57,6 @@ class LazyThetaStar(ThetaStar):
         while OPEN:
             node = heapq.heappop(OPEN)
 
-            # set vertex: path 1
-            try:
-                node_p = CLOSED[CLOSED.index(Node(node.parent))]
-                if not self.lineOfSight(node_p, node):
-                    node.g = float("inf")
-                    for node_n in self.getNeighbor(node):
-                        if node_n in CLOSED:
-                            node_n = CLOSED[CLOSED.index(node_n)]
-                            if node.g > node_n.g + self.dist(node_n, node):
-                                node.g = node_n.g + self.dist(node_n, node)
-                                node.parent = node_n.current
-            except:
-                pass
-
             # exists in CLOSED set
             if node in CLOSED:
                 continue
@@ -78,45 +67,72 @@ class LazyThetaStar(ThetaStar):
                 cost, path = self.extractPath(CLOSED)
                 return cost, path, CLOSED
 
-            for node_n in self.getNeighbor(node):                
+            for node_n in self.getNeighbor(node):
                 # exists in CLOSED set
                 if node_n in CLOSED:
                     continue
-                
+
                 # path1
                 node_n.parent = node.current
                 node_n.h = self.h(node_n, self.goal)
 
+                alpha = 0.0
                 try:
                     p_index = CLOSED.index(Node(node.parent))
                     node_p = CLOSED[p_index]
+                    alpha = self.getAlpha(node_p, node_n)
+                    node_n.g += alpha
                 except:
                     node_p = None
 
                 if node_p:
-                    # path2
-                    self.updateVertex(node_p, node_n)
+                    self.updateVertex(node_p, node_n, alpha)
 
                 # goal found
                 if node_n == self.goal:
                     heapq.heappush(OPEN, node_n)
                     break
-                
+
                 # update OPEN set
                 heapq.heappush(OPEN, node_n)
-            
+
             CLOSED.append(node)
         return [], [], []
-    
-    def updateVertex(self, node_p: Node, node_c: Node) -> None:
+
+    def updateVertex(self, node_p: Node, node_c: Node, alpha: float) -> None:
         """
         Update extend node information with current node's parent node.
 
         Parameters:
             node_p (Node): parent node
             node_c (Node): current node
+            alpha (float): alpha angle
         """
-        # path 2
-        if node_p.g + self.dist(node_c, node_p) <= node_c.g:
-            node_c.g = node_p.g + self.dist(node_c, node_p)
-            node_c.parent = node_p.current  
+        # if alpha == 0 or self.lineOfSight(node_c, node_p):    # "alpha == 0" will cause the path to penetrate obstacles
+        if self.lineOfSight(node_c, node_p):
+            # path 2
+            new_g = node_p.g + self.dist(node_c, node_p) + alpha
+            if new_g <= node_c.g:
+                node_c.g = new_g
+                node_c.parent = node_p.current
+
+    def getAlpha(self, node_p: Node, node_c: Node):
+        """
+        α(t) represents the deviation in the trajectory to reach the goal node g
+        through the node t in relation to the straight-line distance between the parent of its
+        predecessor (t ∈ succ(p) and parent(p) = q) and the goal node.
+
+        Parameters:
+            node_p (Node): parent node
+            node_c (Node): current node
+
+        Returns:
+            alpha (float): alpha angle
+        """
+        d_qt = self.dist(node_p, node_c)
+        d_qg = self.dist(node_p, self.goal)
+        d_tg = self.dist(node_c, self.goal)
+        value = (d_qt * d_qt + d_qg * d_qg - d_tg * d_tg) / (2.0 * d_qt * d_qg)
+        value = max(-1.0, min(1.0, value))
+        cost = acos(value)
+        return cost
