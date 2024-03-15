@@ -23,7 +23,7 @@ if __name__ == '__main__':
     env = Grid(51, 31)
 
     # creat planner
-    planner = search_factory("a_star", start=start, goal=goal, env=env)
+    # planner = search_factory("a_star", start=start, goal=goal, env=env)
     # planner = search_factory("dijkstra", start=start, goal=goal, env=env)
     # planner = search_factory("gbfs", start=start, goal=goal, env=env)
     # planner = search_factory("theta_star", start=start, goal=goal, env=env)
@@ -35,9 +35,10 @@ if __name__ == '__main__':
     # planner = search_factory("d_star_lite", start=start, goal=goal, env=env)
     # planner = search_factory("voronoi", start=start, goal=goal, env=env, n_knn=4,
     #                             max_edge_len=10.0, inflation_r=1.0)
+    planner = search_factory("anya", start=start, goal=goal, env=env)
 
     # animation
-    # planner.run()
+    planner.run()
 
     # ========================================================
 
@@ -64,4 +65,4 @@ if __name__ == '__main__':
     evolutionary search
     '''
     # planner = search_factory("pso", start=start, goal=goal, env=env)
-    planner.run()
+    # planner.run()

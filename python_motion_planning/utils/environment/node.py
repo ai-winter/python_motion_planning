@@ -1,8 +1,8 @@
 """
 @file: node.py
 @breif: 2-dimension node data stucture
-@author: Winter
-@update: 2023.1.13
+@author: Yang Haodong, Wu Maojia
+@update: 2024.3.15
 """
 
 class Node(object):
@@ -30,22 +30,26 @@ class Node(object):
         >>> node1 != node3
         >>> True
     """
-    def __init__(self, current: tuple, parent: tuple=None, g: float=0, h: float=0) -> None:
+    def __init__(self, current: tuple, parent: tuple = None, g: float = 0, h: float = 0) -> None:
         self.current = current
         self.parent = parent
         self.g = g
         self.h = h
     
     def __add__(self, node):
+        assert isinstance(node, Node)
         return Node((self.x + node.x, self.y + node.y), self.parent, self.g + node.g, self.h)
 
     def __eq__(self, node) -> bool:
+        if not isinstance(node, Node):
+            return False
         return self.current == node.current
     
     def __ne__(self, node) -> bool:
         return not self.__eq__(node)
 
     def __lt__(self, node) -> bool:
+        assert isinstance(node, Node)
         return self.g + self.h < node.g + node.h or \
                 (self.g + self.h == node.g + node.h and self.h < node.h)
 
@@ -53,8 +57,10 @@ class Node(object):
         return hash(self.current)
 
     def __str__(self) -> str:
-        return "----------\ncurrent:{}\nparent:{}\ng:{}\nh:{}\n----------" \
-            .format(self.current, self.parent, self.g, self.h)
+        return "Node({}, {}, {}, {})".format(self.current, self.parent, self.g, self.h)
+
+    def __repr__(self) -> str:
+        return self.__str__()
     
     @property
     def x(self) -> float:

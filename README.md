@@ -8,12 +8,14 @@
 * `Path Planning`: It's based on path constraints (such as obstacles), planning the optimal path sequence for the robot to travel without conflict between the start and goal.
 * `Trajectory planning`: It plans the motion state to approach the global path based on kinematics, dynamics constraints and path sequence.
 
-This repository provides the implement of common `Motion planning` algorithm, welcome your star & fork & PR.
+This repository provides the implementations of common `Motion planning` algorithms. **Your stars and forks are welcome**. This repository is not complete yet, and maintaining it requires a huge amount of work. **Therefore, you are also welcome to contribute to this repository by opening issues, submitting pull requests or joining our development team**.
 
-The theory analysis can be found at [motion-planning](https://blog.csdn.net/frigidwinter/category_11410243.html)
+The theory analysis can be found at [motion-planning](https://blog.csdn.net/frigidwinter/category_11410243.html).
 
 We also provide [ROS C++](https://github.com/ai-winter/ros_motion_planning) version and [Matlab](https://github.com/ai-winter/matlab_motion_planning) version.
+
 # Quick Start
+
 The file structure is shown below
 
 ```

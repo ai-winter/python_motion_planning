@@ -33,6 +33,8 @@ class SearchFactory(object):
             return LazyThetaStar(**config)
         elif planner_name == "s_theta_star":
             return SThetaStar(**config)
+        elif planner_name == "anya":
+            return Anya(**config)
         elif planner_name == "rrt":
             return RRT(**config)
         elif planner_name == "rrt_connect":

@@ -1,7 +1,7 @@
 from python_motion_planning import *
 
 # -------------global planners-------------
-plt = AStar(start=(5, 5), goal=(45, 25), env=Grid(51, 31))
+# plt = AStar(start=(5, 5), goal=(45, 25), env=Grid(51, 31))
 # plt = DStar(start=(5, 5), goal=(45, 25), env=Grid(51, 31))
 # plt = DStarLite(start=(5, 5), goal=(45, 25), env=Grid(51, 31))
 # plt = Dijkstra(start=(5, 5), goal=(45, 25), env=Grid(51, 31))
@@ -13,6 +13,7 @@ plt = AStar(start=(5, 5), goal=(45, 25), env=Grid(51, 31))
 # plt = LPAStar(start=(5, 5), goal=(45, 25), env=Grid(51, 31))
 # plt = VoronoiPlanner(start=(5, 5), goal=(45, 25), env=Grid(51, 31))
 # plt = HybridAStar(start=(5, 5), goal=(45, 25), env=Grid(51, 31))
+plt = Anya(start=(5, 5), goal=(45, 25), env=Grid(51, 31))
 
 # plt = RRT(start=(18, 8), goal=(37, 18), env=Map(51, 31), max_dist=0.5, sample_num=10000)
 # plt = RRTConnect(start=(18, 8), goal=(37, 18), env=Map(51, 31), max_dist=0.5, sample_num=10000)
