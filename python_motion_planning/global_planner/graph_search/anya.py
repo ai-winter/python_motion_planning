@@ -2,8 +2,10 @@
 @file: anya.py
 @breif: Anya motion planning
 @author: Wu Maojia
-@update: 2024.3.15
+@update: 2024.3.17
 """
+import heapq
+
 from .graph_search import GraphSearcher
 from python_motion_planning.utils import Env, Point2D
 
@@ -72,23 +74,31 @@ class AnyaNode(object):
         parent (AnyaNode): parent node of the node
         eps (float): tolerance for float comparison
     """
-    def __init__(self, interval: AnyaInterval, root: Point2D, parent=None, eps: float = 1e-6) -> None:
+    def __init__(self, interval: AnyaInterval, root: Point2D, parent = None, goal: Point2D = None) -> None:
         assert isinstance(parent, AnyaNode) or parent is None
 
         self.interval = interval
         self.root = root
         self.parent = parent
-        self.eps = eps
+        self.start = self.parent.start if parent is not None else self.root
+        self.goal = self.parent.goal if parent is not None else goal
+        self.eps = self.interval.eps
 
         if parent is None:
             self.g = 0
         else:
             self.g = parent.g + root.dist(parent.root)
 
+        self.h = self.heuristic
+        self.f = self.g + self.h
+
     def __eq__(self, other) -> bool:
         if not isinstance(other, AnyaNode):
             return False
         return self.interval == other.interval and self.root == other.root
+
+    def __lt__(self, other) -> bool:
+        return self.f < other.f
 
     def __hash__(self) -> int:
         return hash((self.interval, self.root))
@@ -99,14 +109,15 @@ class AnyaNode(object):
     def __repr__(self) -> str:
         return self.__str__()
 
-    def heuristic(self, goal: Point2D) -> float:
+    @property
+    def heuristic(self) -> float:
         # mirror the goal point if it is on the opposite side of the interval
-        if ((self.root.y > self.interval.row and goal.y > self.interval.row) or
-                (self.root.y < self.interval.row and goal.y < self.interval.row)):
-            goal.y = 2 * self.interval.row - goal.y
+        if ((self.root.y > self.interval.row and self.goal.y > self.interval.row) or
+                (self.root.y < self.interval.row and self.goal.y < self.interval.row)):
+            self.goal.y = 2 * self.interval.row - self.goal.y
 
         # the intersection point of the line connecting the root and the goal with the interval
-        x = self.root.x + (goal.x - self.root.x) * (self.interval.row - self.root.y) / (goal.y - self.root.y)
+        x = self.root.x + (self.goal.x - self.root.x) * (self.interval.row - self.root.y) / (self.goal.y - self.root.y)
         y = self.interval.row
 
         # restrict the intersection point to the interval
@@ -117,7 +128,7 @@ class AnyaNode(object):
 
         intersection = Point2D(x, y)
 
-        return intersection.dist(self.root) + intersection.dist(goal)
+        return intersection.dist(self.root) + intersection.dist(self.goal)
 
 
 class AnyaExpander(object):
@@ -126,46 +137,225 @@ class AnyaExpander(object):
 
     Parameters:
     """
-    def __init__(self) -> None:
-        pass
+    def __init__(self, env) -> None:
+        self.env = env
 
     def generate_successors(self, node: AnyaNode) -> list:
-        pass
+        if node.parent is None:     # start node has no parent
+            return self.generate_start_successors(node)
 
-    def generate_start_successors(self, point: Point2D) -> list:
-        pass
+        left = node.interval.left
+        right = node.interval.right
+        row = node.interval.row
+        root = node.root
+        left_endpoint = Point2D(left, row)
+        right_endpoint = Point2D(right, row)
+        successors = []
 
-    def generate_flat_successors(self, node: AnyaNode) -> list:
-        pass
-
-    def generate_cone_successors(self, node: AnyaNode) -> list:
-        root_new = None
-
-        if node.interval.row == node.root.y:
-            # get the farthest point from root
-            if node.interval.left.dist(node.root) < node.interval.right.dist(node.root):
-                root_new = Point2D(node.interval.right, node.interval.row)
+        if row == root.y:    # if node is flat
+            # get the endpoint of the interval farthest from root
+            if left_endpoint.dist(root) > right_endpoint.dist(root):
+                endpoint = left_endpoint
             else:
-                root_new = Point2D(node.interval.left, node.interval.row)
+                endpoint = right_endpoint
 
-            # points from an adjacent row
-            point_up = Point2D(node.interval.left, node.interval.row + 1)
-            point_down = Point2D(node.interval.right, node.interval.row - 1)
+            # generate successors from the endpoint
+            successors += self.generate_flat_successors(endpoint, node)
 
-            # a maximum open interval, beginning at p and entirely observable from root_new
+            # if the endpoint is a turning point on a taut local path beginning at root
+            if self.is_corner_point(endpoint):
+                successors += self.generate_cone_successors(left_endpoint, right_endpoint, node)
 
+        else:   # if node is not flat, it must be a cone
+            successors += self.generate_cone_successors(left_endpoint, right_endpoint, node)
+            if self.is_corner_point(left_endpoint):
+                successors += self.generate_flat_successors(left_endpoint, node)
+                successors += self.generate_cone_successors(left_endpoint, left_endpoint, node)
+            if self.is_corner_point(right_endpoint):
+                successors += self.generate_flat_successors(right_endpoint, node)
+                successors += self.generate_cone_successors(right_endpoint, right_endpoint, node)
 
-        elif len(node.interval) < node.eps:
-            root_new = Point2D(node.interval.left, node.interval.row)
+        return successors
 
-            # a point from an adjacent row
+    def generate_start_successors(self, node: AnyaNode) -> list:
+        root = node.root
+        successors = []
 
+        # scan left
+        left = self.scan_row_left(root)
+        if left is not None:
+            intervals = self.split_interval(AnyaInterval(left, root.x, root.y, eps=self.env.eps))
+            for interval in intervals:
+                successors.append(AnyaNode(interval, root, node))
 
-            # a maximum closed interval, beginning at p and entirely observable from root_new
+        # scan right
+        right = self.scan_row_right(root)
+        if right is not None:
+            intervals = self.split_interval(AnyaInterval(root.x, right, root.y, eps=self.env.eps))
+            for interval in intervals:
+                successors.append(AnyaNode(interval, root, node))
+
+        # scan the row above
+        point_up = Point2D(root.x, root.y+1)
+        left, right = self.scan_row_left(point_up), self.scan_row_right(point_up)
+        if left is not None and right is not None:
+            intervals = self.split_interval(AnyaInterval(left, right, point_up.y, eps=self.env.eps))
+            for interval in intervals:
+                successors.append(AnyaNode(interval, point_up, node))
+
+        # scan the row below
+        point_down = Point2D(root.x, root.y-1)
+        left, right = self.scan_row_left(point_down), self.scan_row_right(point_down)
+        if left is not None and right is not None:
+            intervals = self.split_interval(AnyaInterval(left, right, point_down.y, eps=self.env.eps))
+            for interval in intervals:
+                successors.append(AnyaNode(interval, point_down, node))
+
+        return successors
+
+    def generate_flat_successors(self, point: Point2D, node: AnyaNode) -> list:
+        root = node.root
+        direction = 1 if point.x > root.x else -1
+        current_point = point
+        next_point = Point2D(current_point.x + direction, current_point.y)
+        successors = []
+
+        while not self.is_corner_point(current_point) and next_point.to_tuple not in self.env.obstacles:
+            current_point = next_point
+            next_point = Point2D(current_point.x + direction, current_point.y)
+
+        if root.y == point.y:
+            successors.append(AnyaNode(
+                    AnyaInterval(point.x, current_point.x, point.y, eps=self.env.eps),
+                    root, node))
+        else:
+            successors.append(AnyaNode(
+                    AnyaInterval(point.x, current_point.x, point.y, eps=self.env.eps),
+                    point, node))
+
+        return successors
+
+    def generate_cone_successors(self, left: Point2D, right: Point2D, node: AnyaNode) -> list:
+        root = node.root
+        successors = []
+
+        if left.y == right.y and right.y == root.y:
+            # get the endpoint of the interval farthest from root
+            if left.dist(root) > right.dist(root):
+                root_new = left
+            else:
+                root_new = right
+
+            # scan the row above
+            point_up = Point2D(root_new.x, root_new.y+1)
+            left, right = self.scan_row_left(point_up), self.scan_row_right(point_up)
+            if left is not None and right is not None:
+                intervals = self.split_interval(AnyaInterval(left, right, point_up.y, eps=self.env.eps))
+                for interval in intervals:
+                    successors.append(AnyaNode(interval, point_up, node))
+
+            # scan the row below
+            point_down = Point2D(root_new.x, root_new.y-1)
+            left, right = self.scan_row_left(point_down), self.scan_row_right(point_down)
+            if left is not None and right is not None:
+                intervals = self.split_interval(AnyaInterval(left, right, point_down.y, eps=self.env.eps))
+                for interval in intervals:
+                    successors.append(AnyaNode(interval, point_down, node))
+
+        elif left == right:
+            root_new = left     # left and right endpoints are the same
+
+            # scan the row above
+            point_up = Point2D(root_new.x, root_new.y+1)
+            left, right = self.scan_row_left(point_up), self.scan_row_right(point_up)
+            if left is not None and right is not None:
+                intervals = self.split_interval(AnyaInterval(left, right, point_up.y, eps=self.env.eps))
+                for interval in intervals:
+                    successors.append(AnyaNode(interval, point_up, node))
+
+            # scan the row below
+            point_down = Point2D(root_new.x, root_new.y-1)
+            left, right = self.scan_row_left(point_down), self.scan_row_right(point_down)
+            if left is not None and right is not None:
+                intervals = self.split_interval(AnyaInterval(left, right, point_down.y, eps=self.env.eps))
+                for interval in intervals:
+                    successors.append(AnyaNode(interval, point_down, node))
 
         else:
-            pass
+            # TODO: linear projection or directly up and down?
+            row_up = left.y + 1
+            up_left = self.scan_row_left(Point2D(left.x, row_up))
+            up_right = self.scan_row_right(Point2D(right.x, row_up))
+            if up_left is not None and up_right is not None:
+                # if the new interval contains any obstacle, discard it
+                any_obstacle = False
+                for x in range(up_left, up_right+1):
+                    if (x, row_up) in self.env.obstacles:
+                        any_obstacle = True
+                        break
+                if not any_obstacle:
+                    intervals = self.split_interval(AnyaInterval(up_left, up_right, row_up, eps=self.env.eps))
+                    for interval in intervals:
+                        successors.append(AnyaNode(interval, Point2D(up_left, row_up), node))
 
+            row_down = right.y - 1
+            down_left = self.scan_row_left(Point2D(left.x, row_down))
+            down_right = self.scan_row_right(Point2D(right.x, row_down))
+            if down_left is not None and down_right is not None:
+                # if the new interval contains any obstacle, discard it
+                any_obstacle = False
+                for x in range(down_left, down_right+1):
+                    if (x, row_down) in self.env.obstacles:
+                        any_obstacle = True
+                        break
+                if not any_obstacle:
+                    intervals = self.split_interval(AnyaInterval(down_left, down_right, row_down, eps=self.env.eps))
+                    for interval in intervals:
+                        successors.append(AnyaNode(interval, Point2D(down_left, row_down), node))
+
+        return successors
+
+    def scan_row_left(self, point: Point2D) -> int:
+        # TODO: half-closed interval
+        if point.to_tuple in self.env.obstacles:
+            return None
+        left = point.x
+        while (left - 1, point.y) not in self.env.obstacles:
+            left -= 1
+        return left
+
+    def scan_row_right(self, point: Point2D) -> int:
+        # TODO: half-closed interval
+        if point.to_tuple in self.env.obstacles:
+            return None
+        right = point.x
+        while (right + 1, point.y) not in self.env.obstacles:
+            right += 1
+        return right
+
+    def split_interval(self, interval: AnyaInterval) -> list:
+        intervals = []
+
+        # TODO: split by obstacles
+        # split by corner points
+        left = interval.left
+        for right in range(int(interval.left), int(interval.right+1)):
+            if self.is_corner_point(Point2D(right, interval.row)):
+                intervals.append(AnyaInterval(left, right, interval.row, eps=self.env.eps))
+                left = right
+        intervals.append(AnyaInterval(left, interval.right, interval.row, eps=self.env.eps))
+        return intervals
+
+    def is_corner_point(self, point: Point2D) -> bool:
+        if point.to_tuple in self.env.obstacles:
+            return False
+        directions = [(1, 1), (-1, -1), (-1, 1), (1, -1)]
+        for direction in directions:
+            if ((point.x+direction[0], point.y+direction[1]) in self.env.obstacles
+                    and (point.x, point.y+direction[1]) not in self.env.obstacles
+                    and (point.x+direction[0], point.y) not in self.env.obstacles):
+                return True
+        return False
 
 
 class Anya(GraphSearcher):
@@ -192,15 +382,9 @@ class Anya(GraphSearcher):
     """
     def __init__(self, start: tuple, goal: tuple, env: Env) -> None:
         super().__init__(start, goal, env, None)
-        self.start = DNode(start, None, 'NEW', float('inf'), float("inf"))
-        self.goal = DNode(goal, None, 'NEW', 0, float('inf'))
-        # record history infomation of map grids
-        self.map = None
-        # allowed motions
-        self.motions = [DNode(motion.current, None, None, motion.g, 0) for motion in self.env.motions]
-        # OPEN set and EXPAND set
-        self.OPEN = []
-        self.EXPAND = []
+        self.start = Point2D(start[0], start[1])
+        self.goal = Point2D(goal[0], goal[1])
+        self.expander = AnyaExpander(env)
 
     def __str__(self) -> str:
         return "Anya"
@@ -214,216 +398,44 @@ class Anya(GraphSearcher):
             path (list): planning path
             expand (list): all nodes that planner has searched
         """
-        while True:
-            self.processState()
-            if self.start.t == 'CLOSED':
-                break
-        cost, path = self.extractPath(self.map)
-        return cost, path, None
+        OPEN = []
+        heapq.heappush(OPEN, AnyaNode(AnyaInterval(self.start.x, self.start.x, self.start.y, eps=self.env.eps),
+                                      root=self.start, parent=None, goal=self.goal))
+        CLOSED = []
+        while OPEN:
+            node = heapq.heappop(OPEN)
+
+            if node in CLOSED:
+                continue
+
+            if node.interval.contains(self.goal):
+                CLOSED.append(node)
+                cost, path = self.extractPath(CLOSED)
+                return cost, path, CLOSED
+
+            for successor in self.expander.generate_successors(node):
+                if successor in CLOSED:
+                    continue
+                heapq.heappush(OPEN, successor)
+
+            CLOSED.append(node)
+
+        return [], [], []
+
+    def extractPath(self, closed_set: list):
+        path = [self.goal]
+        node = closed_set[-1]
+        cost = node.root.dist(self.goal)
+        while node.parent is not None:
+            path.append(node.root)
+            cost += node.root.dist(node.parent.root)
+            node = node.parent
+
+        return [], []
 
     def run(self):
         """
-        Running both plannig and animation.
+        Running both planning and animation.
         """
-        # intialize global information
-        self.map = [DNode(s, None, 'NEW', float("inf"), float("inf")) for s in self.env.grid_map]
-        self.map[self.map.index(self.goal)] = self.goal
-        self.map[self.map.index(self.start)] = self.start
-
-        # intialize OPEN set
-        self.insert(self.goal, 0)
-
-        # static planning
-        cost, path, _ = self.plan()
-
-        # animation
-        self.plot.connect('button_press_event', self.OnPress)
-        self.plot.animation(path, str(self), cost=cost)
-
-    def OnPress(self, event):
-        """
-        Mouse button callback function.
-        """
-        x, y = int(event.xdata), int(event.ydata)
-        if x < 0 or x > self.env.x_range - 1 or y < 0 or y > self.env.y_range - 1:
-            print("Please choose right area!")
-        else:
-            if (x, y) not in self.obstacles:
-                print("Add obstacle at: ({}, {})".format(x, y))
-                # update obstacles
-                self.obstacles.add((x, y))
-                self.env.update(self.obstacles)
-
-                # move from start to goal, replan locally when meeting collisions
-                node = self.start
-                self.EXPAND, path, cost = [], [], 0
-                while node != self.goal:
-                    node_parent = self.map[self.map.index(DNode(node.parent, None, None, None, None))]
-                    if self.isCollision(node, node_parent):
-                        self.modify(node, node_parent)
-                        continue
-                    path.append(node.current)
-                    cost += self.cost(node, node_parent)
-                    node = node_parent
-
-                self.plot.clean()
-                self.plot.animation(path, str(self), cost, self.EXPAND)
-
-            self.plot.update()
-
-    def extractPath(self, closed_set):
-        """
-        Extract the path based on the CLOSED set.
-
-        Parameters:
-            closed_set (list): CLOSED set
-
-        Returns:
-            cost (float): the cost of planning path
-            path (list): the planning path
-        """
-        cost = 0
-        node = self.start
-        path = [node.current]
-        while node != self.goal:
-            node_parent = closed_set[closed_set.index(DNode(node.parent, None, None, None, None))]
-            cost += self.cost(node, node_parent)
-            node = node_parent
-            path.append(node.current)
-
-        return cost, path
-
-    def processState(self) -> float:
-        """
-        Broadcast dynamic obstacle information.
-
-        Returns:
-            min_k (float): minimum k value of map
-        """
-        # get node in OPEN set with min k value
-        node = self.min_state
-        self.EXPAND.append(node)
-
-        if node is None:
-            return -1
-
-        # record the min k value of this iteration
-        k_old = self.min_k
-        # move node from OPEN set to CLOSED set
-        self.delete(node)
-
-        # k_min < h[x] --> x: RAISE state (try to reduce k value by neighbor)
-        if k_old < node.h:
-            for node_n in self.getNeighbor(node):
-                if node_n.h <= k_old and node.h > node_n.h + self.cost(node, node_n):
-                    # update h_value and choose parent
-                    node.parent = node_n.current
-                    node.h = node_n.h + self.cost(node, node_n)
-
-        # k_min >= h[x] -- > x: LOWER state (cost reductions)
-        if k_old == node.h:
-            for node_n in self.getNeighbor(node):
-                if node_n.t == 'NEW' or \
-                    (node_n.parent == node.current and node_n.h != node.h + self.cost(node, node_n)) or \
-                    (node_n.parent != node.current and node_n.h > node.h + self.cost(node, node_n)):
-                    # Condition:
-                    # 1) t[node_n] == 'NEW': not visited
-                    # 2) node_n's parent: cost reduction
-                    # 3) node_n find a better parent
-                    node_n.parent = node.current
-                    self.insert(node_n, node.h + self.cost(node, node_n))
-        else:
-            for node_n in self.getNeighbor(node):
-                if node_n.t == 'NEW' or \
-                    (node_n.parent == node.current and node_n.h != node.h + self.cost(node, node_n)):
-                    # Condition:
-                    # 1) t[node_n] == 'NEW': not visited
-                    # 2) node_n's parent: cost reduction
-                    node_n.parent = node.current
-                    self.insert(node_n, node.h + self.cost(node, node_n))
-                else:
-                    if node_n.parent != node.current and \
-                        node_n.h > node.h + self.cost(node, node_n):
-                        # Condition: LOWER happened in OPEN set (s), s should be explored again
-                        self.insert(node, node.h)
-                    else:
-                        if node_n.parent != node.current and \
-                            node.h > node_n.h + self.cost(node, node_n) and \
-                            node_n.t == 'CLOSED' and \
-                            node_n.h > k_old:
-                            # Condition: LOWER happened in CLOSED set (s_n), s_n should be explored again
-                            self.insert(node_n, node_n.h)
-        return self.min_k
-
-    @property
-    def min_state(self) -> DNode:
-        """
-        Choose the node with the minimum k value in OPEN set.
-        """
-        if not self.OPEN:
-            return None
-        return min(self.OPEN, key=lambda node: node.k)
-
-    @property
-    def min_k(self) -> float:
-        """
-        Choose the minimum k value for nodes in OPEN set.
-        """
-        return self.min_state.k
-
-    def insert(self, node: DNode, h_new: float) -> None:
-        """
-        Insert node into OPEN set.
-
-        Parameters:
-            node (DNode): the node to insert
-            h_new (float): new or better cost to come value
-        """
-        if node.t == 'NEW':         node.k = h_new
-        elif node.t == 'OPEN':      node.k = min(node.k, h_new)
-        elif node.t == 'CLOSED':    node.k = min(node.h, h_new)
-        node.h, node.t = h_new, 'OPEN'
-        self.OPEN.append(node)
-
-    def delete(self, node: DNode) -> None:
-        """
-        Delete node from OPEN set.
-
-        Parameters:
-            node (DNode): the node to delete
-        """
-        if node.t == 'OPEN':
-            node.t = 'CLOSED'
-        self.OPEN.remove(node)
-
-    def modify(self, node: DNode, node_parent: DNode) -> None:
-        """
-        Start processing from node.
-
-        Parameters:
-            node (DNode): the node to modify
-            node_parent (DNode): the parent node of `node`
-        """
-        if node.t == 'CLOSED':
-            self.insert(node, node_parent.h + self.cost(node, node_parent))
-        while True:
-            k_min = self.processState()
-            if k_min >= node.h:
-                break
-
-    def getNeighbor(self, node: DNode) -> list:
-        """
-        Find neighbors of node.
-
-        Parameters:
-            node (DNode): current node
-
-        Returns:
-            neighbors (list): neighbors of current node
-        """
-        neighbors = []
-        for motion in self.motions:
-            n = self.map[self.map.index(node + motion)]
-            if not self.isCollision(node, n):
-                neighbors.append(n)
-        return neighbors
+        cost, path, expand = self.plan()
+        self.plot.animation(path, str(self), cost, expand)

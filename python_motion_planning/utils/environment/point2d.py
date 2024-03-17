@@ -79,6 +79,14 @@ class Point2D(object):
     def __repr__(self) -> str:
         return self.__str__()
 
+    @staticmethod
+    def from_tuple(point: tuple):
+        return Point2D(point[0], point[1])
+
+    @property
+    def to_tuple(self) -> tuple:
+        return self.x, self.y
+
     def dist(self, point) -> float:
         assert isinstance(point, Point2D)
         return math.hypot(self.x - point.x, self.y - point.y)

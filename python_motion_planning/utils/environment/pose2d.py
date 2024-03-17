@@ -81,3 +81,11 @@ class Pose2D(object):
 
     def __repr__(self) -> str:
         return self.__str__()
+
+    @staticmethod
+    def from_tuple(pose: tuple):
+        return Pose2D(pose[0], pose[1], pose[2])
+
+    @property
+    def to_tuple(self) -> tuple:
+        return self.x, self.y, self.theta
