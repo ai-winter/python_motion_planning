@@ -31,7 +31,7 @@ class AnyaInterval(object):
         if self.left_is_discrete:
             self.left = round(left)
         if self.right_is_discrete:
-            self.left = round(right)
+            self.right = round(right)
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, AnyaInterval):
@@ -130,6 +130,14 @@ class AnyaNode(object):
 
         return intersection.dist(self.root) + intersection.dist(self.goal)
 
+    @property
+    def x(self) -> float:
+        return self.root.x
+
+    @property
+    def y(self) -> float:
+        return self.root.y
+
 
 class AnyaExpander(object):
     """
@@ -201,7 +209,7 @@ class AnyaExpander(object):
         if left is not None and right is not None:
             intervals = self.split_interval(AnyaInterval(left, right, point_up.y, eps=self.env.eps))
             for interval in intervals:
-                successors.append(AnyaNode(interval, point_up, node))
+                successors.append(AnyaNode(interval, root, node))
 
         # scan the row below
         point_down = Point2D(root.x, root.y-1)
@@ -209,7 +217,7 @@ class AnyaExpander(object):
         if left is not None and right is not None:
             intervals = self.split_interval(AnyaInterval(left, right, point_down.y, eps=self.env.eps))
             for interval in intervals:
-                successors.append(AnyaNode(interval, point_down, node))
+                successors.append(AnyaNode(interval, root, node))
 
         return successors
 
@@ -225,13 +233,23 @@ class AnyaExpander(object):
             next_point = Point2D(current_point.x + direction, current_point.y)
 
         if root.y == point.y:
-            successors.append(AnyaNode(
-                    AnyaInterval(point.x, current_point.x, point.y, eps=self.env.eps),
-                    root, node))
+            if current_point.x < root.x:
+                successors.append(AnyaNode(
+                        AnyaInterval(current_point.x, point.x, point.y, eps=self.env.eps),
+                        root, node))
+            else:
+                successors.append(AnyaNode(
+                        AnyaInterval(point.x, current_point.x, point.y, eps=self.env.eps),
+                        root, node))
         else:
-            successors.append(AnyaNode(
-                    AnyaInterval(point.x, current_point.x, point.y, eps=self.env.eps),
-                    point, node))
+            if current_point.x < root.x:
+                successors.append(AnyaNode(
+                        AnyaInterval(current_point.x, point.x, point.y, eps=self.env.eps),
+                        point, node))
+            else:
+                successors.append(AnyaNode(
+                        AnyaInterval(point.x, current_point.x, point.y, eps=self.env.eps),
+                        point, node))
 
         return successors
 
@@ -252,7 +270,7 @@ class AnyaExpander(object):
             if left is not None and right is not None:
                 intervals = self.split_interval(AnyaInterval(left, right, point_up.y, eps=self.env.eps))
                 for interval in intervals:
-                    successors.append(AnyaNode(interval, point_up, node))
+                    successors.append(AnyaNode(interval, root_new, node))
 
             # scan the row below
             point_down = Point2D(root_new.x, root_new.y-1)
@@ -260,7 +278,7 @@ class AnyaExpander(object):
             if left is not None and right is not None:
                 intervals = self.split_interval(AnyaInterval(left, right, point_down.y, eps=self.env.eps))
                 for interval in intervals:
-                    successors.append(AnyaNode(interval, point_down, node))
+                    successors.append(AnyaNode(interval, root_new, node))
 
         elif left == right:
             root_new = left     # left and right endpoints are the same
@@ -271,7 +289,7 @@ class AnyaExpander(object):
             if left is not None and right is not None:
                 intervals = self.split_interval(AnyaInterval(left, right, point_up.y, eps=self.env.eps))
                 for interval in intervals:
-                    successors.append(AnyaNode(interval, point_up, node))
+                    successors.append(AnyaNode(interval, root_new, node))
 
             # scan the row below
             point_down = Point2D(root_new.x, root_new.y-1)
@@ -279,10 +297,11 @@ class AnyaExpander(object):
             if left is not None and right is not None:
                 intervals = self.split_interval(AnyaInterval(left, right, point_down.y, eps=self.env.eps))
                 for interval in intervals:
-                    successors.append(AnyaNode(interval, point_down, node))
+                    successors.append(AnyaNode(interval, root_new, node))
 
         else:
             # TODO: linear projection or directly up and down?
+            root_new = root
             row_up = left.y + 1
             up_left = self.scan_row_left(Point2D(left.x, row_up))
             up_right = self.scan_row_right(Point2D(right.x, row_up))
@@ -296,7 +315,7 @@ class AnyaExpander(object):
                 if not any_obstacle:
                     intervals = self.split_interval(AnyaInterval(up_left, up_right, row_up, eps=self.env.eps))
                     for interval in intervals:
-                        successors.append(AnyaNode(interval, Point2D(up_left, row_up), node))
+                        successors.append(AnyaNode(interval, root_new, node))
 
             row_down = right.y - 1
             down_left = self.scan_row_left(Point2D(left.x, row_down))
@@ -311,7 +330,7 @@ class AnyaExpander(object):
                 if not any_obstacle:
                     intervals = self.split_interval(AnyaInterval(down_left, down_right, row_down, eps=self.env.eps))
                     for interval in intervals:
-                        successors.append(AnyaNode(interval, Point2D(down_left, row_down), node))
+                        successors.append(AnyaNode(interval, root_new, node))
 
         return successors
 
@@ -334,16 +353,30 @@ class AnyaExpander(object):
         return right
 
     def split_interval(self, interval: AnyaInterval) -> list:
+        traversable_intervals = []
         intervals = []
 
-        # TODO: split by obstacles
-        # split by corner points
+        # split by obstacles
         left = interval.left
-        for right in range(int(interval.left), int(interval.right+1)):
-            if self.is_corner_point(Point2D(right, interval.row)):
-                intervals.append(AnyaInterval(left, right, interval.row, eps=self.env.eps))
-                left = right
-        intervals.append(AnyaInterval(left, interval.right, interval.row, eps=self.env.eps))
+        right = interval.left
+        while right <= interval.right:
+            if (right, interval.row) in self.env.obstacles:
+                if right > left:
+                    traversable_intervals.append(AnyaInterval(left, right-1, interval.row, eps=self.env.eps))
+                left = right + 1
+            right += 1
+        if right > left:
+            traversable_intervals.append(AnyaInterval(left, right-1, interval.row, eps=self.env.eps))
+
+        # split by corner points
+        for traversable_interval in traversable_intervals:
+            left = traversable_interval.left
+            for right in range(int(traversable_interval.left), int(traversable_interval.right+1)):
+                if self.is_corner_point(Point2D(right, traversable_interval.row)):
+                    intervals.append(AnyaInterval(left, right, traversable_interval.row, eps=self.env.eps))
+                    left = right
+            intervals.append(AnyaInterval(left, traversable_interval.right, traversable_interval.row, eps=self.env.eps))
+
         return intervals
 
     def is_corner_point(self, point: Point2D) -> bool:
@@ -382,8 +415,8 @@ class Anya(GraphSearcher):
     """
     def __init__(self, start: tuple, goal: tuple, env: Env) -> None:
         super().__init__(start, goal, env, None)
-        self.start = Point2D(start[0], start[1])
-        self.goal = Point2D(goal[0], goal[1])
+        self.start = start
+        self.goal = goal
         self.expander = AnyaExpander(env)
 
     def __str__(self) -> str:
@@ -399,8 +432,8 @@ class Anya(GraphSearcher):
             expand (list): all nodes that planner has searched
         """
         OPEN = []
-        heapq.heappush(OPEN, AnyaNode(AnyaInterval(self.start.x, self.start.x, self.start.y, eps=self.env.eps),
-                                      root=self.start, parent=None, goal=self.goal))
+        heapq.heappush(OPEN, AnyaNode(AnyaInterval(self.start[0], self.start[0], self.start[1], eps=self.env.eps),
+                                      root=Point2D.from_tuple(self.start), parent=None, goal=Point2D.from_tuple(self.goal)))
         CLOSED = []
         while OPEN:
             node = heapq.heappop(OPEN)
@@ -408,7 +441,7 @@ class Anya(GraphSearcher):
             if node in CLOSED:
                 continue
 
-            if node.interval.contains(self.goal):
+            if node.interval.contains(Point2D.from_tuple(self.goal)):
                 CLOSED.append(node)
                 cost, path = self.extractPath(CLOSED)
                 return cost, path, CLOSED
@@ -420,18 +453,21 @@ class Anya(GraphSearcher):
 
             CLOSED.append(node)
 
-        return [], [], []
+        cost, path = self.extractPath(CLOSED)
+        return cost, path, CLOSED
+
+        # return [], [], []
 
     def extractPath(self, closed_set: list):
         path = [self.goal]
         node = closed_set[-1]
-        cost = node.root.dist(self.goal)
+        cost = node.root.dist(Point2D.from_tuple(self.goal))
         while node.parent is not None:
-            path.append(node.root)
+            path.append(node.root.to_tuple)
             cost += node.root.dist(node.parent.root)
             node = node.parent
 
-        return [], []
+        return cost, path
 
     def run(self):
         """
