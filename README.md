@@ -108,6 +108,7 @@ Planner      |   Version   | Animation
 | **BSpline** | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/curve_generation/bspline_curve.py) | ![bspline_curve_python.png](gif/bspline_curve_python.png)
 | **Dubins** | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/curve_generation/dubins_curve.py) | ![dubins_curve_python.png](gif/dubins_curve_python.png)
 | **Reeds-Shepp** | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/curve_generation/reeds_shepp.py) | ![reeds_shepp_python.png](gif/reeds_shepp_python.gif)
+| **Fem-Pos Smoother** | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/curve_generation/fem_pos_smooth.py) | ![fem_pos_smoother_python.png](gif/fem_pos_smoother_python.png)
 
 
 

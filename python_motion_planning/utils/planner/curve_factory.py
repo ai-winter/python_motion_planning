@@ -23,5 +23,7 @@ class CurveFactory(object):
             return CubicSpline(**config)
         elif curve_name == "bspline":
             return BSpline(**config)
+        elif curve_name == "fem_pos_smoother":
+            return FemPosSmoother(**config)
         else:
             raise ValueError("The `curve_name` must be set correctly.")
