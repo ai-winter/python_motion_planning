@@ -8,6 +8,7 @@ from .d_star_lite import DStarLite
 from .voronoi import VoronoiPlanner
 from .theta_star import ThetaStar
 from .lazy_theta_star import LazyThetaStar
+from .s_theta_star import SThetaStar
 
 __all__ = ["AStar",
            "Dijkstra",
