@@ -219,6 +219,9 @@ class AnyaExpander(object):
             for interval in intervals:
                 successors.append(AnyaNode(interval, root, node))
 
+        if round(node.root.y) == 10:
+            print(f"interval: {node.interval}, root: {node.root}, successors: {successors}")
+
         return successors
 
     def generate_flat_successors(self, point: Point2D, node: AnyaNode) -> list:
@@ -309,7 +312,7 @@ class AnyaExpander(object):
                 # if the new interval contains any obstacle, discard it
                 any_obstacle = False
                 for x in range(up_left, up_right+1):
-                    if (x, row_up) in self.env.obstacles:
+                    if (int(x), int(row_up)) in self.env.obstacles:
                         any_obstacle = True
                         break
                 if not any_obstacle:
@@ -324,7 +327,7 @@ class AnyaExpander(object):
                 # if the new interval contains any obstacle, discard it
                 any_obstacle = False
                 for x in range(down_left, down_right+1):
-                    if (x, row_down) in self.env.obstacles:
+                    if (int(x), int(row_down)) in self.env.obstacles:
                         any_obstacle = True
                         break
                 if not any_obstacle:
@@ -339,7 +342,7 @@ class AnyaExpander(object):
         if point.to_tuple in self.env.obstacles:
             return None
         left = point.x
-        while (left - 1, point.y) not in self.env.obstacles:
+        while (int(left - 1), int(point.y)) not in self.env.obstacles:
             left -= 1
         return left
 
@@ -348,7 +351,7 @@ class AnyaExpander(object):
         if point.to_tuple in self.env.obstacles:
             return None
         right = point.x
-        while (right + 1, point.y) not in self.env.obstacles:
+        while (int(right + 1), int(point.y)) not in self.env.obstacles:
             right += 1
         return right
 
@@ -360,7 +363,7 @@ class AnyaExpander(object):
         left = interval.left
         right = interval.left
         while right <= interval.right:
-            if (right, interval.row) in self.env.obstacles:
+            if (int(right), int(interval.row)) in self.env.obstacles:
                 if right > left:
                     traversable_intervals.append(AnyaInterval(left, right-1, interval.row, eps=self.env.eps))
                 left = right + 1

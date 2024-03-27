@@ -85,7 +85,7 @@ class Point2D(object):
 
     @property
     def to_tuple(self) -> tuple:
-        return self.x, self.y
+        return int(self.x), int(self.y)
 
     def dist(self, point) -> float:
         assert isinstance(point, Point2D)
