@@ -4,8 +4,9 @@
 @author: Winter
 @update: 2024.1.30
 """
-import cvxopt
+import osqp
 import numpy as np
+from scipy import sparse
 
 from .local_planner import LocalPlanner
 from python_motion_planning.utils import Env
@@ -30,7 +31,7 @@ class MPC(LocalPlanner):
         >>> planner.run()
     """
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
-        super().__init__(start, goal, env, heuristic_type, MIN_LOOKAHEAD_DIST=1.0, MAX_V=2.0, MAX_ITERATION=2000)
+        super().__init__(start, goal, env, heuristic_type, MIN_LOOKAHEAD_DIST=1.0, MIN_W=-0.78, MAX_ITERATION=2000)
         # MPC parameters
         self.p = 12
         self.m = 8
@@ -179,6 +180,7 @@ class MPC(LocalPlanner):
         g = S_u.T @ Q @ (S_x @ x - Yr)              # (2m x 1)
 
         # constriants
+        I = np.eye(2 * self.m)
         A_I = np.kron(np.tril(np.ones((self.m, self.m))), np.diag([1, 1]))
         U_min = np.kron(np.ones((self.m, 1)), self.u_min)
         U_max = np.kron(np.ones((self.m, 1)), self.u_max)
@@ -189,8 +191,14 @@ class MPC(LocalPlanner):
         dU_max = np.kron(np.ones((self.m, 1)), self.du_max)
 
         # solve
-        dU_opt = self._quadprog(H, g, A=np.vstack([-A_I, A_I]),
-            b=np.vstack([-U_min + U_k_1, U_max - U_k_1]), lb=dU_min, ub=dU_max)
+        solver = osqp.OSQP()
+        H = sparse.csc_matrix(H)
+        A = sparse.csc_matrix(np.vstack([A_I, I]))
+        l = np.vstack([U_min - U_k_1, dU_min])
+        u = np.vstack([U_max - U_k_1, dU_max])
+        solver.setup(H, g, A, l, u, verbose=False)
+        res = solver.solve()
+        dU_opt = res.x[:, None]
         
         # first element
         du = dU_opt[0:2]
@@ -202,37 +210,3 @@ class MPC(LocalPlanner):
             [self.linearRegularization(float(u[0]))], 
             [self.angularRegularization(float(u[1]))]
         ]), (float(u[0]) - u_r[0], float(u[1]) - u_r[1])
-
-    def _quadprog(self, H, f, A=None, b=None, Aeq=None, beq=None, lb=None, ub=None):
-        n_var = H.shape[1]
-
-        P = cvxopt.matrix(H, tc='d')
-        q = cvxopt.matrix(f, tc='d')
-
-        if A is not None or b is not None:
-            assert(A is not None and b is not None)
-            if lb is not None:
-                A = np.vstack([A, -np.eye(n_var)])
-                b = np.vstack([b, -lb])
-
-            if ub is not None:
-                A = np.vstack([A, np.eye(n_var)])
-                b = np.vstack([b, ub])
-
-            A = cvxopt.matrix(A, tc='d')
-            b = cvxopt.matrix(b, tc='d')
-
-        if Aeq is not None or beq is not None:
-            assert(Aeq is not None and beq is not None)
-            Aeq = cvxopt.matrix(Aeq, tc='d')
-            beq = cvxopt.matrix(beq, tc='d')
-
-        cvxopt.solvers.options['show_progress'] = False
-        sol = cvxopt.solvers.qp(P, q, A, b, Aeq, beq, verbose=True)
-
-        return np.array(sol['x'])
-
-        
-
-
-

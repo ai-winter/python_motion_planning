@@ -10,7 +10,7 @@ from .theta_star import ThetaStar
 from .lazy_theta_star import LazyThetaStar
 from .s_theta_star import SThetaStar
 from .anya import Anya
-from .hybrid_a_star import HybridAStar
+# from .hybrid_a_star import HybridAStar
 
 __all__ = ["AStar",
            "Dijkstra",
@@ -24,5 +24,5 @@ __all__ = ["AStar",
            "LazyThetaStar",
            "SThetaStar",
            "Anya",
-           "HybridAStar"
+           # "HybridAStar"
         ]
