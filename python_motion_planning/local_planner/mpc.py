@@ -39,7 +39,8 @@ class MPC(LocalPlanner):
         self.R = np.diag([2, 2])
         self.u_min = np.array([[self.params["MIN_V"]], [self.params["MIN_W"]]])
         self.u_max = np.array([[self.params["MAX_V"]], [self.params["MAX_W"]]])
-        self.du_min = np.array([[self.params["MIN_V"]], [self.params["MIN_W"]]])
+        # self.du_min = np.array([[self.params["MIN_V"]], [self.params["MIN_W"]]])
+        self.du_min = np.array([[self.params["MIN_V_INC"]], [self.params["MIN_W_INC"]]])
         self.du_max = np.array([[self.params["MAX_V_INC"]], [self.params["MAX_W_INC"]]])
 
         # global planner

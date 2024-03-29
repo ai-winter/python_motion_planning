@@ -25,9 +25,9 @@ from python_motion_planning import *
 # plt.run()
 
 # -------------local planners-------------
-# plt = PID(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
+plt = PID(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
 # plt = DWA(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
-plt = APF(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
+# plt = APF(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
 # plt = LQR(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
 # plt = RPP(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
 # plt = MPC(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))

@@ -65,7 +65,7 @@ class Robot(Agent):
     def __str__(self) -> str:
         return "Robot"
     
-    def kinematic(self, u: np.ndarray, dt: float, obstacles: set = set(), replace: bool = True):
+    def kinematic(self, u: np.ndarray, dt: float, replace: bool = True):
         """
         Run robot kinematic once.
 
@@ -78,7 +78,7 @@ class Robot(Agent):
         Returns:
             robot (Robot): a new robot object
         """
-        new_state = self.lookforward(self.state, u, dt, obstacles).squeeze().tolist()
+        new_state = self.lookforward(self.state, u, dt).squeeze().tolist()
         if replace:
             self.history_pose.append((self.px, self.py, self.theta))
             self.px, self.py, self.theta = new_state[0], new_state[1], new_state[2]
@@ -89,7 +89,7 @@ class Robot(Agent):
             new_robot.setParameters(self.parameters)
             return new_robot
     
-    def lookforward(self, state: np.ndarray, u: np.ndarray, dt: float, obstacles: set = set()) -> np.ndarray:
+    def lookforward(self, state: np.ndarray, u: np.ndarray, dt: float) -> np.ndarray:
         """
         Run robot kinematic once but do not update.
 

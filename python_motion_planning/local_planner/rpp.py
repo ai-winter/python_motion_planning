@@ -79,9 +79,7 @@ class RPP(LocalPlanner):
                 else:
                     u = np.array([[0], [self.angularRegularization(e_theta / dt)]])
             else:
-                e_theta = self.regularizeAngle(
-                    self.angle(self.robot.position, lookahead_pt) - self.robot.theta
-                )
+                e_theta = self.regularizeAngle(self.angle(self.robot.position, lookahead_pt) - self.robot.theta)
                 if self.shouldRotateToPath(abs(e_theta)):
                     u = np.array([[0], [self.angularRegularization(e_theta / dt)]])
                 else:

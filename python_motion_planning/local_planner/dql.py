@@ -15,7 +15,7 @@ import random
 import math
 
 from .local_planner import LocalPlanner
-from python_motion_planning.utils import Env
+from python_motion_planning.utils import Env, MathHelper
 
 
 Transition = namedtuple('Transition',
@@ -252,24 +252,21 @@ class DQL(LocalPlanner):
             reward (float): reward for taking the action
             done (bool): whether the episode is done
         """
-        v_inc, w_inc = action
-        v = state[3]
-        w = state[4]
-        v_next = max(min(v + v_inc, self.params["MAX_V"]), self.params["MIN_V"])
-        w_next = max(min(w + w_inc, self.params["MAX_W"]), self.params["MIN_W"])
-        x_next, y_next, theta_next = self.robot.kinematic((v_next, w_next), self.params["TIME_STEP"])
-        next_state = (x_next, y_next, theta_next, v_next, w_next)
+        v_d = state[3] + action[0]
+        w_d = state[4] + action[1]
+        self.robot.kinematic((v_d, w_d), self.params["TIME_STEP"])
+        next_state = self.robot.state
         reward = self.reward(next_state)
         done = self.is_done(next_state)
         return next_state, reward, done
 
     def reward(self, state):
-        return math.hypot(state[0] - self.goal[0], state[1] - self.goal[1])
+        return self.dist((state[0], state[1]), self.goal)
 
     def is_done(self, state):
-        e_theta = self.regularizeAngle(state[2] - self.goal[2]) / 10
-        return (self.shouldRotateToGoal((state[0], state[1]), self.goal) and
-                self.shouldRotateToPath(self.angle(state, self.goal), np.pi / 4))
+        e_theta = self.regularizeAngle(state[2] - self.goal[2])
+        return not (self.shouldRotateToGoal((state[0], state[1]), self.goal)
+                    or self.shouldRotateToPath(abs(e_theta)))
 
     def dql_control(self, s: tuple, s_d: tuple, u_r: tuple, u_p: tuple) -> np.ndarray:
         pass

@@ -8,7 +8,7 @@ import numpy as np
 import math
 
 from .local_planner import LocalPlanner
-from python_motion_planning.utils import Env
+from python_motion_planning.utils import Env, MathHelper
 
 
 class PID(LocalPlanner):
@@ -88,7 +88,7 @@ class PID(LocalPlanner):
                     u = np.array([[self.linearRegularization(v_d)], [self.angularRegularization(e_theta / dt)]])
 
             # feed into robotic kinematic
-            self.robot.kinematic(u, dt, self.obstacles)
+            self.robot.kinematic(u, dt)
         
         return False, None
 
@@ -124,16 +124,10 @@ class PID(LocalPlanner):
         k_v_i = 0.00
         k_v_d = 0.00
         v_inc = k_v_p * e_v + k_v_i * self.i_v + k_v_d * d_v
-
-        if abs(v_inc) > self.params["MAX_V_INC"]:
-            v_inc = math.copysign(self.params["MAX_V_INC"], v_inc)
+        v_inc = MathHelper.clamp(v_inc, self.params["MIN_V_INC"], self.params["MAX_V_INC"])
 
         v = self.robot.v + v_inc
-
-        if abs(v) > self.params["MAX_V"]:
-            v = math.copysign(self.params["MAX_V"], v)
-        if abs(v) < self.params["MIN_V"]:
-            v = math.copysign(self.params["MIN_V"], v)
+        v = MathHelper.clamp(v, self.params["MIN_V"], self.params["MAX_V"])
         
         return v
 
