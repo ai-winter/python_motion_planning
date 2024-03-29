@@ -1,8 +1,8 @@
 """
 @file: lqr.py
 @breif: Linear Quadratic Regulator(LQR) motion planning
-@author: Winter
-@update: 2024.1.12
+@author: Yang Haodong, Wu Maojia
+@update: 2024.3.29
 """
 import numpy as np
 
@@ -63,7 +63,7 @@ class LQR(LocalPlanner):
             lookahead_pt, theta_trj, kappa = self.getLookaheadPoint()
 
             # calculate velocity command
-            e_theta = self.regularizeAngle(self.robot.theta - self.goal[2]) / 10
+            e_theta = self.regularizeAngle(self.robot.theta - self.goal[2])
             if self.shouldRotateToGoal(self.robot.position, self.goal):
                 if not self.shouldRotateToPath(abs(e_theta)):
                     u = np.array([[0], [0]])
@@ -73,8 +73,8 @@ class LQR(LocalPlanner):
                 e_theta = self.regularizeAngle(
                     self.angle(self.robot.position, lookahead_pt) - self.robot.theta
                 )
-                if self.shouldRotateToPath(abs(e_theta), np.pi / 4):
-                    u = np.array([[0], [self.angularRegularization(e_theta / dt / 10)]])
+                if self.shouldRotateToPath(abs(e_theta)):
+                    u = np.array([[0], [self.angularRegularization(e_theta / dt)]])
                 else:
                     s = (self.robot.px, self.robot.py, self.robot.theta) # current state
                     s_d = (lookahead_pt[0], lookahead_pt[1], theta_trj)  # desired state

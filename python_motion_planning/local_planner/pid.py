@@ -1,10 +1,11 @@
 """
 @file: pid.py
 @breif: PID motion planning
-@author: Winter
-@update: 2023.10.24
+@author: Yang Haodong, Wu Maojia
+@update: 2024.3.29
 """
 import numpy as np
+import math
 
 from .local_planner import LocalPlanner
 from python_motion_planning.utils import Env
@@ -72,22 +73,22 @@ class PID(LocalPlanner):
             theta_d = k_theta * theta_err + (1 - k_theta) * theta_trj
     
             # calculate velocity command
-            e_theta = self.regularizeAngle(self.robot.theta - self.goal[2]) / 10
+            e_theta = self.regularizeAngle(self.robot.theta - self.goal[2])
             if self.shouldRotateToGoal(self.robot.position, self.goal):
                 if not self.shouldRotateToPath(abs(e_theta)):
                     u = np.array([[0], [0]])
                 else:
                     u = np.array([[0], [self.angularRegularization(e_theta / dt)]])
             else:
-                e_theta = self.regularizeAngle(theta_d - self.robot.theta) / 10
-                if self.shouldRotateToPath(abs(e_theta), np.pi / 4):
+                e_theta = self.regularizeAngle(theta_d - self.robot.theta)
+                if self.shouldRotateToPath(abs(e_theta)):
                     u = np.array([[0], [self.angularRegularization(e_theta / dt)]])
                 else:
-                    v_d = self.dist(lookahead_pt, self.robot.position) / dt / 10
+                    v_d = self.dist(lookahead_pt, self.robot.position) / dt
                     u = np.array([[self.linearRegularization(v_d)], [self.angularRegularization(e_theta / dt)]])
 
             # feed into robotic kinematic
-            self.robot.kinematic(u, dt)
+            self.robot.kinematic(u, dt, self.obstacles)
         
         return False, None
 
@@ -124,7 +125,15 @@ class PID(LocalPlanner):
         k_v_d = 0.00
         v_inc = k_v_p * e_v + k_v_i * self.i_v + k_v_d * d_v
 
+        if abs(v_inc) > self.params["MAX_V_INC"]:
+            v_inc = math.copysign(self.params["MAX_V_INC"], v_inc)
+
         v = self.robot.v + v_inc
+
+        if abs(v) > self.params["MAX_V"]:
+            v = math.copysign(self.params["MAX_V"], v)
+        if abs(v) < self.params["MIN_V"]:
+            v = math.copysign(self.params["MIN_V"], v)
         
         return v
 
@@ -148,6 +157,14 @@ class PID(LocalPlanner):
         k_w_d = 0.01
         w_inc = k_w_p * e_w + k_w_i * self.i_w + k_w_d * d_w
 
+        if abs(w_inc) > self.params["MAX_W_INC"]:
+            w_inc = math.copysign(self.params["MAX_W_INC"], w_inc)
+
         w = self.robot.w + w_inc
+
+        if abs(w) > self.params["MAX_W"]:
+            w = math.copysign(self.params["MAX_W"], w)
+        if abs(w) < self.params["MIN_W"]:
+            w = math.copysign(self.params["MIN_W"], w)
 
         return w

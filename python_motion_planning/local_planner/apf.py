@@ -1,8 +1,8 @@
 """
 @file: apf.py
 @breif: Artificial Potential Field(APF) motion planning
-@author: Winter
-@update: 2023.10.24
+@author: Yang Haodong, Wu Maojia
+@update: 2024.3.29
 """
 import math
 import numpy as np
@@ -34,8 +34,8 @@ class APF(LocalPlanner):
         super().__init__(start, goal, env, heuristic_type)
         # APF parameters
         self.zeta = 1.0
-        self.eta = 1.5
-        self.d_0 = 1.5
+        self.eta = 1.0
+        self.d_0 = 1.0
 
         # global planner
         g_start = (start[0], start[1])
@@ -74,15 +74,15 @@ class APF(LocalPlanner):
             theta_d = math.atan2(new_v[1], new_v[0])
 
             # calculate velocity command
-            e_theta = self.regularizeAngle(self.robot.theta - self.goal[2]) / 10
+            e_theta = self.regularizeAngle(self.robot.theta - self.goal[2])
             if self.shouldRotateToGoal(self.robot.position, self.goal):
                 if not self.shouldRotateToPath(abs(e_theta)):
                     u = np.array([[0], [0]])
                 else:
                     u = np.array([[0], [self.angularRegularization(e_theta / dt)]])
             else:
-                e_theta = self.regularizeAngle(theta_d - self.robot.theta) / 10
-                if self.shouldRotateToPath(abs(e_theta), np.pi / 4):
+                e_theta = self.regularizeAngle(theta_d - self.robot.theta)
+                if self.shouldRotateToPath(abs(e_theta)):
                     u = np.array([[0], [self.angularRegularization(e_theta / dt)]])
                 else:
                     v_d = np.linalg.norm(new_v)

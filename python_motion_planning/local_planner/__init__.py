@@ -4,6 +4,7 @@ from .apf import APF
 from .rpp import RPP
 from .lqr import LQR
 from .mpc import MPC
+from .dql import DQL
 
 __all__ = [
     "DWA",
@@ -11,5 +12,6 @@ __all__ = [
     "APF",
     "RPP",
     "LQR",
-    "MPC"
+    "MPC",
+    "DQL"
 ]

@@ -100,8 +100,9 @@ Planner      | Version                                                          
 | **LQR**     | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/local_planner/lqr.py) | ![lqr_python.gif](gif/lqr_python.gif) 
 | **TEB**     | ![Status](https://img.shields.io/badge/develop-v1.0-red) | ![Status](https://img.shields.io/badge/gif-none-yellow) 
 | **MPC**     | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/local_planner/mpc.py) | ![mpc_python.gif](gif/mpc_python.gif)
+| **MPPI**    | ![Status](https://img.shields.io/badge/develop-v1.0-red) |![Status](https://img.shields.io/badge/gif-none-yellow)
 | **Lattice** | ![Status](https://img.shields.io/badge/develop-v1.0-red) |![Status](https://img.shields.io/badge/gif-none-yellow)
-| **DQN**     | ![Status](https://img.shields.io/badge/develop-v1.0-red) |![Status](https://img.shields.io/badge/gif-none-yellow)
+| **DQL**     | ![Status](https://img.shields.io/badge/develop-v1.0-red) |![Status](https://img.shields.io/badge/gif-none-yellow)
 
 ## Curve Generation
 
@@ -128,6 +129,7 @@ Planner      | Version                                                          
 * [Theta*: ](https://www.jair.org/index.php/jair/article/view/10676) Theta*: Any-Angle Path Planning on Grids
 * [Lazy Theta*: ](https://ojs.aaai.org/index.php/AAAI/article/view/7566) Lazy Theta*: Any-Angle Path Planning and Path Length Analysis in 3D
 * [S-Theta*: ](https://link.springer.com/chapter/10.1007/978-1-4471-4739-8_8) S-Theta*: low steering path-planning algorithm
+* [Anya: ](http://www.grastien.net/ban/articles/hgoa-jair16.pdf) Optimal Any-Angle Pathfinding In Practice
 * [RRT: ](http://msl.cs.uiuc.edu/~lavalle/papers/Lav98c.pdf) Rapidly-Exploring Random Trees: A New Tool for Path Planning
 * [RRT-Connect: ](http://www-cgi.cs.cmu.edu/afs/cs/academic/class/15494-s12/readings/kuffner_icra2000.pdf) RRT-Connect: An Efficient Approach to Single-Query Path Planning
 * [RRT*: ](https://journals.sagepub.com/doi/abs/10.1177/0278364911406761) Sampling-based algorithms for optimal motion planning
@@ -137,8 +139,10 @@ Planner      | Version                                                          
 ## Local Planning
 
 * [DWA: ](https://www.ri.cmu.edu/pub_files/pub1/fox_dieter_1997_1/fox_dieter_1997_1.pdf) The Dynamic Window Approach to Collision Avoidance
-* [APF: ](https://ieeexplore.ieee.org/document/1087247)Real-time obstacle avoidance for manipulators and mobile robots
-* [RPP: ](https://arxiv.org/pdf/2305.20026.pdf)Regulated Pure Pursuit for Robot Path Tracking
+* [APF: ](https://ieeexplore.ieee.org/document/1087247) Real-time obstacle avoidance for manipulators and mobile robots
+* [RPP: ](https://arxiv.org/pdf/2305.20026.pdf) Regulated Pure Pursuit for Robot Path Tracking
+* [MPPI: ](https://ieeexplore.ieee.org/document/7989202/) Information theoretic MPC for model-based reinforcement learning
+* [DQL: ](https://www.nature.com/articles/nature14236) Human-level control through deep reinforcement learning
 
 ## Curve Generation
 * [Dubins: ]() On curves of minimal length with a constraint on average curvature, and with prescribed initial and terminal positions and tangents

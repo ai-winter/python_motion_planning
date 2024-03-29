@@ -1,8 +1,8 @@
 """
 @file: rpp.py
 @breif: Regulated Pure Pursuit (RPP) motion planning
-@author: Winter
-@update: 2023.1.25
+@author: Yang Haodong, Wu Maojia
+@update: 2024.3.29
 """
 import math
 import numpy as np
@@ -72,7 +72,7 @@ class RPP(LocalPlanner):
             ) / self.lookahead_dist
 
             # calculate velocity command
-            e_theta = self.regularizeAngle(self.robot.theta - self.goal[2]) / 10
+            e_theta = self.regularizeAngle(self.robot.theta - self.goal[2])
             if self.shouldRotateToGoal(self.robot.position, self.goal):
                 if not self.shouldRotateToPath(abs(e_theta)):
                     u = np.array([[0], [0]])
@@ -81,8 +81,8 @@ class RPP(LocalPlanner):
             else:
                 e_theta = self.regularizeAngle(
                     self.angle(self.robot.position, lookahead_pt) - self.robot.theta
-                ) / 10
-                if self.shouldRotateToPath(abs(e_theta), np.pi / 4):
+                )
+                if self.shouldRotateToPath(abs(e_theta)):
                     u = np.array([[0], [self.angularRegularization(e_theta / dt)]])
                 else:
                     # apply constraints

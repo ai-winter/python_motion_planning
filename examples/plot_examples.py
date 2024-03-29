@@ -13,7 +13,6 @@ from python_motion_planning import *
 # plt = LPAStar(start=(5, 5), goal=(45, 25), env=Grid(51, 31))
 # plt = VoronoiPlanner(start=(5, 5), goal=(45, 25), env=Grid(51, 31))
 # plt = HybridAStar(start=(5, 5), goal=(45, 25), env=Grid(51, 31))
-plt = Anya(start=(5, 5), goal=(45, 25), env=Grid(51, 31))
 
 # plt = RRT(start=(18, 8), goal=(37, 18), env=Map(51, 31), max_dist=0.5, sample_num=10000)
 # plt = RRTConnect(start=(18, 8), goal=(37, 18), env=Map(51, 31), max_dist=0.5, sample_num=10000)
@@ -23,17 +22,18 @@ plt = Anya(start=(5, 5), goal=(45, 25), env=Grid(51, 31))
 # plt = ACO(start=(5, 5), goal=(45, 25), env=Grid(51, 31))
 # plt = PSO(start=(5, 5), goal=(45, 25), env=Grid(51, 31))
 
-plt.run()
+# plt.run()
 
 # -------------local planners-------------
 # plt = PID(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
 # plt = DWA(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
-# plt = APF(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
+plt = APF(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
 # plt = LQR(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
 # plt = RPP(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
 # plt = MPC(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
+# plt = DQL(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
 
-# plt.run()
+plt.run()
 
 # -------------curve generators-------------
 # points = [(0, 0, 0), (10, 10, -90), (20, 5, 60), (30, 10, 120),
