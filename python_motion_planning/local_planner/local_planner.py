@@ -5,6 +5,7 @@
 @update: 2024.3.29
 """
 import math
+import random
 
 from python_motion_planning.utils import Env, Planner, SearchFactory, Plot, Robot, MathHelper
 
@@ -224,3 +225,14 @@ class LocalPlanner(Planner):
             flag (bool): true if robot should perform rotation
         """
         return angle_to_path > self.params["ROTATE_TOL"]
+
+    def sample_action(self) -> tuple:
+        """
+        Sample an action from the action space.
+
+        Returns:
+            action (tuple): sampled action (v, w)
+        """
+        v = random.uniform(self.params["MIN_V"], self.params["MAX_V"])
+        w = random.uniform(self.params["MIN_W"], self.params["MAX_W"])
+        return v, w

@@ -25,15 +25,16 @@ from python_motion_planning import *
 # plt.run()
 
 # -------------local planners-------------
-plt = PID(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
+# plt = PID(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
 # plt = DWA(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
 # plt = APF(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
 # plt = LQR(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
 # plt = RPP(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
 # plt = MPC(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
-# plt = DQL(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
+plt = DQL(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
 
-plt.run()
+plt.train()
+# plt.run()
 
 # -------------curve generators-------------
 # points = [(0, 0, 0), (10, 10, -90), (20, 5, 60), (30, 10, 120),

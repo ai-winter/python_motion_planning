@@ -138,6 +138,7 @@ class DQL(LocalPlanner):
             # calculate velocity command
             e_theta = self.regularizeAngle(self.robot.theta - self.goal[2]) / 10
             if self.shouldRotateToGoal(self.robot.position, self.goal):
+
                 if not self.shouldRotateToPath(abs(e_theta)):
                     u = np.array([[0], [0]])
                 else:
@@ -146,13 +147,13 @@ class DQL(LocalPlanner):
                 e_theta = self.regularizeAngle(
                     self.angle(self.robot.position, lookahead_pt) - self.robot.theta
                 )
-                if self.shouldRotateToPath(abs(e_theta), np.pi / 4):
+                if self.shouldRotateToPath(abs(e_theta)):
                     u = np.array([[0], [self.angularRegularization(e_theta / dt / 10)]])
                 else:
                     s = (self.robot.px, self.robot.py, self.robot.theta) # current state
                     s_d = (lookahead_pt[0], lookahead_pt[1], theta_trj)  # desired state
                     u_r = (self.robot.v, self.robot.v * kappa)           # refered input
-                    u, u_p = self.dqnControl(s, s_d, u_r, u_p)
+                    u = self.select_action(s)
 
             # feed into robotic kinematic
             self.robot.kinematic(u, dt)
@@ -181,9 +182,11 @@ class DQL(LocalPlanner):
         self.steps_done += 1
         if sample > eps_threshold:
             with torch.no_grad():
-                return self.policy_net(torch.FloatTensor(state).to(self.device)).max(1)[1].view(1, 1)
+                tmp = self.policy_net(state)
+                return tmp
         else:
-            return torch.tensor([[random.randrange(self.n_actions)]], device=self.device, dtype=torch.long)
+            tmp = torch.tensor(self.sample_action(), device=self.device).t()
+            return tmp
 
     def optimize_model(self):
         """
@@ -201,8 +204,8 @@ class DQL(LocalPlanner):
         non_final_mask = torch.tensor(tuple(map(lambda s: s is not None, batch.next_state)),
                                       device=self.device, dtype=torch.bool)
         non_final_next_states = torch.cat([s for s in batch.next_state if s is not None])
-        state_batch = torch.cat(batch.state)
-        action_batch = torch.cat(batch.action)
+        state_batch = torch.stack(batch.state)
+        action_batch = torch.stack(batch.action)
         reward_batch = torch.cat(batch.reward)
 
         # Compute Q(s_t, a) - the model computes Q(s_t), then we select the
@@ -234,10 +237,16 @@ class DQL(LocalPlanner):
     def train(self, num_episodes=1000):
         for i_episode in range(num_episodes):
             self.robot.reset()
-            state = self.robot.state
+            state = torch.tensor(self.robot.state, device=self.device, dtype=torch.float).squeeze(dim=1)
             for t in range(1000):
                 action = self.select_action(state)
-
+                next_state, reward, done = self.step(state, action)
+                self.memory.push(state, action, next_state, torch.tensor([reward], device=self.device))
+                state = next_state
+                self.optimize_model()
+                print(f"Episode: {i_episode+1}, Step: {t+1}, Reward: {reward:.2f}")
+                if done:
+                    break
 
     def step(self, state, action):
         """
@@ -252,10 +261,10 @@ class DQL(LocalPlanner):
             reward (float): reward for taking the action
             done (bool): whether the episode is done
         """
-        v_d = state[3] + action[0]
-        w_d = state[4] + action[1]
-        self.robot.kinematic((v_d, w_d), self.params["TIME_STEP"])
-        next_state = self.robot.state
+        v_d = state[3].item() + action[0].item()
+        w_d = state[4].item() + action[1].item()
+        self.robot.kinematic(np.array([[v_d], [w_d]]), self.params["TIME_STEP"])
+        next_state = torch.tensor(self.robot.state, device=self.device, dtype=torch.float).squeeze(dim=1)
         reward = self.reward(next_state)
         done = self.is_done(next_state)
         return next_state, reward, done
