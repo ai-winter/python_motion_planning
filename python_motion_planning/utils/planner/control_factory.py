@@ -23,7 +23,7 @@ class ControlFactory(object):
             return LQR(**config)
         elif planner_name == "mpc":
             return MPC(**config)
-        elif planner_name == "dqn":
-            return DQN(**config)
+        elif planner_name == "ddpg":
+            return DDPG(**config)
         else:
             raise ValueError("The `planner_name` must be set correctly.")

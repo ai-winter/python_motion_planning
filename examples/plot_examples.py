@@ -31,9 +31,10 @@ from python_motion_planning import *
 # plt = LQR(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
 # plt = RPP(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
 # plt = MPC(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
-plt = DQL(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
+plt = DDPG(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31),
+           actor_load_path="models/actor_best.pth", critic_load_path="models/critic_best.pth", TIME_STEP=0.5)
 
-plt.train()
+plt.train(num_episodes=20)     # only for learning-based planners, such as DDPG
 # plt.run()
 
 # -------------curve generators-------------

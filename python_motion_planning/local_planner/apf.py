@@ -57,7 +57,7 @@ class APF(LocalPlanner):
         dt = self.params["TIME_STEP"]
         for _ in range(self.params["MAX_ITERATION"]):
             # break until goal reached
-            if self.shouldRotateToGoal(self.robot.position, self.goal):
+            if not self.shouldMoveToGoal(self.robot.position, self.goal):
                 return True, self.robot.history_pose
             
             # compute the tatget pose and force at the current step
@@ -75,7 +75,7 @@ class APF(LocalPlanner):
 
             # calculate velocity command
             e_theta = self.regularizeAngle(self.robot.theta - self.goal[2])
-            if self.shouldRotateToGoal(self.robot.position, self.goal):
+            if not self.shouldMoveToGoal(self.robot.position, self.goal):
                 if not self.shouldRotateToPath(abs(e_theta)):
                     u = np.array([[0], [0]])
                 else:

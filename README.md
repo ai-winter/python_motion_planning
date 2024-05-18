@@ -102,7 +102,7 @@ Planner      | Version                                                          
 | **MPC**     | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/local_planner/mpc.py) | ![mpc_python.gif](gif/mpc_python.gif)
 | **MPPI**    | ![Status](https://img.shields.io/badge/develop-v1.0-red) |![Status](https://img.shields.io/badge/gif-none-yellow)
 | **Lattice** | ![Status](https://img.shields.io/badge/develop-v1.0-red) |![Status](https://img.shields.io/badge/gif-none-yellow)
-| **DQL**     | ![Status](https://img.shields.io/badge/develop-v1.0-red) |![Status](https://img.shields.io/badge/gif-none-yellow)
+| **DDPG**    | ![Status](https://img.shields.io/badge/develop-v1.0-red) |![Status](https://img.shields.io/badge/gif-none-yellow)
 
 ## Curve Generation
 
@@ -141,8 +141,7 @@ Planner      | Version                                                          
 * [DWA: ](https://www.ri.cmu.edu/pub_files/pub1/fox_dieter_1997_1/fox_dieter_1997_1.pdf) The Dynamic Window Approach to Collision Avoidance
 * [APF: ](https://ieeexplore.ieee.org/document/1087247) Real-time obstacle avoidance for manipulators and mobile robots
 * [RPP: ](https://arxiv.org/pdf/2305.20026.pdf) Regulated Pure Pursuit for Robot Path Tracking
-* [MPPI: ](https://ieeexplore.ieee.org/document/7989202/) Information theoretic MPC for model-based reinforcement learning
-* [DQL: ](https://www.nature.com/articles/nature14236) Human-level control through deep reinforcement learning
+* [DDPG: ](https://arxiv.org/abs/1509.02971) Continuous control with deep reinforcement learning
 
 ## Curve Generation
 * [Dubins: ]() On curves of minimal length with a constraint on average curvature, and with prescribed initial and terminal positions and tangents
