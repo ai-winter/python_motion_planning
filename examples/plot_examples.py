@@ -31,11 +31,17 @@ from python_motion_planning import *
 # plt = LQR(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
 # plt = RPP(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
 # plt = MPC(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
-plt = DDPG(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31),
-           actor_load_path="models/actor_best.pth", critic_load_path="models/critic_best.pth", TIME_STEP=0.5)
 
-plt.train(num_episodes=20)     # only for learning-based planners, such as DDPG
-# plt.run()
+# plt = DDPG(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31),
+#            # actor_load_path="models/actor_best.pth", critic_load_path="models/critic_best.pth",
+#            TIME_STEP=0.1)
+# plt.train(num_episodes=100)     # only for learning-based planners, such as DDPG
+
+
+plt = DDPG(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31),
+           actor_load_path="models/actor_best.pth", critic_load_path="models/critic_best.pth",
+           TIME_STEP=0.1)
+plt.run()
 
 # -------------curve generators-------------
 # points = [(0, 0, 0), (10, 10, -90), (20, 5, 60), (30, 10, 120),

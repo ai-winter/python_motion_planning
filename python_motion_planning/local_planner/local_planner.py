@@ -2,7 +2,7 @@
 @file: local_planner.py
 @breif: Base class for local planner.
 @author: Yang Haodong, Wu Maojia
-@update: 2024.3.29
+@update: 2024.5.19
 """
 import math
 import random
@@ -39,7 +39,7 @@ class LocalPlanner(Planner):
         # parameters and default value
         self.params = {}
         self.params["TIME_STEP"] = params["TIME_STEP"] if "TIME_STEP" in params.keys() else 0.1
-        self.params["MAX_ITERATION"] = params["MAX_ITERATION"] if "MAX_ITERATION" in params.keys() else 20000
+        self.params["MAX_ITERATION"] = params["MAX_ITERATION"] if "MAX_ITERATION" in params.keys() else 1500
         self.params["LOOKAHEAD_TIME"] = params["LOOKAHEAD_TIME"] if "LOOKAHEAD_TIME" in params.keys() else 1.0
         self.params["MAX_LOOKAHEAD_DIST"] = params["MAX_LOOKAHEAD_DIST"] if "MAX_LOOKAHEAD_DIST" in params.keys() else 2.5
         self.params["MIN_LOOKAHEAD_DIST"] = params["MIN_LOOKAHEAD_DIST"] if "MIN_LOOKAHEAD_DIST" in params.keys() else 1.5
@@ -240,14 +240,3 @@ class LocalPlanner(Planner):
         e_theta = self.regularizeAngle(cur[2] - goal[2])
         return not (self.shouldMoveToGoal((cur[0], cur[1]), (goal[0], goal[1]))
                     or self.shouldRotateToPath(abs(e_theta)))
-
-    def sample_action(self) -> tuple:
-        """
-        Sample an action from the action space.
-
-        Returns:
-            action (tuple): sampled action (v_inc, w_inc)
-        """
-        v_inc = random.uniform(self.params["MIN_V_INC"], self.params["MAX_V_INC"])
-        w_inc = random.uniform(self.params["MIN_W_INC"], self.params["MAX_W_INC"])
-        return v_inc, w_inc
