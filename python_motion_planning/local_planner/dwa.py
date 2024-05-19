@@ -34,8 +34,8 @@ class DWA(LocalPlanner):
     References:
         [1] The Dynamic Window Approach to Collision Avoidance.
     """
-    def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
-        super().__init__(start, goal, env, heuristic_type)
+    def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean", **params) -> None:
+        super().__init__(start, goal, env, heuristic_type, **params)
         # kinematic parameters
         kinematic = {}
         kinematic["V_MAX"]         = 2.0                #  maximum velocity [m/s]

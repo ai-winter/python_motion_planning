@@ -32,16 +32,16 @@ from python_motion_planning import *
 # plt = RPP(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
 # plt = MPC(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
 
-# plt = DDPG(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31),
-#            # actor_load_path="models/actor_best.pth", critic_load_path="models/critic_best.pth",
-#            TIME_STEP=0.1)
-# plt.train(num_episodes=100)     # only for learning-based planners, such as DDPG
-
-
 plt = DDPG(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31),
-           actor_load_path="models/actor_best.pth", critic_load_path="models/critic_best.pth",
-           TIME_STEP=0.1)
-plt.run()
+           # actor_load_path="models/actor_best.pth", critic_load_path="models/critic_best.pth",
+           TIME_STEP=0.1, GOAL_DIST_TOL=3.0, ROTATE_TOL=7.0)
+plt.train(num_episodes=1500)     # only for learning-based planners, such as DDPG
+
+
+# plt = DDPG(start=(38, 20, 0), goal=(45, 25, 0), env=Grid(51, 31),
+#            actor_load_path="models/actor_best.pth", critic_load_path="models/critic_best.pth",
+#            TIME_STEP=0.1, GOAL_DIST_TOL=3.0, ROTATE_TOL=7.0)
+# plt.run()
 
 # -------------curve generators-------------
 # points = [(0, 0, 0), (10, 10, -90), (20, 5, 60), (30, 10, 120),

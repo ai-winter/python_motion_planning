@@ -31,8 +31,8 @@ class RPP(LocalPlanner):
         >>> planner = RPP(start, goal, env)
         >>> planner.run()
     """
-    def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
-        super().__init__(start, goal, env, heuristic_type)
+    def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean", **params) -> None:
+        super().__init__(start, goal, env, heuristic_type, **params)
         # RPP parameters
         self.regulated_radius_min = 0.9
         self.scaling_dist = 0.6

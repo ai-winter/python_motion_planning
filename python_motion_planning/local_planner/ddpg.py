@@ -53,48 +53,54 @@ class ReplayBuffer(object):
 
 
 class Actor(nn.Module):
-    def __init__(self, state_dim, action_dim, hidden_width, min_state, max_state, min_action, max_action):
+    def __init__(self, state_dim, action_dim, num_hidden, hidden_width, min_state, max_state, min_action, max_action):
         super(Actor, self).__init__()
         self.min_state = min_state
         self.max_state = max_state
         self.min_action = min_action
         self.max_action = max_action
 
-        self.l1 = nn.Linear(state_dim, hidden_width)
-        self.l2 = nn.Linear(hidden_width, hidden_width)
-        self.l3 = nn.Linear(hidden_width, action_dim)
+        self.num_hidden = num_hidden
+        self.input_layer = nn.Linear(state_dim, hidden_width)
+        self.hidden_layers = nn.ModuleList([nn.Linear(hidden_width, hidden_width) for _ in range(self.num_hidden)])
+        self.output_layer = nn.Linear(hidden_width, action_dim)
 
     def forward(self, s):
         # 归一化
         s = (s - self.min_state) / (self.max_state - self.min_state)
 
-        s = F.relu(self.l1(s))
-        s = F.relu(self.l2(s))
-        # a = self.min_action + (self.max_action - self.min_action) * torch.sigmoid(s)  # [min,max]
-        a = self.min_action + (self.max_action - self.min_action) * torch.sigmoid(self.l3(s))  # [min,max]
-        # a = self.max_action * torch.tanh(self.l3(s))  # [-max,max]
+        s = F.relu(self.input_layer(s))
+        for i in range(self.num_hidden):
+            s = F.relu(self.hidden_layers[i](s))
+        s = self.output_layer(s)
+        a = self.min_action + (self.max_action - self.min_action) * torch.sigmoid(s)  # [min,max]
         return a
 
 
 class Critic(nn.Module):  # According to (s,a), directly calculate q(s,a)
-    def __init__(self, state_dim, action_dim, hidden_width, min_state, max_state, min_action, max_action):
+    def __init__(self, state_dim, action_dim, num_hidden, hidden_width, min_state, max_state, min_action, max_action):
         super(Critic, self).__init__()
         self.min_state = min_state
         self.max_state = max_state
         self.min_action = min_action
         self.max_action = max_action
-        self.l1 = nn.Linear(state_dim + action_dim, hidden_width)
-        self.l2 = nn.Linear(hidden_width, hidden_width)
-        self.l3 = nn.Linear(hidden_width, 1)
+
+        self.num_hidden = num_hidden
+        self.input_layer = nn.Linear(state_dim, hidden_width)
+        self.hidden_layers = nn.ModuleList([nn.Linear(hidden_width, hidden_width) for _ in range(self.num_hidden)])
+        self.output_layer = nn.Linear(hidden_width, action_dim)
 
     def forward(self, s, a):
         # 归一化
         s = (s - self.min_state) / (self.max_state - self.min_state)
         a = (a - self.min_action) / (self.max_action - self.min_action)
 
-        q = F.relu(self.l1(torch.cat([s, a], 1)))
-        q = F.relu(self.l2(q))
-        q = self.l3(q)
+        input = torch.cat([s, a], axis=-1)
+
+        q = F.relu(self.input_layer(input))
+        for i in range(self.num_hidden):
+            q = F.relu(self.hidden_layers[i](q))
+        q = self.output_layer(q)
         return q
 
 
@@ -124,45 +130,50 @@ class DDPG(LocalPlanner):
                          actor_save_path="models/actor_best.pth",
                          critic_save_path="models/critic_best.pth",
                          actor_load_path=None,
-                         critic_load_path=None,**params) -> None:
-        super().__init__(start, goal, env, heuristic_type)
+                         critic_load_path=None, **params) -> None:
+        super().__init__(start, goal, env, heuristic_type, **params)
         # DDPG parameters
+        self.num_hidden = 2    # The number of hidden layers of the neural network
         self.hidden_width = 512 # The number of neurons in hidden layers of the neural network
-        self.batch_size = 64   # batch size
+        self.batch_size = 100   # batch size
         self.gamma = 0.999      # discount factor
         self.tau = 1e-3         # Softly update the target network
         self.lr = 5e-4          # learning rate
-        self.random_episodes = 5    # Take the random actions in the beginning for the better exploration
-        self.update_freq = 1    # Update the network every 'update_freq' steps if episode > exploration_episodes
-        self.evaluate_times = 3 # Times of evaluations and calculate the average
+        self.random_episodes = 30   # Take the random actions in the beginning for the better exploration
+        self.update_freq = 1        # Update the network every 'update_freq' steps if episode > exploration_episodes
+        self.evaluate_times = 30    # Times of evaluations and calculate the average
+        self.evaluate_freq = 30  # Evaluate the network every 'evaluate_freq' episodes
         # self.win_reward = 1.0   # Reward for winning the game (reach the goal)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print(f"Using device: {self.device}")
         self.actor_save_path = actor_save_path
         self.critic_save_path = critic_save_path
 
-        self.n_observations = 5     # x, y, theta, v, w
+        self.n_observations = 9     # x, y, theta, v, w, g_x, g_y, g_theta, steps
         self.n_actions = 2          # v_inc, w_inc
 
-        self.min_state = torch.tensor([0, 0, -math.pi, self.params["MIN_V"], self.params["MIN_W"]], device=self.device)
-        self.max_state = torch.tensor([self.env.x_range, self.env.y_range, math.pi, self.params["MAX_V"], self.params["MAX_W"]], device=self.device)
+        self.min_state = torch.tensor([0, 0, -math.pi, self.params["MIN_V"], self.params["MIN_W"], 0, 0, -math.pi, 0],
+                                      device=self.device)
+        self.max_state = torch.tensor([self.env.x_range, self.env.y_range, math.pi, self.params["MAX_V"],
+                                       self.params["MAX_W"], self.env.x_range, self.env.y_range, math.pi,
+                                       self.params["MAX_ITERATION"]], device=self.device)
         self.min_action = torch.tensor([self.params["MIN_V_INC"], self.params["MIN_W_INC"]], device=self.device)
         self.max_action = torch.tensor([self.params["MAX_V_INC"], self.params["MAX_W_INC"]], device=self.device)
 
-        self.actor = Actor(self.n_observations, self.n_actions, self.hidden_width, self.min_state, self.max_state,
-                           self.min_action, self.max_action).to(self.device)
+        self.actor = Actor(self.n_observations, self.n_actions, self.num_hidden, self.hidden_width, self.min_state,
+                           self.max_state, self.min_action, self.max_action).to(self.device)
         if actor_load_path:
             self.actor.load_state_dict(torch.load(actor_load_path))
         self.actor_target = copy.deepcopy(self.actor)
 
-        self.critic = Critic(self.n_observations, self.n_actions, self.hidden_width, self.min_state, self.max_state,
-                             self.min_action, self.max_action).to(self.device)
+        self.critic = Critic(self.n_observations + self.n_actions, 1, self.num_hidden, self.hidden_width,
+                             self.min_state, self.max_state, self.min_action, self.max_action).to(self.device)
         if critic_load_path:
             self.critic.load_state_dict(torch.load(critic_load_path))
         self.critic_target = copy.deepcopy(self.critic)
 
-        self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), lr=self.lr)
-        self.critic_optimizer = torch.optim.Adam(self.critic.parameters(), lr=self.lr)
+        self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), lr=self.lr, weight_decay=1e-4)
+        self.critic_optimizer = torch.optim.Adam(self.critic.parameters(), lr=self.lr, weight_decay=1e-4)
 
         self.criterion = nn.MSELoss()
 
@@ -198,6 +209,13 @@ class DDPG(LocalPlanner):
         for step in range(self.params["MAX_ITERATION"]):
             a = self.select_action(s)
             s_, r, done, win = self.step(s, a)
+            if not self.shouldMoveToGoal(tuple(s_[0:2]), tuple(s_[5:7])):
+                print(f"kkStep: {step}, Reward: {episode_reward}, Done: {done}, Win: {win}")
+                print(self.shouldRotateToPath(abs(self.regularizeAngle(s_[2] - s_[7]))))
+                return True, self.robot.history_pose
+            if self.reach_goal(tuple(s_[0:3]), tuple(s_[5:8])):
+                print(f"ssStep: {step}, Reward: {episode_reward}, Done: {done}, Win: {win}")
+                return True, self.robot.history_pose
             if done:
                 print(f"Step: {step}, Reward: {episode_reward}, Done: {done}, Win: {win}")
                 return True, self.robot.history_pose
@@ -271,7 +289,7 @@ class DDPG(LocalPlanner):
         print(f"Evaluating: ")
         evaluate_reward = 0
         for _ in tqdm(range(self.evaluate_times)):
-            s = self.reset()
+            s = self.reset(random_sg=True)
             done = False
             episode_reward = 0
             step = 0
@@ -288,7 +306,7 @@ class DDPG(LocalPlanner):
         return evaluate_reward / self.evaluate_times
 
     def train(self, num_episodes=100):
-        noise_std = 1.0 * torch.tensor([
+        noise_std = 0.2 * torch.tensor([
             self.params["MAX_V_INC"] - self.params["MIN_V_INC"],
             self.params["MAX_W_INC"] - self.params["MIN_W_INC"]
         ], device=self.device)  # the std of Gaussian noise for exploration
@@ -298,8 +316,7 @@ class DDPG(LocalPlanner):
         # Train the model
         for episode in range(1, num_episodes+1):
             print(f"Episode: {episode}/{num_episodes}, Training: ")
-            s = self.reset()
-            episode_steps = 0
+            s = self.reset(random_sg=True)
             for episode_steps in tqdm(range(1, self.params["MAX_ITERATION"]+1)):
                 if episode <= self.random_episodes:  # Take the random actions in the beginning for the better exploration
                     a = torch.tensor([
@@ -315,12 +332,10 @@ class DDPG(LocalPlanner):
                             clamp(self.params["MIN_W_INC"], self.params["MAX_W_INC"]))
                 s_, r, done, win = self.step(s, a)
 
-                self.replay_buffer.store(s, a, r, s_, done)  # Store the transition
+                self.replay_buffer.store(s, a, r, s_, win)  # Store the transition
 
-                # if episode_steps <= 5 or self.params["MAX_ITERATION"] - episode_steps < 5:
-                #     print(f"Step: {episode_steps}, State: {s}, Action: {a}, Reward: {r:.4f}, Next State: {s_}")
                 if win:
-                    print(f"Done! State: {s}, Action: {a}, Reward: {r:.4f}, Next State: {s_}")
+                    print(f"Goal reached! State: {s}, Action: {a}, Reward: {r:.4f}, Next State: {s_}")
                     break
                 elif done:  # lose
                     print(f"Collision! State: {s}, Action: {a}, Reward: {r:.4f}, Next State: {s_}")
@@ -333,27 +348,47 @@ class DDPG(LocalPlanner):
                     for _ in range(self.update_freq):
                         self.optimize_model()
 
-            evaluate_reward = self.evaluate_policy()
-            print("episode_steps:{} \t evaluate_reward:{}".format(episode_steps, evaluate_reward))
-            print()
-            self.writer.add_scalar('episode_rewards', evaluate_reward, global_step=episode)
+            if episode % self.evaluate_freq == 0:
+                print()
+                evaluate_reward = self.evaluate_policy()
+                print("Evaluate_reward:{}".format(evaluate_reward))
+                print()
+                self.writer.add_scalar('episode_rewards', evaluate_reward, global_step=episode)
 
-            # Save the model
-            if evaluate_reward > best_reward:
-                best_reward = evaluate_reward
+                # Save the model
+                if evaluate_reward > best_reward:
+                    best_reward = evaluate_reward
 
-                # Create the directory if it does not exist
-                if not os.path.exists(os.path.dirname(self.actor_save_path)):
-                    os.makedirs(os.path.dirname(self.actor_save_path))
-                if not os.path.exists(os.path.dirname(self.critic_save_path)):
-                    os.makedirs(os.path.dirname(self.critic_save_path))
+                    # Create the directory if it does not exist
+                    if not os.path.exists(os.path.dirname(self.actor_save_path)):
+                        os.makedirs(os.path.dirname(self.actor_save_path))
+                    if not os.path.exists(os.path.dirname(self.critic_save_path)):
+                        os.makedirs(os.path.dirname(self.critic_save_path))
 
-                torch.save(self.actor.state_dict(), self.actor_save_path)
-                torch.save(self.critic.state_dict(), self.critic_save_path)
+                    torch.save(self.actor.state_dict(), self.actor_save_path)
+                    torch.save(self.critic.state_dict(), self.critic_save_path)
 
-    def reset(self):
-        self.robot = Robot(self.start[0], self.start[1], self.start[2], 0, 0)
-        state = torch.tensor(self.robot.state, device=self.device, dtype=torch.float).squeeze(dim=1)
+    def reset(self, random_sg=False):
+        if random_sg:   # random start and goal
+            start = (random.uniform(0, self.env.x_range), random.uniform(0, self.env.y_range), random.uniform(-math.pi, math.pi))
+            goal = (random.uniform(0, self.env.x_range), random.uniform(0, self.env.y_range), random.uniform(-math.pi, math.pi))
+
+            # generate random start and goal until they are not in collision
+            while self.is_collision(torch.tensor(start)):
+                start = (random.uniform(0, self.env.x_range), random.uniform(0, self.env.y_range), random.uniform(-math.pi, math.pi))
+            while self.is_collision(torch.tensor(goal)):
+                goal = (random.uniform(0, self.env.x_range), random.uniform(0, self.env.y_range), random.uniform(-math.pi, math.pi))
+
+        else:
+            start = self.start
+            goal = self.goal
+
+        self.robot = Robot(start[0], start[1], start[2], 0, 0)
+        state = self.robot.state    # np.array([[self.px], [self.py], [self.theta], [self.v], [self.w]])
+        state = np.pad(state, pad_width=((0, 4), (0, 0)), mode='constant')
+        state[5:8, 0] = goal
+        # state[8] = 0
+        state = torch.tensor(state, device=self.device, dtype=torch.float).squeeze(dim=1)
         # self.total_reward = 0
         return state
 
@@ -373,17 +408,21 @@ class DDPG(LocalPlanner):
         v_d = (state[3] + action[0]).item()
         w_d = (state[4] + action[1]).item()
         self.robot.kinematic(np.array([[v_d], [w_d]]), self.params["TIME_STEP"])
-        next_state = torch.tensor(self.robot.state, device=self.device, dtype=torch.float).squeeze(dim=1)
+        next_state = self.robot.state
+        next_state = np.pad(next_state, pad_width=((0, 4), (0, 0)), mode='constant')
+        next_state = torch.tensor(next_state, device=self.device, dtype=torch.float).squeeze(dim=1)
+        next_state[5:8] = state[5:8]
+        next_state[8] = state[8] + 1
         next_state[2] = self.regularizeAngle(next_state[2].item())
         next_state[3] = MathHelper.clamp(next_state[3].item(), self.params["MIN_V"], self.params["MAX_V"])
         next_state[4] = MathHelper.clamp(next_state[4].item(), self.params["MIN_W"], self.params["MAX_W"])
-        win = self.reach_goal(tuple(next_state[0:3]), tuple(self.goal[0:3]))
+        win = self.reach_goal(tuple(next_state[0:3]), tuple(next_state[5:8]))
         lose = self.is_collision(next_state)
         reward = self.reward(next_state)
         if win:
-            reward += 10 # self.params["MAX_ITERATION"]
+            reward += 5.0   # self.params["MAX_ITERATION"]
         if lose:
-            reward -= 10 # self.params["MAX_ITERATION"]
+            reward -= 1.0   # self.params["MAX_ITERATION"]
         # self.total_reward += reward
         done = win or lose
         return next_state, reward, done, win
@@ -393,15 +432,15 @@ class DDPG(LocalPlanner):
         state = state.cpu().numpy()
         cur_pos = np.array([[state[0], state[1]]])
         obstacle_dist = np.min(cdist(obstacles, cur_pos))
-        return obstacle_dist <= 1.0
+        return obstacle_dist <= 0.5
 
     def reward(self, state):
         dist_scale = self.env.x_range + self.env.y_range
-        goal_dist = self.dist((state[0], state[1]), (self.goal[0], self.goal[1]))
+        goal_dist = self.dist((state[0], state[1]), (state[5], state[6]))
         scaled_goal_dist = goal_dist / dist_scale
         # goal_reward = 1.0 if done else 0.0
 
-        return -scaled_goal_dist
+        return - 5.0 * scaled_goal_dist - state[8] / self.params["MAX_ITERATION"]
 
         # return goal_reward + obstacle_reward
         # return 1.0 / goal_dist - 1.0 / obstacle_dist + 1.0 * done

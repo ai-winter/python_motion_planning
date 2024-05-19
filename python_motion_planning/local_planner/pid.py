@@ -30,8 +30,8 @@ class PID(LocalPlanner):
         >>> planner = PID(start, goal, env)
         >>> planner.run()
     """
-    def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
-        super().__init__(start, goal, env, heuristic_type)
+    def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean", **params) -> None:
+        super().__init__(start, goal, env, heuristic_type, **params)
         # PID parameters
         self.e_w, self.i_w = 0.0, 0.0
         self.e_v, self.i_v = 0.0, 0.0

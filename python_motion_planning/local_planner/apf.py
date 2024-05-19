@@ -30,8 +30,8 @@ class APF(LocalPlanner):
         >>> planner = APF(start, goal, env)
         >>> planner.run()
     """
-    def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
-        super().__init__(start, goal, env, heuristic_type)
+    def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean", **params) -> None:
+        super().__init__(start, goal, env, heuristic_type, **params)
         # APF parameters
         self.zeta = 1.0
         self.eta = 1.0
