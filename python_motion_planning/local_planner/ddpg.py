@@ -14,6 +14,7 @@ import math
 import copy
 import datetime
 import os
+import heapq
 from scipy.spatial.distance import cdist
 from torch.utils.tensorboard import SummaryWriter
 
@@ -52,17 +53,87 @@ class ReplayBuffer(object):
         return batch_s, batch_a, batch_r, batch_s_, batch_dw
 
 
+# class PrioritizedReplayBuffer(object):
+#     def __init__(self, state_dim, action_dim, device, alpha=0.6, beta_start=0.4, beta_frames=100000):
+#         self.max_size = int(1e6)
+#         self.count = 0
+#         self.size = 0
+#         self.alpha = alpha  # Importance sampling parameter
+#         self.beta_start = beta_start
+#         self.beta_frames = beta_frames
+#         self.frame = 1
+#         self.beta = self.beta_schedule(self.frame)
+#         self.device = device
+#
+#         self.s = torch.zeros((self.max_size, state_dim), dtype=torch.float, device=self.device)  # state
+#         self.a = torch.zeros((self.max_size, action_dim), dtype=torch.float, device=self.device)  # action
+#         self.r = torch.zeros((self.max_size, 1), dtype=torch.float, device=self.device)  # reward
+#         self.s_ = torch.zeros((self.max_size, state_dim), dtype=torch.float, device=self.device)  # next state
+#         self.dw = torch.zeros((self.max_size, 1), dtype=torch.bool, device=self.device)  # dead or win
+#         self.priorities = torch.zeros((self.max_size, 1), dtype=torch.float, device=self.device)  # priorities initialized to 1.0
+#
+#         self.heap = []  # Min-heap for efficient sampling
+#
+#     def beta_schedule(self, frame_idx):
+#         return min(1.0, self.beta_start + frame_idx * (1.0 - self.beta_start) / self.beta_frames)
+#
+#     def store(self, s, a, r, s_, dw):
+#         idx = self.count % self.max_size
+#         self.s[idx] = s
+#         self.a[idx] = a
+#         self.r[idx] = r
+#         self.s_[idx] = s_
+#         self.dw[idx] = torch.tensor(dw, dtype=torch.bool)
+#         self.priorities[idx] = max(self.priorities.max().item(), 1e-6)  # Set minimum priority to 1e-6 to avoid division by zero errors
+#         entry = (-self.priorities[idx], idx)  # Min heap, so we use negative priorities
+#         heapq.heappush(self.heap, entry)
+#         self.count = (self.count + 1) % self.max_size
+#         self.size = min(self.size + 1, self.max_size)
+#
+#     def sample(self, batch_size):
+#         if self.size < batch_size:
+#             raise ValueError("Not enough samples in buffer yet.")
+#
+#         # Sample indices based on priorities
+#         segment = self.size // batch_size
+#         indices = [heapq.heappop(self.heap)[1] for _ in range(batch_size)]
+#         batch_s = self.s[indices]
+#         batch_a = self.a[indices]
+#         batch_r = self.r[indices]
+#         batch_s_ = self.s_[indices]
+#         batch_dw = self.dw[indices]
+#         priorities = self.priorities[indices]
+#
+#         # Importance Sampling weights
+#         weights = (self.size * priorities) ** -self.alpha
+#         weights /= weights.max()
+#         weights = torch.tensor(weights, dtype=torch.float, device=self.device)
+#         weights *= (self.beta_start ** self.frame)  # Annealing beta
+#
+#         self.frame += 1
+#         self.beta = self.beta_schedule(self.frame)
+#
+#         return batch_s, batch_a, batch_r, batch_s_, batch_dw, indices, weights
+#
+#     def update_priorities(self, indices, new_priorities):
+#         for idx, priority in zip(indices, new_priorities):
+#             self.priorities[idx] = priority
+#             # Update the heap
+#             heapq.heapify(
+#                 self.heap)  # This is inefficient; ideally, only the affected entries would be updated in-place
+
+
 class Actor(nn.Module):
-    def __init__(self, state_dim, action_dim, num_hidden, hidden_width, min_state, max_state, min_action, max_action):
+    def __init__(self, state_dim, action_dim, hidden_depth, hidden_width, min_state, max_state, min_action, max_action):
         super(Actor, self).__init__()
         self.min_state = min_state
         self.max_state = max_state
         self.min_action = min_action
         self.max_action = max_action
 
-        self.num_hidden = num_hidden
+        self.hidden_depth = hidden_depth
         self.input_layer = nn.Linear(state_dim, hidden_width)
-        self.hidden_layers = nn.ModuleList([nn.Linear(hidden_width, hidden_width) for _ in range(self.num_hidden)])
+        self.hidden_layers = nn.ModuleList([nn.Linear(hidden_width, hidden_width) for _ in range(self.hidden_depth)])
         self.output_layer = nn.Linear(hidden_width, action_dim)
 
     def forward(self, s):
@@ -70,7 +141,7 @@ class Actor(nn.Module):
         s = (s - self.min_state) / (self.max_state - self.min_state)
 
         s = F.relu(self.input_layer(s))
-        for i in range(self.num_hidden):
+        for i in range(self.hidden_depth):
             s = F.relu(self.hidden_layers[i](s))
         s = self.output_layer(s)
         a = self.min_action + (self.max_action - self.min_action) * torch.sigmoid(s)  # [min,max]
@@ -78,16 +149,16 @@ class Actor(nn.Module):
 
 
 class Critic(nn.Module):  # According to (s,a), directly calculate q(s,a)
-    def __init__(self, state_dim, action_dim, num_hidden, hidden_width, min_state, max_state, min_action, max_action):
+    def __init__(self, state_dim, action_dim, hidden_depth, hidden_width, min_state, max_state, min_action, max_action):
         super(Critic, self).__init__()
         self.min_state = min_state
         self.max_state = max_state
         self.min_action = min_action
         self.max_action = max_action
 
-        self.num_hidden = num_hidden
+        self.hidden_depth = hidden_depth
         self.input_layer = nn.Linear(state_dim, hidden_width)
-        self.hidden_layers = nn.ModuleList([nn.Linear(hidden_width, hidden_width) for _ in range(self.num_hidden)])
+        self.hidden_layers = nn.ModuleList([nn.Linear(hidden_width, hidden_width) for _ in range(self.hidden_depth)])
         self.output_layer = nn.Linear(hidden_width, action_dim)
 
     def forward(self, s, a):
@@ -98,7 +169,7 @@ class Critic(nn.Module):  # According to (s,a), directly calculate q(s,a)
         input = torch.cat([s, a], axis=-1)
 
         q = F.relu(self.input_layer(input))
-        for i in range(self.num_hidden):
+        for i in range(self.hidden_depth):
             q = F.relu(self.hidden_layers[i](q))
         q = self.output_layer(q)
         return q
@@ -127,22 +198,24 @@ class DDPG(LocalPlanner):
         [1] Continuous control with deep reinforcement learning
     """
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean",
-                         actor_save_path="models/actor_best.pth",
-                         critic_save_path="models/critic_best.pth",
-                         actor_load_path=None,
-                         critic_load_path=None, **params) -> None:
+                 hidden_depth=2, hidden_width=512, batch_size=100, gamma=0.999, tau=1e-3, lr=5e-4, random_episodes=30,
+                 update_freq=1, evaluate_times=30, evaluate_freq=30,
+                 actor_save_path="models/actor_best.pth",
+                 critic_save_path="models/critic_best.pth",
+                 actor_load_path=None,
+                 critic_load_path=None, **params) -> None:
         super().__init__(start, goal, env, heuristic_type, **params)
         # DDPG parameters
-        self.num_hidden = 2    # The number of hidden layers of the neural network
-        self.hidden_width = 512 # The number of neurons in hidden layers of the neural network
-        self.batch_size = 100   # batch size
-        self.gamma = 0.999      # discount factor
-        self.tau = 1e-3         # Softly update the target network
-        self.lr = 5e-4          # learning rate
-        self.random_episodes = 30   # Take the random actions in the beginning for the better exploration
-        self.update_freq = 1        # Update the network every 'update_freq' steps if episode > exploration_episodes
-        self.evaluate_times = 30    # Times of evaluations and calculate the average
-        self.evaluate_freq = 30  # Evaluate the network every 'evaluate_freq' episodes
+        self.hidden_depth = hidden_depth        # The number of hidden layers of the neural network
+        self.hidden_width = hidden_width        # The number of neurons in hidden layers of the neural network
+        self.batch_size = batch_size            # batch size
+        self.gamma = gamma                      # discount factor
+        self.tau = tau                          # Softly update the target network
+        self.lr = lr                            # learning rate
+        self.random_episodes = random_episodes  # Take the random actions in the beginning for the better exploration
+        self.update_freq = update_freq          # Update the network every 'update_freq' steps if episode > exploration_episodes
+        self.evaluate_times = evaluate_times    # Times of evaluations and calculate the average
+        self.evaluate_freq = evaluate_freq      # Evaluate the network every 'evaluate_freq' episodes
         # self.win_reward = 1.0   # Reward for winning the game (reach the goal)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print(f"Using device: {self.device}")
@@ -160,13 +233,13 @@ class DDPG(LocalPlanner):
         self.min_action = torch.tensor([self.params["MIN_V_INC"], self.params["MIN_W_INC"]], device=self.device)
         self.max_action = torch.tensor([self.params["MAX_V_INC"], self.params["MAX_W_INC"]], device=self.device)
 
-        self.actor = Actor(self.n_observations, self.n_actions, self.num_hidden, self.hidden_width, self.min_state,
+        self.actor = Actor(self.n_observations, self.n_actions, self.hidden_depth, self.hidden_width, self.min_state,
                            self.max_state, self.min_action, self.max_action).to(self.device)
         if actor_load_path:
             self.actor.load_state_dict(torch.load(actor_load_path))
         self.actor_target = copy.deepcopy(self.actor)
 
-        self.critic = Critic(self.n_observations + self.n_actions, 1, self.num_hidden, self.hidden_width,
+        self.critic = Critic(self.n_observations + self.n_actions, 1, self.hidden_depth, self.hidden_width,
                              self.min_state, self.max_state, self.min_action, self.max_action).to(self.device)
         if critic_load_path:
             self.critic.load_state_dict(torch.load(critic_load_path))
@@ -178,6 +251,7 @@ class DDPG(LocalPlanner):
         self.criterion = nn.MSELoss()
 
         self.replay_buffer = ReplayBuffer(self.n_observations, self.n_actions, device=self.device)
+        # self.replay_buffer = PrioritizedReplayBuffer(self.n_observations, self.n_actions, device=self.device)
 
         self.total_reward = 0   # accumulate reward in each episode
 
@@ -209,13 +283,6 @@ class DDPG(LocalPlanner):
         for step in range(self.params["MAX_ITERATION"]):
             a = self.select_action(s)
             s_, r, done, win = self.step(s, a)
-            if not self.shouldMoveToGoal(tuple(s_[0:2]), tuple(s_[5:7])):
-                print(f"kkStep: {step}, Reward: {episode_reward}, Done: {done}, Win: {win}")
-                print(self.shouldRotateToPath(abs(self.regularizeAngle(s_[2] - s_[7]))))
-                return True, self.robot.history_pose
-            if self.reach_goal(tuple(s_[0:3]), tuple(s_[5:8])):
-                print(f"ssStep: {step}, Reward: {episode_reward}, Done: {done}, Win: {win}")
-                return True, self.robot.history_pose
             if done:
                 print(f"Step: {step}, Reward: {episode_reward}, Done: {done}, Win: {win}")
                 return True, self.robot.history_pose
@@ -247,7 +314,11 @@ class DDPG(LocalPlanner):
         return a
 
     def optimize_model(self):
+        # batch_s, batch_a, batch_r, batch_s_, batch_dw, indices, weights = self.replay_buffer.sample(self.batch_size)  # Sample a batch
         batch_s, batch_a, batch_r, batch_s_, batch_dw = self.replay_buffer.sample(self.batch_size)  # Sample a batch
+
+        # # Normalize weights if needed, typically when alpha is not 0
+        # weights = weights.unsqueeze(1)  # Reshape to match dimensions for multiplication
 
         # Compute the target q
         with torch.no_grad():  # target_q has no gradient
@@ -257,6 +328,9 @@ class DDPG(LocalPlanner):
         # Compute the current q and the critic loss
         current_q = self.critic(batch_s, batch_a)
         critic_loss = self.criterion(target_q, current_q)
+        # critic_loss = (weights * self.criterion(target_q, current_q)).mean()  # Apply weights and take mean
+        # new_priorities = abs(target_q.squeeze(1) - current_q.squeeze(1)).detach() + 1e-6  # Add a small constant to avoid zero priorities
+        # self.replay_buffer.update_priorities(indices, new_priorities)
 
         # Optimize the critic
         self.critic_optimizer.zero_grad()
@@ -277,6 +351,11 @@ class DDPG(LocalPlanner):
         # Unfreeze critic networks
         for params in self.critic.parameters():
             params.requires_grad = True
+
+        # # Update priorities in the replay buffer based on the critic's TD error
+        # td_error = target_q - current_q
+        # new_priorities = abs(td_error.squeeze(1)).detach().cpu().numpy() + 1e-6  # Add a small constant to avoid zero priorities
+        # self.replay_buffer.update_priorities(indices, new_priorities)  # Assuming you have implemented this method in ReplayBuffer
 
         # Softly update the target networks
         for param, target_param in zip(self.critic.parameters(), self.critic_target.parameters()):
@@ -306,7 +385,7 @@ class DDPG(LocalPlanner):
         return evaluate_reward / self.evaluate_times
 
     def train(self, num_episodes=100):
-        noise_std = 0.2 * torch.tensor([
+        noise_std = 0.1 * torch.tensor([
             self.params["MAX_V_INC"] - self.params["MIN_V_INC"],
             self.params["MAX_W_INC"] - self.params["MIN_W_INC"]
         ], device=self.device)  # the std of Gaussian noise for exploration
