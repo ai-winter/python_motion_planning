@@ -31,7 +31,7 @@ class ReplayBuffer(object):
         max_size (int): maximum replay buffer size
         device (torch.device): device to store the data
     """
-    def __init__(self, state_dim: int, action_dim: int, max_size: int, device: torch.device):
+    def __init__(self, state_dim: int, action_dim: int, max_size: int, device: torch.device) -> None:
         self.max_size = max_size
         self.count = 0
         self.size = 0
@@ -39,9 +39,9 @@ class ReplayBuffer(object):
         self.a = torch.zeros((self.max_size, action_dim), dtype=torch.float, device=device)
         self.r = torch.zeros((self.max_size, 1), dtype=torch.float, device=device)
         self.s_ = torch.zeros((self.max_size, state_dim), dtype=torch.float, device=device)
-        self.dw = torch.zeros((self.max_size, 1), dtype=torch.bool, device=device)
+        self.win = torch.zeros((self.max_size, 1), dtype=torch.bool, device=device)
 
-    def store(self, s: torch.Tensor, a: torch.Tensor, r: torch.Tensor, s_: torch.Tensor, dw: bool):
+    def store(self, s: torch.Tensor, a: torch.Tensor, r: torch.Tensor, s_: torch.Tensor, win: bool) -> None:
         """
         Store a new transition in the replay buffer.
 
@@ -50,13 +50,13 @@ class ReplayBuffer(object):
             a (torch.Tensor): action
             r (torch.Tensor): reward
             s_ (torch.Tensor): next state
-            dw (bool): dead or win, True: win (reached the goal), False: dead (otherwise).
+            win (bool): win or otherwise, True: win (reached the goal), False: otherwise.
         """
         self.s[self.count] = s
         self.a[self.count] = a
         self.r[self.count] = r
         self.s_[self.count] = s_
-        self.dw[self.count] = torch.tensor(dw, dtype=torch.bool)
+        self.win[self.count] = torch.tensor(win, dtype=torch.bool)
         self.count = (self.count + 1) % self.max_size  # When the 'count' reaches max_size, it will be reset to 0.
         self.size = min(self.size + 1, self.max_size)  # Record the number of  transitions
 
@@ -72,16 +72,16 @@ class ReplayBuffer(object):
             batch_a (torch.Tensor): batch of actions
             batch_r (torch.Tensor): batch of rewards
             batch_s_ (torch.Tensor): batch of next states
-            batch_dw (torch.Tensor): batch of dead or win, True: win (reached the goal), False: dead (otherwise).
+            batch_win (torch.Tensor): batch of win or otherwise, True: win (reached the goal), False: otherwise.
         """
         index = torch.randint(self.size, size=(batch_size,))  # Randomly sampling
         batch_s = self.s[index]
         batch_a = self.a[index]
         batch_r = self.r[index]
         batch_s_ = self.s_[index]
-        batch_dw = self.dw[index]
+        batch_win = self.win[index]
 
-        return batch_s, batch_a, batch_r, batch_s_, batch_dw
+        return batch_s, batch_a, batch_r, batch_s_, batch_win
 
 
 class Actor(nn.Module):
@@ -99,7 +99,7 @@ class Actor(nn.Module):
         max_action (torch.Tensor): maximum of each value in the action
     """
     def __init__(self, state_dim: int, action_dim: int, hidden_depth: int, hidden_width: int,
-                 min_state: torch.Tensor, max_state: torch.Tensor, min_action: torch.Tensor, max_action: torch.Tensor):
+                 min_state: torch.Tensor, max_state: torch.Tensor, min_action: torch.Tensor, max_action: torch.Tensor) -> None:
         super(Actor, self).__init__()
         self.min_state = min_state
         self.max_state = max_state
@@ -147,7 +147,7 @@ class Critic(nn.Module):
         max_action (torch.Tensor): maximum of each value in the action
     """
     def __init__(self, state_dim: int, action_dim: int, hidden_depth: int, hidden_width: int,
-                 min_state: torch.Tensor, max_state: torch.Tensor, min_action: torch.Tensor, max_action: torch.Tensor):
+                 min_state: torch.Tensor, max_state: torch.Tensor, min_action: torch.Tensor, max_action: torch.Tensor) -> None:
         super(Critic, self).__init__()
         self.min_state = min_state
         self.max_state = max_state
@@ -202,9 +202,10 @@ class DDPG(LocalPlanner):
         train_noise (float): Action noise coefficient during training for exploration
         random_episodes (int): Take the random actions in the beginning for the better exploration
         max_episode_steps (int): Maximum steps for each episode
-        update_times (int): Update the network every 'update_times' steps if episode > exploration_episodes
-        evaluate_times (int): Times of evaluations and calculate the average
-        evaluate_freq (int): Evaluate the network every 'evaluate_freq' episodes
+        update_freq (int): Frequency (times) of updating the network for each step
+        update_steps (int): Update the network for every 'update_steps' steps
+        evaluate_freq (int): Frequency (times) of evaluations and calculate the average
+        evaluate_episodes (int): Evaluate the network every 'evaluate_episodes' episodes
         actor_save_path (str): Save path of the trained actor network
         critic_save_path (str): Save path of the trained critic network
         actor_load_path (str): Load path of the trained actor network
@@ -224,10 +225,10 @@ class DDPG(LocalPlanner):
         [1] Continuous control with deep reinforcement learning
     """
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean",
-                 hidden_depth: int = 3, hidden_width: int = 512, batch_size: int = 5000, buffer_size: int = 2e6,
-                 gamma: float = 0.999, tau: float = 1e-3, lr: float = 1e-4, train_noise: float = 0.1,
-                 random_episodes: int = 50, max_episode_steps: int = 200,
-                 update_times: int = 1, evaluate_times: int = 50, evaluate_freq: int = 50,
+                 hidden_depth: int = 3, hidden_width: int = 512, batch_size: int = 2e4, buffer_size: int = 2e6,
+                 gamma: float = 0.999, tau: float = 1e-3, lr: float = 5e-4, train_noise: float = 0.1,
+                 random_episodes: int = 100, max_episode_steps: int = 200,
+                 update_freq: int = 1, update_steps: int = 5, evaluate_freq: int = 50, evaluate_episodes: int = 50,
                  actor_save_path: str = "models/actor_best.pth",
                  critic_save_path: str = "models/critic_best.pth",
                  actor_load_path: str = None,
@@ -237,7 +238,7 @@ class DDPG(LocalPlanner):
         # DDPG parameters
         self.hidden_depth = hidden_depth        # The number of hidden layers of the neural network
         self.hidden_width = hidden_width        # The number of neurons in hidden layers of the neural network
-        self.batch_size = batch_size            # batch size to optimize the neural networks
+        self.batch_size = int(batch_size)       # batch size to optimize the neural networks
         self.buffer_size = int(buffer_size)     # maximum replay buffer size
         self.gamma = gamma                      # discount factor
         self.tau = tau                          # Softly update the target network
@@ -245,9 +246,10 @@ class DDPG(LocalPlanner):
         self.train_noise = train_noise          # Action noise coefficient during training for exploration
         self.random_episodes = random_episodes  # Take the random actions in the beginning for the better exploration
         self.max_episode_steps = max_episode_steps  # Maximum steps for each episode
-        self.update_times = update_times        # Times of updating the network for each step if episode > exploration_episodes
-        self.evaluate_times = evaluate_times    # Times of evaluations and calculate the average
-        self.evaluate_freq = evaluate_freq      # Evaluate the network every 'evaluate_freq' episodes
+        self.update_freq = update_freq          # Frequency (times) of updating the network for each step
+        self.update_steps = update_steps        # Update the network for every 'update_steps' steps
+        self.evaluate_freq = evaluate_freq      # Frequency (times) of evaluations and calculate the average
+        self.evaluate_episodes = evaluate_episodes      # Evaluate the network every 'evaluate_episodes' episodes
         self.actor_save_path = actor_save_path      # Save path of the trained actor network
         self.critic_save_path = critic_save_path    # Save path of the trained critic network
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -285,8 +287,6 @@ class DDPG(LocalPlanner):
 
         self.replay_buffer = ReplayBuffer(self.n_observations, self.n_actions, max_size=self.buffer_size, device=self.device)
 
-        self.total_reward = 0   # accumulate reward in each episode
-
         # Build a tensorboard
         self.writer = SummaryWriter(log_dir='runs/DDPG_{}'.format(datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')))
 
@@ -297,7 +297,7 @@ class DDPG(LocalPlanner):
         self.path = self.g_path[::-1]
         self.history_lookahead = []
 
-    def __del__(self):
+    def __del__(self) -> None:
         self.writer.close()
 
     def __str__(self) -> str:
@@ -330,12 +330,12 @@ class DDPG(LocalPlanner):
 
         return True, self.robot.history_pose
 
-    def run(self):
+    def run(self) -> None:
         """
         Running both plannig and animation.
         """
         _, history_pose = self.plan()
-        print(f"path length: {len(history_pose)}")
+        print(f"Number of iterations: {len(history_pose)}")
         if not history_pose:
             raise ValueError("Path not found and planning failed!")
 
@@ -358,16 +358,20 @@ class DDPG(LocalPlanner):
         a = self.actor(s).detach().flatten()
         return a
 
-    def optimize_model(self):
+    def optimize_model(self) -> tuple:
         """
         Optimize the neural networks when training.
+
+        Returns:
+            actor_loss (float): actor loss
+            critic_loss (float): critic loss
         """
-        batch_s, batch_a, batch_r, batch_s_, batch_dw = self.replay_buffer.sample(self.batch_size)  # Sample a batch
+        batch_s, batch_a, batch_r, batch_s_, batch_win = self.replay_buffer.sample(self.batch_size)  # Sample a batch
 
         # Compute the target q
         with torch.no_grad():  # target_q has no gradient
             q_ = self.critic_target(batch_s_, self.actor_target(batch_s_))
-            target_q = batch_r + self.gamma * torch.logical_not(batch_dw) * q_
+            target_q = batch_r + self.gamma * torch.logical_not(batch_win) * q_
 
         # Compute the current q and the critic loss
         current_q = self.critic(batch_s, batch_a)
@@ -402,7 +406,7 @@ class DDPG(LocalPlanner):
         for param, target_param in zip(self.actor.parameters(), self.actor_target.parameters()):
             target_param.data.copy_(self.tau * param.data + (1 - self.tau) * target_param.data)
 
-        return critic_loss.item(), actor_loss.item()
+        return actor_loss.item(), critic_loss.item()
 
     def evaluate_policy(self) -> float:
         """
@@ -413,7 +417,7 @@ class DDPG(LocalPlanner):
         """
         print(f"Evaluating: ")
         evaluate_reward = 0
-        for _ in tqdm(range(self.evaluate_times)):
+        for _ in tqdm(range(self.evaluate_freq)):
             s = self.reset(random_sg=True)
             done = False
             episode_reward = 0
@@ -421,6 +425,7 @@ class DDPG(LocalPlanner):
             while not done:
                 a = self.select_action(s)  # We do not add noise when evaluating
                 s_, r, done, win = self.step(s, a)
+                self.replay_buffer.store(s, a, r, s_, win)  # Store the transition
                 episode_reward += r
                 s = s_
                 step += 1
@@ -428,9 +433,9 @@ class DDPG(LocalPlanner):
                     break
             evaluate_reward += episode_reward / step
 
-        return evaluate_reward / self.evaluate_times
+        return evaluate_reward / self.evaluate_freq
 
-    def train(self, num_episodes: int = 1000):
+    def train(self, num_episodes: int = 1000) -> None:
         """
         Train the model.
 
@@ -448,8 +453,11 @@ class DDPG(LocalPlanner):
         for episode in range(1, num_episodes+1):
             print(f"Episode: {episode}/{num_episodes}, Training: ")
             s = self.reset(random_sg=True)
+            episode_actor_loss = 0
+            episode_critic_loss = 0
             for episode_steps in tqdm(range(1, self.max_episode_steps+1)):
-                if episode <= self.random_episodes:  # Take the random actions in the beginning for the better exploration
+                if episode <= self.random_episodes:
+                    # Take the random actions in the beginning for the better exploration
                     a = torch.tensor([
                         random.uniform(self.params["MIN_V_INC"], self.params["MAX_V_INC"]),
                         random.uniform(self.params["MIN_W_INC"], self.params["MAX_W_INC"])
@@ -475,18 +483,19 @@ class DDPG(LocalPlanner):
                 s = s_  # Move to the next state
 
                 # update the networks if enough samples are available
-                if episode > self.random_episodes:
-                    total_actor_loss = 0
-                    total_critic_loss = 0
-                    for _ in range(self.update_times):
+                if episode > self.random_episodes and (episode_steps - 1) % self.update_steps == 0:
+                    for _ in range(self.update_freq):
                         actor_loss, critic_loss = self.optimize_model()
-                        total_actor_loss += actor_loss
-                        total_critic_loss += critic_loss
+                        episode_actor_loss += actor_loss
+                        episode_critic_loss += critic_loss
 
-                    self.writer.add_scalar('Actor train loss', total_actor_loss / self.update_times, global_step=episode)
-                    self.writer.add_scalar('Critic train loss', total_critic_loss / self.update_times, global_step=episode)
+            if episode > self.random_episodes:
+                average_actor_loss = episode_actor_loss / (self.max_episode_steps + self.update_freq)
+                average_critic_loss = episode_critic_loss / (self.max_episode_steps + self.update_freq)
+                self.writer.add_scalar('Actor train loss', average_actor_loss, global_step=episode)
+                self.writer.add_scalar('Critic train loss', average_critic_loss, global_step=episode)
 
-            if episode % self.evaluate_freq == 0:
+            if episode % self.evaluate_episodes == 0:
                 print()
                 evaluate_reward = self.evaluate_policy()
                 print("Evaluate_reward:{}".format(evaluate_reward))
@@ -550,7 +559,6 @@ class DDPG(LocalPlanner):
         state = np.pad(state, pad_width=((0, 3), (0, 0)), mode='constant')
         state[5:8, 0] = goal
         state = torch.tensor(state, device=self.device, dtype=torch.float).squeeze(dim=1)
-        # self.total_reward = 0
         return state
 
     def step(self, state: torch.Tensor, action: torch.Tensor) -> tuple:
@@ -580,7 +588,6 @@ class DDPG(LocalPlanner):
         win = self.reach_goal(tuple(next_state[0:3]), tuple(next_state[5:8]))
         lose = self.in_collision(tuple(next_state[0:2]))
         reward = self.reward(next_state, win, lose)
-        # self.total_reward += reward
         done = win or lose
         return next_state, reward, done, win
 
@@ -604,8 +611,8 @@ class DDPG(LocalPlanner):
         reward -= scaled_goal_dist
 
         if win:
-            reward += self.max_episode_steps   # self.params["MAX_ITERATION"]
+            reward += self.max_episode_steps
         if lose:
-            reward -= self.max_episode_steps / 5.0   # self.params["MAX_ITERATION"]
+            reward -= self.max_episode_steps / 5.0
 
         return reward

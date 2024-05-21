@@ -23,7 +23,7 @@ class Agent(ABC):
         self.theta = theta
         self.parameters = None
 
-    def setParameters(self, **parameters):
+    def setParameters(self, **parameters) -> None:
         # other customer parameters
         self.parameters = parameters
         for param, val in parameters.items():
@@ -131,7 +131,7 @@ class Robot(Agent):
         self.history_pose = []
 
     @property
-    def state(self):
+    def state(self) -> None:
         """
         Get the state.
 

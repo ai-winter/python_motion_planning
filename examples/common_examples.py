@@ -34,14 +34,17 @@ from python_motion_planning import *
 # plt.run()
 
 
-plt = DDPG(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31),
-           # random_episodes=1, batch_size=10,
-           TIME_STEP=0.1, GOAL_DIST_TOL=0.5, ROTATE_TOL=0.5)
-plt.train(num_episodes=10000)     # only for learning-based planners, such as DDPG
+# Train the model, only for learning-based planners, such as DDPG
+# It costs a lot of time to train the model, please be patient.
+# If you want a faster training, try reducing num_episodes and batch_size,
+# or increasing update_steps and evaluate_episodes, or fine-tuning other hyperparameters
+# if you are familiar with them, usually in a cost of performance, however.
+plt = DDPG(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
+plt.train(num_episodes=10000)
 
-# plt = DDPG(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31),
-#            actor_load_path="models/actor_best.pth", critic_load_path="models/critic_best.pth",
-#            TIME_STEP=0.1, GOAL_DIST_TOL=0.5, ROTATE_TOL=0.5)
+# load the trained model and run
+# plt = DDPG(start=(30, 10, 0), goal=(45, 25, 0), env=Grid(51, 31),
+#            actor_load_path="models/actor_best.pth", critic_load_path="models/critic_best.pth",)
 # plt.run()
 
 # -------------curve generators-------------
