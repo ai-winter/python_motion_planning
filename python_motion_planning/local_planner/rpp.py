@@ -2,7 +2,7 @@
 @file: rpp.py
 @breif: Regulated Pure Pursuit (RPP) motion planning
 @author: Yang Haodong, Wu Maojia
-@update: 2024.3.29
+@update: 2024.5.21
 """
 import math
 import numpy as np
@@ -21,6 +21,7 @@ class RPP(LocalPlanner):
         goal (tuple): goal point coordinate
         env (Env): environment
         heuristic_type (str): heuristic function type
+        **params: other parameters can be found in the parent class LocalPlanner
 
     Examples:
         >>> from python_motion_planning.utils import Grid

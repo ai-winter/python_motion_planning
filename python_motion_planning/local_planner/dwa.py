@@ -1,8 +1,8 @@
 """
 @file: dwa.py
 @breif: Dynamic Window Approach(DWA) motion planning
-@author: Winter
-@update: 2023.3.2
+@author: Yang Haodong, Wu Maojia
+@update: 2024.5.21
 """
 import numpy as np
 from itertools import product
@@ -21,6 +21,7 @@ class DWA(LocalPlanner):
         goal (tuple): goal point coordinate
         env (Env): environment
         heuristic_type (str): heuristic function type
+        **params: other parameters can be found in the parent class LocalPlanner
 
     Examples:
         >>> from python_motion_planning.utils import Grid

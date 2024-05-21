@@ -2,10 +2,9 @@
 @file: local_planner.py
 @breif: Base class for local planner.
 @author: Yang Haodong, Wu Maojia
-@update: 2024.5.19
+@update: 2024.5.20
 """
 import math
-import random
 
 from python_motion_planning.utils import Env, Planner, SearchFactory, Plot, Robot, MathHelper
 
@@ -19,6 +18,7 @@ class LocalPlanner(Planner):
         goal (tuple): goal point coordinate
         env (Env): environment
         heuristic_type (str): heuristic function type
+        **params: other parameters
     """
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str="euclidean", **params) -> None:
         # start and goal pose
@@ -141,6 +141,10 @@ class LocalPlanner(Planner):
             prev_p = (px - self.robot.px, py - self.robot.py)
             goal_p = (gx - self.robot.px, gy - self.robot.py)
             i_points = MathHelper.circleSegmentIntersection(prev_p, goal_p, self.lookahead_dist)
+            if len(i_points) == 0:
+                # If there is no intersection, take the closest intersection point (foot of a perpendicular)
+                # between the current position and the line segment
+                i_points.append(MathHelper.closestPointOnLine(prev_p, goal_p))
             pt_x = i_points[0][0] + self.robot.px
             pt_y = i_points[0][1] + self.robot.py
 
@@ -240,3 +244,19 @@ class LocalPlanner(Planner):
         e_theta = self.regularizeAngle(cur[2] - goal[2])
         return not (self.shouldMoveToGoal((cur[0], cur[1]), (goal[0], goal[1]))
                     or self.shouldRotateToPath(abs(e_theta)))
+
+    def in_collision(self, cur_pos: tuple):
+        """
+        Whether the robot is in collision with obstacles
+
+        Parameters:
+            cur_pos (tuple): current position of robot
+
+        Returns:
+            flag (bool): true if robot is in collision
+        """
+        obstacles = self.obstacles
+        for obs in obstacles:
+            if abs(cur_pos[0] - obs[0]) < 0.5 and abs(cur_pos[1] - obs[1]) < 0.5:
+                return True
+        return False

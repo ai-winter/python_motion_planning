@@ -31,18 +31,18 @@ from python_motion_planning import *
 # plt = LQR(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
 # plt = RPP(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
 # plt = MPC(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
+# plt.run()
+
+
+plt = DDPG(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31),
+           # random_episodes=1, batch_size=10,
+           TIME_STEP=0.1, GOAL_DIST_TOL=0.5, ROTATE_TOL=0.5)
+plt.train(num_episodes=10000)     # only for learning-based planners, such as DDPG
 
 # plt = DDPG(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31),
-#            # random_episodes=1, batch_size=10,
-#            # actor_load_path="models/actor_best.pth", critic_load_path="models/critic_best.pth",
-#            TIME_STEP=0.1, GOAL_DIST_TOL=3.0, ROTATE_TOL=7.0)
-# plt.train(num_episodes=30000)     # only for learning-based planners, such as DDPG
-
-
-plt = DDPG(start=(25, 12, 0), goal=(45, 25, 0), env=Grid(51, 31),
-           actor_load_path="models/actor_best.pth", critic_load_path="models/critic_best.pth",
-           TIME_STEP=0.1, GOAL_DIST_TOL=3.0, ROTATE_TOL=7.0)
-plt.run()
+#            actor_load_path="models/actor_best.pth", critic_load_path="models/critic_best.pth",
+#            TIME_STEP=0.1, GOAL_DIST_TOL=0.5, ROTATE_TOL=0.5)
+# plt.run()
 
 # -------------curve generators-------------
 # points = [(0, 0, 0), (10, 10, -90), (20, 5, 60), (30, 10, 120),
