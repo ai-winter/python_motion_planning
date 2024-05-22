@@ -1,8 +1,8 @@
 """
 @file: rpp.py
 @breif: Regulated Pure Pursuit (RPP) motion planning
-@author: Winter
-@update: 2023.1.25
+@author: Yang Haodong, Wu Maojia
+@update: 2024.5.21
 """
 import math
 import numpy as np
@@ -21,6 +21,7 @@ class RPP(LocalPlanner):
         goal (tuple): goal point coordinate
         env (Env): environment
         heuristic_type (str): heuristic function type
+        **params: other parameters can be found in the parent class LocalPlanner
 
     Examples:
         >>> from python_motion_planning.utils import Grid
@@ -31,8 +32,8 @@ class RPP(LocalPlanner):
         >>> planner = RPP(start, goal, env)
         >>> planner.run()
     """
-    def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
-        super().__init__(start, goal, env, heuristic_type)
+    def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean", **params) -> None:
+        super().__init__(start, goal, env, heuristic_type, **params)
         # RPP parameters
         self.regulated_radius_min = 0.9
         self.scaling_dist = 0.6
@@ -60,7 +61,7 @@ class RPP(LocalPlanner):
         dt = self.params["TIME_STEP"]
         for _ in range(self.params["MAX_ITERATION"]):
             # break until goal reached
-            if self.shouldRotateToGoal(self.robot.position, self.goal):
+            if not self.shouldMoveToGoal(self.robot.position, self.goal):
                 return True, self.robot.history_pose, lookahead_pts
 
             # get the particular point on the path at the lookahead distance
@@ -72,17 +73,15 @@ class RPP(LocalPlanner):
             ) / self.lookahead_dist
 
             # calculate velocity command
-            e_theta = self.regularizeAngle(self.robot.theta - self.goal[2]) / 10
-            if self.shouldRotateToGoal(self.robot.position, self.goal):
+            e_theta = self.regularizeAngle(self.robot.theta - self.goal[2])
+            if not self.shouldMoveToGoal(self.robot.position, self.goal):
                 if not self.shouldRotateToPath(abs(e_theta)):
                     u = np.array([[0], [0]])
                 else:
                     u = np.array([[0], [self.angularRegularization(e_theta / dt)]])
             else:
-                e_theta = self.regularizeAngle(
-                    self.angle(self.robot.position, lookahead_pt) - self.robot.theta
-                ) / 10
-                if self.shouldRotateToPath(abs(e_theta), np.pi / 4):
+                e_theta = self.regularizeAngle(self.angle(self.robot.position, lookahead_pt) - self.robot.theta)
+                if self.shouldRotateToPath(abs(e_theta)):
                     u = np.array([[0], [self.angularRegularization(e_theta / dt)]])
                 else:
                     # apply constraints

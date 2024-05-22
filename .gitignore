@@ -13,6 +13,15 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# tensorboard logs
+examples/runs/
+
+# model state dict files
+examples/models/*
+# some example models
+!examples/models/actor_best_example.pth
+!examples/models/critic_best_example.pth
+
 # Editor directories and files
 .idea
 .vscode

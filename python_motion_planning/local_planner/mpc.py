@@ -1,8 +1,8 @@
 """
 @file: mpc.py
 @breif: Model Predicted Control (MPC) motion planning
-@author: Winter
-@update: 2024.1.30
+@author: Yang Haodong, Wu Maojia
+@update: 2024.5.21
 """
 import osqp
 import numpy as np
@@ -20,18 +20,19 @@ class MPC(LocalPlanner):
         goal (tuple): goal point coordinate
         env (Env): environment
         heuristic_type (str): heuristic function type
+        **params: other parameters can be found in the parent class LocalPlanner
 
     Examples:
         >>> from python_motion_planning.utils import Grid
-        >>> from python_motion_planning.local_planner import LQR
+        >>> from python_motion_planning.local_planner import MPC
         >>> start = (5, 5, 0)
         >>> goal = (45, 25, 0)
         >>> env = Grid(51, 31)
-        >>> planner = LQR(start, goal, env)
+        >>> planner = MPC(start, goal, env)
         >>> planner.run()
     """
-    def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
-        super().__init__(start, goal, env, heuristic_type, MIN_LOOKAHEAD_DIST=1.0, MIN_W=-0.78, MAX_ITERATION=2000)
+    def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean", **params) -> None:
+        super().__init__(start, goal, env, heuristic_type, MIN_LOOKAHEAD_DIST=1.0, MIN_W=-0.78, MAX_ITERATION=2000, **params)
         # MPC parameters
         self.p = 12
         self.m = 8
@@ -39,7 +40,8 @@ class MPC(LocalPlanner):
         self.R = np.diag([2, 2])
         self.u_min = np.array([[self.params["MIN_V"]], [self.params["MIN_W"]]])
         self.u_max = np.array([[self.params["MAX_V"]], [self.params["MAX_W"]]])
-        self.du_min = np.array([[self.params["MIN_V"]], [self.params["MIN_W"]]])
+        # self.du_min = np.array([[self.params["MIN_V"]], [self.params["MIN_W"]]])
+        self.du_min = np.array([[self.params["MIN_V_INC"]], [self.params["MIN_W_INC"]]])
         self.du_max = np.array([[self.params["MAX_V_INC"]], [self.params["MAX_W_INC"]]])
 
         # global planner
@@ -63,15 +65,15 @@ class MPC(LocalPlanner):
         u_p = (0, 0)
         for _ in range(self.params["MAX_ITERATION"]):
             # break until goal reached
-            if self.shouldRotateToGoal(self.robot.position, self.goal):
+            if not self.shouldMoveToGoal(self.robot.position, self.goal):
                 return True, self.robot.history_pose
 
             # get the particular point on the path at the lookahead distance
             lookahead_pt, theta_trj, kappa = self.getLookaheadPoint()
 
             # calculate velocity command
-            e_theta = self.regularizeAngle(self.robot.theta - self.goal[2]) / 10
-            if self.shouldRotateToGoal(self.robot.position, self.goal):
+            e_theta = self.regularizeAngle(self.robot.theta - self.goal[2])
+            if not self.shouldMoveToGoal(self.robot.position, self.goal):
                 if not self.shouldRotateToPath(abs(e_theta)):
                     u = np.array([[0], [0]])
                 else:
@@ -80,8 +82,8 @@ class MPC(LocalPlanner):
                 e_theta = self.regularizeAngle(
                     self.angle(self.robot.position, lookahead_pt) - self.robot.theta
                 )
-                if self.shouldRotateToPath(abs(e_theta), np.pi / 4):
-                    u = np.array([[0], [self.angularRegularization(e_theta / dt / 10)]])
+                if self.shouldRotateToPath(abs(e_theta)):
+                    u = np.array([[0], [self.angularRegularization(e_theta / dt)]])
                 else:
                     s = (self.robot.px, self.robot.py, self.robot.theta) # current state
                     s_d = (lookahead_pt[0], lookahead_pt[1], theta_trj)  # desired state

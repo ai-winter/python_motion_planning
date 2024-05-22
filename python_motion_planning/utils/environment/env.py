@@ -18,15 +18,17 @@ class Env(ABC):
     Parameters:
         x_range (int): x-axis range of enviroment
         y_range (int): y-axis range of environmet
+        eps (float): tolerance for float comparison
 
     Examples:
         >>> from python_motion_planning.utils import Env
         >>> env = Env(30, 40)
     """
-    def __init__(self, x_range: int, y_range: int) -> None:
+    def __init__(self, x_range: int, y_range: int, eps: float = 1e-6) -> None:
         # size of environment
         self.x_range = x_range  
         self.y_range = y_range
+        self.eps = eps
 
     @property
     def grid_map(self) -> set:

@@ -1,13 +1,14 @@
 """
 @file: pid.py
 @breif: PID motion planning
-@author: Winter
-@update: 2023.10.24
+@author: Yang Haodong, Wu Maojia
+@update: 2024.5.21
 """
 import numpy as np
+import math
 
 from .local_planner import LocalPlanner
-from python_motion_planning.utils import Env
+from python_motion_planning.utils import Env, MathHelper
 
 
 class PID(LocalPlanner):
@@ -19,6 +20,7 @@ class PID(LocalPlanner):
         goal (tuple): goal point coordinate
         env (Env): environment
         heuristic_type (str): heuristic function type
+        **params: other parameters can be found in the parent class LocalPlanner
 
     Examples:
         >>> from python_motion_planning.utils import Grid
@@ -29,8 +31,8 @@ class PID(LocalPlanner):
         >>> planner = PID(start, goal, env)
         >>> planner.run()
     """
-    def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
-        super().__init__(start, goal, env, heuristic_type)
+    def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean", **params) -> None:
+        super().__init__(start, goal, env, heuristic_type, **params)
         # PID parameters
         self.e_w, self.i_w = 0.0, 0.0
         self.e_v, self.i_v = 0.0, 0.0
@@ -55,7 +57,7 @@ class PID(LocalPlanner):
         dt = self.params["TIME_STEP"]
         for _ in range(self.params["MAX_ITERATION"]):
             # break until goal reached
-            if self.shouldRotateToGoal(self.robot.position, self.goal):
+            if not self.shouldMoveToGoal(self.robot.position, self.goal):
                 return True, self.robot.history_pose
             
             # find next tracking point
@@ -72,18 +74,18 @@ class PID(LocalPlanner):
             theta_d = k_theta * theta_err + (1 - k_theta) * theta_trj
     
             # calculate velocity command
-            e_theta = self.regularizeAngle(self.robot.theta - self.goal[2]) / 10
-            if self.shouldRotateToGoal(self.robot.position, self.goal):
+            e_theta = self.regularizeAngle(self.robot.theta - self.goal[2])
+            if not self.shouldMoveToGoal(self.robot.position, self.goal):
                 if not self.shouldRotateToPath(abs(e_theta)):
                     u = np.array([[0], [0]])
                 else:
                     u = np.array([[0], [self.angularRegularization(e_theta / dt)]])
             else:
-                e_theta = self.regularizeAngle(theta_d - self.robot.theta) / 10
-                if self.shouldRotateToPath(abs(e_theta), np.pi / 4):
+                e_theta = self.regularizeAngle(theta_d - self.robot.theta)
+                if self.shouldRotateToPath(abs(e_theta)):
                     u = np.array([[0], [self.angularRegularization(e_theta / dt)]])
                 else:
-                    v_d = self.dist(lookahead_pt, self.robot.position) / dt / 10
+                    v_d = self.dist(lookahead_pt, self.robot.position) / dt
                     u = np.array([[self.linearRegularization(v_d)], [self.angularRegularization(e_theta / dt)]])
 
             # feed into robotic kinematic
@@ -123,8 +125,10 @@ class PID(LocalPlanner):
         k_v_i = 0.00
         k_v_d = 0.00
         v_inc = k_v_p * e_v + k_v_i * self.i_v + k_v_d * d_v
+        v_inc = MathHelper.clamp(v_inc, self.params["MIN_V_INC"], self.params["MAX_V_INC"])
 
         v = self.robot.v + v_inc
+        v = MathHelper.clamp(v, self.params["MIN_V"], self.params["MAX_V"])
         
         return v
 
@@ -148,6 +152,14 @@ class PID(LocalPlanner):
         k_w_d = 0.01
         w_inc = k_w_p * e_w + k_w_i * self.i_w + k_w_d * d_w
 
+        if abs(w_inc) > self.params["MAX_W_INC"]:
+            w_inc = math.copysign(self.params["MAX_W_INC"], w_inc)
+
         w = self.robot.w + w_inc
+
+        if abs(w) > self.params["MAX_W"]:
+            w = math.copysign(self.params["MAX_W"], w)
+        if abs(w) < self.params["MIN_W"]:
+            w = math.copysign(self.params["MIN_W"], w)
 
         return w

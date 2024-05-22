@@ -1,8 +1,8 @@
 """
 @file: apf.py
 @breif: Artificial Potential Field(APF) motion planning
-@author: Winter
-@update: 2023.10.24
+@author: Yang Haodong, Wu Maojia
+@update: 2024.5.21
 """
 import math
 import numpy as np
@@ -20,6 +20,7 @@ class APF(LocalPlanner):
         goal (tuple): goal point coordinate
         env (Env): environment
         heuristic_type (str): heuristic function type
+        **params: other parameters can be found in the parent class LocalPlanner
 
     Examples:
         >>> from python_motion_planning.utils import Grid
@@ -30,12 +31,12 @@ class APF(LocalPlanner):
         >>> planner = APF(start, goal, env)
         >>> planner.run()
     """
-    def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
-        super().__init__(start, goal, env, heuristic_type)
+    def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean", **params) -> None:
+        super().__init__(start, goal, env, heuristic_type, **params)
         # APF parameters
         self.zeta = 1.0
-        self.eta = 1.5
-        self.d_0 = 1.5
+        self.eta = 1.0
+        self.d_0 = 1.0
 
         # global planner
         g_start = (start[0], start[1])
@@ -57,7 +58,7 @@ class APF(LocalPlanner):
         dt = self.params["TIME_STEP"]
         for _ in range(self.params["MAX_ITERATION"]):
             # break until goal reached
-            if self.shouldRotateToGoal(self.robot.position, self.goal):
+            if not self.shouldMoveToGoal(self.robot.position, self.goal):
                 return True, self.robot.history_pose
             
             # compute the tatget pose and force at the current step
@@ -74,15 +75,15 @@ class APF(LocalPlanner):
             theta_d = math.atan2(new_v[1], new_v[0])
 
             # calculate velocity command
-            e_theta = self.regularizeAngle(self.robot.theta - self.goal[2]) / 10
-            if self.shouldRotateToGoal(self.robot.position, self.goal):
+            e_theta = self.regularizeAngle(self.robot.theta - self.goal[2])
+            if not self.shouldMoveToGoal(self.robot.position, self.goal):
                 if not self.shouldRotateToPath(abs(e_theta)):
                     u = np.array([[0], [0]])
                 else:
                     u = np.array([[0], [self.angularRegularization(e_theta / dt)]])
             else:
-                e_theta = self.regularizeAngle(theta_d - self.robot.theta) / 10
-                if self.shouldRotateToPath(abs(e_theta), np.pi / 4):
+                e_theta = self.regularizeAngle(theta_d - self.robot.theta)
+                if self.shouldRotateToPath(abs(e_theta)):
                     u = np.array([[0], [self.angularRegularization(e_theta / dt)]])
                 else:
                     v_d = np.linalg.norm(new_v)

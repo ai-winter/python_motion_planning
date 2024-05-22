@@ -1,8 +1,8 @@
 """
 @file: lqr.py
 @breif: Linear Quadratic Regulator(LQR) motion planning
-@author: Winter
-@update: 2024.1.12
+@author: Yang Haodong, Wu Maojia
+@update: 2024.5.21
 """
 import numpy as np
 
@@ -18,6 +18,7 @@ class LQR(LocalPlanner):
         goal (tuple): goal point coordinate
         env (Env): environment
         heuristic_type (str): heuristic function type
+        **params: other parameters can be found in the parent class LocalPlanner
 
     Examples:
         >>> from python_motion_planning.utils import Grid
@@ -28,8 +29,8 @@ class LQR(LocalPlanner):
         >>> planner = LQR(start, goal, env)
         >>> planner.run()
     """
-    def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
-        super().__init__(start, goal, env, heuristic_type, MIN_LOOKAHEAD_DIST=1.0)
+    def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean", **params) -> None:
+        super().__init__(start, goal, env, heuristic_type, MIN_LOOKAHEAD_DIST=1.0, **params)
         # LQR parameters
         self.Q = np.diag([1, 1, 1])
         self.R = np.diag([1, 1])
@@ -56,15 +57,15 @@ class LQR(LocalPlanner):
         dt = self.params["TIME_STEP"]
         for _ in range(self.params["MAX_ITERATION"]):
             # break until goal reached
-            if self.shouldRotateToGoal(self.robot.position, self.goal):
+            if not self.shouldMoveToGoal(self.robot.position, self.goal):
                 return True, self.robot.history_pose
 
             # get the particular point on the path at the lookahead distance
             lookahead_pt, theta_trj, kappa = self.getLookaheadPoint()
 
             # calculate velocity command
-            e_theta = self.regularizeAngle(self.robot.theta - self.goal[2]) / 10
-            if self.shouldRotateToGoal(self.robot.position, self.goal):
+            e_theta = self.regularizeAngle(self.robot.theta - self.goal[2])
+            if not self.shouldMoveToGoal(self.robot.position, self.goal):
                 if not self.shouldRotateToPath(abs(e_theta)):
                     u = np.array([[0], [0]])
                 else:
@@ -73,8 +74,8 @@ class LQR(LocalPlanner):
                 e_theta = self.regularizeAngle(
                     self.angle(self.robot.position, lookahead_pt) - self.robot.theta
                 )
-                if self.shouldRotateToPath(abs(e_theta), np.pi / 4):
-                    u = np.array([[0], [self.angularRegularization(e_theta / dt / 10)]])
+                if self.shouldRotateToPath(abs(e_theta)):
+                    u = np.array([[0], [self.angularRegularization(e_theta / dt)]])
                 else:
                     s = (self.robot.px, self.robot.py, self.robot.theta) # current state
                     s_d = (lookahead_pt[0], lookahead_pt[1], theta_trj)  # desired state

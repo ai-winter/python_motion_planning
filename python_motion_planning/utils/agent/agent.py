@@ -1,8 +1,8 @@
 """
 @file: agent.py
 @breif: Class for agent
-@author: Winter
-@update: 2023.3.2
+@author: Yang Haodong, Wu Maojia
+@update: 2024.3.29
 """
 import math
 import numpy as np
@@ -23,7 +23,7 @@ class Agent(ABC):
         self.theta = theta
         self.parameters = None
 
-    def setParameters(self, **parameters):
+    def setParameters(self, **parameters) -> None:
         # other customer parameters
         self.parameters = parameters
         for param, val in parameters.items():
@@ -41,6 +41,7 @@ class Agent(ABC):
     @abstractmethod
     def state(self):
         pass
+
 
 class Robot(Agent):
     """
@@ -64,13 +65,14 @@ class Robot(Agent):
     def __str__(self) -> str:
         return "Robot"
     
-    def kinematic(self, u: np.ndarray, dt: float, replace: bool=True):
+    def kinematic(self, u: np.ndarray, dt: float, replace: bool = True):
         """
         Run robot kinematic once.
 
         Parameters:
             u (np.ndarray): control command with [v, w]
             dt (float): simulation time
+            obstacles (set): set of obstacles with (x, y)
             replace (bool): update-self if true else return a new Robot object
 
         Returns:
@@ -95,6 +97,7 @@ class Robot(Agent):
             state (np.ndarray): robot state with [x, y, theta, v, w]
             u (np.ndarray): control command with [v, w]
             dt (float): simulation time
+            obstacles (set): set of obstacles with (x, y)
 
         Returns:
             new_state (np.ndarray (5x1)): new robot state with [x, y, theta, v, w]
@@ -110,6 +113,13 @@ class Robot(Agent):
                       [                      1,  0],
                       [                      0,  1]])
         new_state = F @ state + B @ u
+
+        # # if collide with obstacles, reset the position and stop the robot
+        # if (round(new_state[0][0]), round(new_state[1][0])) in obstacles:
+        #     new_state[0][0] = state[0][0]
+        #     new_state[1][0] = state[1][0]
+        #     new_state[3][0] = 0
+
         return new_state
 
     def reset(self) -> None:
@@ -121,7 +131,7 @@ class Robot(Agent):
         self.history_pose = []
 
     @property
-    def state(self):
+    def state(self) -> None:
         """
         Get the state.
 

@@ -1,8 +1,8 @@
 """
 @file: local_planner.py
 @breif: Base class for local planner.
-@author: Winter
-@update: 2023.3.2
+@author: Yang Haodong, Wu Maojia
+@update: 2024.5.20
 """
 import math
 
@@ -18,6 +18,7 @@ class LocalPlanner(Planner):
         goal (tuple): goal point coordinate
         env (Env): environment
         heuristic_type (str): heuristic function type
+        **params: other parameters
     """
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str="euclidean", **params) -> None:
         # start and goal pose
@@ -40,14 +41,16 @@ class LocalPlanner(Planner):
         self.params["TIME_STEP"] = params["TIME_STEP"] if "TIME_STEP" in params.keys() else 0.1
         self.params["MAX_ITERATION"] = params["MAX_ITERATION"] if "MAX_ITERATION" in params.keys() else 1500
         self.params["LOOKAHEAD_TIME"] = params["LOOKAHEAD_TIME"] if "LOOKAHEAD_TIME" in params.keys() else 1.0
-        self.params["MIN_LOOKAHEAD_DIST"] = params["MIN_LOOKAHEAD_DIST"] if "MIN_LOOKAHEAD_DIST" in params.keys() else 1.5
         self.params["MAX_LOOKAHEAD_DIST"] = params["MAX_LOOKAHEAD_DIST"] if "MAX_LOOKAHEAD_DIST" in params.keys() else 2.5
-        self.params["MAX_V_INC"] = params["MAX_V_INC"] if "MAX_V_INC" in params.keys() else 0.5
+        self.params["MIN_LOOKAHEAD_DIST"] = params["MIN_LOOKAHEAD_DIST"] if "MIN_LOOKAHEAD_DIST" in params.keys() else 1.5
+        self.params["MAX_V_INC"] = params["MAX_V_INC"] if "MAX_V_INC" in params.keys() else 1.0
+        self.params["MIN_V_INC"] = params["MIN_V_INC"] if "MIN_V_INC" in params.keys() else -1.0
         self.params["MAX_V"] = params["MAX_V"] if "MAX_V" in params.keys() else 0.5
         self.params["MIN_V"] = params["MIN_V"] if "MIN_V" in params.keys() else 0.0
-        self.params["MAX_W_INC"] = params["MAX_W_INC"] if "MAX_W_INC" in params.keys() else math.pi / 2
+        self.params["MAX_W_INC"] = params["MAX_W_INC"] if "MAX_W_INC" in params.keys() else math.pi
+        self.params["MIN_W_INC"] = params["MIN_W_INC"] if "MIN_W_INC" in params.keys() else -math.pi
         self.params["MAX_W"] = params["MAX_W"] if "MAX_W" in params.keys() else math.pi / 2
-        self.params["MIN_W"] = params["MIN_W"] if "MIN_W" in params.keys() else 0.0
+        self.params["MIN_W"] = params["MIN_W"] if "MIN_W" in params.keys() else -math.pi / 2
         self.params["GOAL_DIST_TOL"] = params["GOAL_DIST_TOL"] if "GOAL_DIST_TOL" in params.keys() else 0.5
         self.params["ROTATE_TOL"] = params["ROTATE_TOL"] if "ROTATE_TOL" in params.keys() else 0.5
 
@@ -138,6 +141,10 @@ class LocalPlanner(Planner):
             prev_p = (px - self.robot.px, py - self.robot.py)
             goal_p = (gx - self.robot.px, gy - self.robot.py)
             i_points = MathHelper.circleSegmentIntersection(prev_p, goal_p, self.lookahead_dist)
+            if len(i_points) == 0:
+                # If there is no intersection, take the closest intersection point (foot of a perpendicular)
+                # between the current position and the line segment
+                i_points.append(MathHelper.closestPointOnLine(prev_p, goal_p))
             pt_x = i_points[0][0] + self.robot.px
             pt_y = i_points[0][1] + self.robot.py
 
@@ -173,15 +180,10 @@ class LocalPlanner(Planner):
             v (float): control velocity output
         """
         v_inc = v_d - self.robot.v
-        if abs(v_inc) > self.params["MAX_V_INC"]:
-            v_inc = math.copysign(self.params["MAX_V_INC"], v_inc)
+        v_inc = MathHelper.clamp(v_inc, self.params["MIN_V_INC"], self.params["MAX_V_INC"])
 
         v = self.robot.v + v_inc
-
-        if abs(v) > self.params["MAX_V"]:
-            v = math.copysign(self.params["MAX_V"], v)
-        if abs(v) < self.params["MIN_V"]:
-            v = math.copysign(self.params["MIN_V"], v)  
+        v = MathHelper.clamp(v, self.params["MIN_V"], self.params["MAX_V"])
 
         return v
 
@@ -196,40 +198,65 @@ class LocalPlanner(Planner):
             w (float): control angular velocity output
         """
         w_inc = w_d - self.robot.w
-        if abs(w_inc) > self.params["MAX_W_INC"]:
-            w_inc = math.copysign(self.params["MAX_W_INC"], w_inc)
+        w_inc = MathHelper.clamp(w_inc, self.params["MIN_W_INC"], self.params["MAX_W_INC"])
 
         w = self.robot.w + w_inc
-
-        if abs(w) > self.params["MAX_W"]:
-            w = math.copysign(self.params["MAX_W"], w)
-        if abs(w) < self.params["MIN_W"]:
-            w = math.copysign(self.params["MIN_W"], w)  
+        w = MathHelper.clamp(w, self.params["MIN_W"], self.params["MAX_W"])
 
         return w
 
-    def shouldRotateToGoal(self, cur: tuple, goal: tuple) -> bool:
+    def shouldMoveToGoal(self, cur: tuple, goal: tuple) -> bool:
         """
-        Whether to reach the target pose through rotation operation
+        Whether to move to the goal pose
 
         Parameters:
             cur (tuple): current pose of robot
             goal (tuple): goal pose of robot
 
         Returns:
-            flag (bool): true if robot should perform rotation
+            flag (bool): true if robot should perform movement
         """
-        return self.dist(cur, goal) < self.params["GOAL_DIST_TOL"]
+        return self.dist(cur, goal) > self.params["GOAL_DIST_TOL"]
     
-    def shouldRotateToPath(self, angle_to_path: float, tol: float=None) -> bool:
+    def shouldRotateToPath(self, angle_to_path: float) -> bool:
         """
         Whether to correct the tracking path with rotation operation
 
         Parameters:
             angle_to_path (float): the angle deviation
-            tol (float): the angle deviation tolerence
 
         Returns:
             flag (bool): true if robot should perform rotation
         """
-        return ((tol is not None) and (angle_to_path > tol)) or (angle_to_path > self.params["ROTATE_TOL"])
+        return angle_to_path > self.params["ROTATE_TOL"]
+
+    def reach_goal(self, cur: tuple, goal: tuple) -> bool:
+        """
+        Whether the robot has reached the goal pose
+
+        Parameters:
+            cur (tuple): current pose of robot
+            goal (tuple): goal pose of robot
+
+        Returns:
+            flag (bool): true if robot has reached the goal
+        """
+        e_theta = self.regularizeAngle(cur[2] - goal[2])
+        return not (self.shouldMoveToGoal((cur[0], cur[1]), (goal[0], goal[1]))
+                    or self.shouldRotateToPath(abs(e_theta)))
+
+    def in_collision(self, cur_pos: tuple):
+        """
+        Whether the robot is in collision with obstacles
+
+        Parameters:
+            cur_pos (tuple): current position of robot
+
+        Returns:
+            flag (bool): true if robot is in collision
+        """
+        obstacles = self.obstacles
+        for obs in obstacles:
+            if abs(cur_pos[0] - obs[0]) < 0.5 and abs(cur_pos[1] - obs[1]) < 0.5:
+                return True
+        return False
