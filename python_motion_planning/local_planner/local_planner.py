@@ -46,7 +46,7 @@ class LocalPlanner(Planner):
         self.params["MAX_V_INC"] = params["MAX_V_INC"] if "MAX_V_INC" in params.keys() else 1.0
         self.params["MIN_V_INC"] = params["MIN_V_INC"] if "MIN_V_INC" in params.keys() else -1.0
         self.params["MAX_V"] = params["MAX_V"] if "MAX_V" in params.keys() else 0.5
-        self.params["MIN_V"] = params["MIN_V"] if "MIN_V" in params.keys() else -0.5
+        self.params["MIN_V"] = params["MIN_V"] if "MIN_V" in params.keys() else 0.0
         self.params["MAX_W_INC"] = params["MAX_W_INC"] if "MAX_W_INC" in params.keys() else math.pi
         self.params["MIN_W_INC"] = params["MIN_W_INC"] if "MIN_W_INC" in params.keys() else -math.pi
         self.params["MAX_W"] = params["MAX_W"] if "MAX_W" in params.keys() else math.pi / 2

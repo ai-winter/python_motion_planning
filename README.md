@@ -69,52 +69,52 @@ if __name__ == '__main__':
 
 Planner      | Version                                                                                                                                                                  | Animation
 ------------ |--------------------------------------------------------------------------------------------------------------------------------------------------------------------------| --------- 
-**GBFS**              | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/graph_search/gbfs.py)     | ![gbfs_python.png](gif/gbfs_python.png) 
-**Dijkstra**                 | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/graph_search/dijkstra.py) | ![dijkstra_python.png](gif/dijkstra_python.png)
-**A***               | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/graph_search/a_star.py)   |  ![a_star_python.png](gif/a_star_python.png) 
-**JPS**                 | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/graph_search/jps.py)      | ![jps_python.png](gif/jps_python.png)
-**D***                  | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/graph_search/d_star.py)   | ![d_star_python.png](gif/d_star_python.png)
-**LPA***                 | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/graph_search/lpa_star.py) | ![lpa_star_python.png](gif/lpa_star_python.png) 
-**D\* Lite**                | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/graph_search/d_star_lite.py) | ![d_star_lite_python.png](gif/d_star_lite_python.png)
-**Theta\***                | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/graph_search/theta_star.py) | ![theta_star_python.png](gif/theta_star_python.png)
-**Lazy Theta\***                | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/graph_search/lazy_theta_star.py) | ![lazy_theta_star_python.png](gif/lazy_theta_star_python.png)
-**S-Theta\***                | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/graph_search/s_theta_star.py) | ![s_theta_star_python.png](gif/s_theta_star_python.png)
+**GBFS**              | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/graph_search/gbfs.py)     | ![gbfs_python.png](assets/gbfs_python.png) 
+**Dijkstra**                 | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/graph_search/dijkstra.py) | ![dijkstra_python.png](assets/dijkstra_python.png)
+**A***               | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/graph_search/a_star.py)   |  ![a_star_python.png](assets/a_star_python.png) 
+**JPS**                 | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/graph_search/jps.py)      | ![jps_python.png](assets/jps_python.png)
+**D***                  | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/graph_search/d_star.py)   | ![d_star_python.png](assets/d_star_python.png)
+**LPA***                 | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/graph_search/lpa_star.py) | ![lpa_star_python.png](assets/lpa_star_python.png) 
+**D\* Lite**                | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/graph_search/d_star_lite.py) | ![d_star_lite_python.png](assets/d_star_lite_python.png)
+**Theta\***                | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/graph_search/theta_star.py) | ![theta_star_python.png](assets/theta_star_python.png)
+**Lazy Theta\***                | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/graph_search/lazy_theta_star.py) | ![lazy_theta_star_python.png](assets/lazy_theta_star_python.png)
+**S-Theta\***                | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/graph_search/s_theta_star.py) | ![s_theta_star_python.png](assets/s_theta_star_python.png)
 **Anya**                | [![Status](https://img.shields.io/badge/develop-v1.0-red)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/graph_search/anya.py) | ![Status](https://img.shields.io/badge/gif-none-yellow)
-**Voronoi**                | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/graph_search/voronoi.py)  | ![voronoi_python.png](gif/voronoi_python.png) 
-**RRT**                 | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/sample_search/rrt.py)     | ![rrt_python.png](gif/rrt_python.png)
-**RRT***                 | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/sample_search/rrt_star.py) | ![rrt_star_python.png](gif/rrt_star_python.png)
-**Informed RRT**                 | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/sample_search/informed_rrt.py) | ![informed_rrt_python.png](gif/informed_rrt_python.png)
-**RRT-Connect**                | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/sample_search/rrt_connect.py) | ![rrt_connect_python.png](gif/rrt_connect_python.png)
-| **ACO** | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/evolutionary_search/aco.py) | ![aco_python.png](gif/aco_python.png)
+**Voronoi**                | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/graph_search/voronoi.py)  | ![voronoi_python.png](assets/voronoi_python.png) 
+**RRT**                 | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/sample_search/rrt.py)     | ![rrt_python.png](assets/rrt_python.png)
+**RRT***                 | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/sample_search/rrt_star.py) | ![rrt_star_python.png](assets/rrt_star_python.png)
+**Informed RRT**                 | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/sample_search/informed_rrt.py) | ![informed_rrt_python.png](assets/informed_rrt_python.png)
+**RRT-Connect**                | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/sample_search/rrt_connect.py) | ![rrt_connect_python.png](assets/rrt_connect_python.png)
+| **ACO** | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/evolutionary_search/aco.py) | ![aco_python.png](assets/aco_python.png)
 | **GA**  | ![Status](https://img.shields.io/badge/develop-v1.0-red) | ![Status](https://img.shields.io/badge/gif-none-yellow) 
 | **PSO**  | ![Status](https://img.shields.io/badge/develop-v1.0-red) | ![Status](https://img.shields.io/badge/gif-none-yellow) 
 
 
 ## Local Planner
-| Planner     |  Version   | Animation                                     
-|-------------| ---------------------------------------- | -------------------------------------------------- 
-| **PID**     | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/local_planner/pid.py) | ![pid_python.gif](gif/pid_python.gif) 
-| **APF**     |[![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/local_planner/apf.py) | ![apf_python.gif](gif/apf_python.gif) 
-| **DWA**     |  [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/local_planner/dwa.py) | ![dwa_python.gif](gif/dwa_python.gif)
-| **RPP**     |     [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/local_planner/rpp.py)     | ![rpp_python.gif](gif/rpp_python.gif)
-| **LQR**     | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/local_planner/lqr.py) | ![lqr_python.gif](gif/lqr_python.gif) 
-| **TEB**     | ![Status](https://img.shields.io/badge/develop-v1.0-red) | ![Status](https://img.shields.io/badge/gif-none-yellow) 
-| **MPC**     | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/local_planner/mpc.py) | ![mpc_python.gif](gif/mpc_python.gif)
-| **MPPI**    | ![Status](https://img.shields.io/badge/develop-v1.0-red) |![Status](https://img.shields.io/badge/gif-none-yellow)
-| **Lattice** | ![Status](https://img.shields.io/badge/develop-v1.0-red) |![Status](https://img.shields.io/badge/gif-none-yellow)
-| **DDPG**    | ![Status](https://img.shields.io/badge/develop-v1.0-red) |![Status](https://img.shields.io/badge/gif-none-yellow)
+| Planner     | Version                                                                                                                                                | Animation                                     
+|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------| -------------------------------------------------- 
+| **PID**     | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/local_planner/pid.py)  | ![pid_python.svg](assets/pid_python.svg) 
+| **APF**     | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/local_planner/apf.py)  | ![apf_python.svg](assets/apf_python.svg) 
+| **DWA**     | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/local_planner/dwa.py)  | ![dwa_python.svg](assets/dwa_python.svg)
+| **RPP**     | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/local_planner/rpp.py)  | ![rpp_python.svg](assets/rpp_python.svg)
+| **LQR**     | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/local_planner/lqr.py)  | ![lqr_python.svg](assets/lqr_python.svg) 
+| **TEB**     | ![Status](https://img.shields.io/badge/develop-v1.0-red)                                                                                               | ![Status](https://img.shields.io/badge/gif-none-yellow) 
+| **MPC**     | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/local_planner/mpc.py)  | ![mpc_python.svg](assets/mpc_python.svg)
+| **MPPI**    | ![Status](https://img.shields.io/badge/develop-v1.0-red)                                                                                               |![Status](https://img.shields.io/badge/gif-none-yellow)
+| **Lattice** | ![Status](https://img.shields.io/badge/develop-v1.0-red)                                                                                               |![Status](https://img.shields.io/badge/gif-none-yellow)
+| **DDPG**    | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/local_planner/ddpg.py) |![ddpg_python.svg](assets/ddpg_python.svg)
 
 ## Curve Generation
 
 | Planner | Version   | Animation                                |
 | ------- | -------------------------------------------------------- | -------------------------------------------------------- 
-| **Polynomia** | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/curve_generation/polynomial_curve.py) | ![polynomial_curve_python.gif](gif/polynomial_curve_python.gif)
-| **Bezier** | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/curve_generation/bezier_curve.py) | ![bezier_curve_python.png](gif/bezier_curve_python.png)
-| **Cubic Spline** | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/curve_generation/cubic_spline.py) | ![cubic_spline_python.png](gif/cubic_spline_python.png)
-| **BSpline** | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/curve_generation/bspline_curve.py) | ![bspline_curve_python.png](gif/bspline_curve_python.png)
-| **Dubins** | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/curve_generation/dubins_curve.py) | ![dubins_curve_python.png](gif/dubins_curve_python.png)
-| **Reeds-Shepp** | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/curve_generation/reeds_shepp.py) | ![reeds_shepp_python.png](gif/reeds_shepp_python.gif)
-| **Fem-Pos Smoother** | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/curve_generation/fem_pos_smooth.py) | ![fem_pos_smoother_python.png](gif/fem_pos_smoother_python.png)
+| **Polynomia** | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/curve_generation/polynomial_curve.py) | ![polynomial_curve_python.gif](assets/polynomial_curve_python.gif)
+| **Bezier** | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/curve_generation/bezier_curve.py) | ![bezier_curve_python.png](assets/bezier_curve_python.png)
+| **Cubic Spline** | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/curve_generation/cubic_spline.py) | ![cubic_spline_python.png](assets/cubic_spline_python.png)
+| **BSpline** | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/curve_generation/bspline_curve.py) | ![bspline_curve_python.png](assets/bspline_curve_python.png)
+| **Dubins** | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/curve_generation/dubins_curve.py) | ![dubins_curve_python.png](assets/dubins_curve_python.png)
+| **Reeds-Shepp** | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/curve_generation/reeds_shepp.py) | ![reeds_shepp_python.png](assets/reeds_shepp_python.gif)
+| **Fem-Pos Smoother** | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/curve_generation/fem_pos_smooth.py) | ![fem_pos_smoother_python.png](assets/fem_pos_smoother_python.png)
 
 
 

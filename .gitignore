@@ -17,7 +17,10 @@ pnpm-debug.log*
 examples/runs/
 
 # model state dict files
-examples/models/
+examples/models/*
+# some example models
+!examples/models/actor_best_example.pth
+!examples/models/critic_best_example.pth
 
 # Editor directories and files
 .idea

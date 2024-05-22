@@ -225,7 +225,7 @@ class DDPG(LocalPlanner):
         [1] Continuous control with deep reinforcement learning
     """
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean",
-                 hidden_depth: int = 5, hidden_width: int = 512, batch_size: int = 2000, buffer_size: int = 1e6,
+                 hidden_depth: int = 3, hidden_width: int = 512, batch_size: int = 2000, buffer_size: int = 1e6,
                  gamma: float = 0.999, tau: float = 1e-3, lr: float = 1e-4, train_noise: float = 0.1,
                  random_episodes: int = 50, max_episode_steps: int = 200,
                  update_freq: int = 1, update_steps: int = 1, evaluate_freq: int = 50, evaluate_episodes: int = 50,
@@ -295,7 +295,6 @@ class DDPG(LocalPlanner):
         g_goal  = (goal[0], goal[1])
         self.g_planner = {"planner_name": "a_star", "start": g_start, "goal": g_goal, "env": env}
         self.path = self.g_path[::-1]
-        self.history_lookahead = []
 
     def __del__(self) -> None:
         self.writer.close()
@@ -319,7 +318,6 @@ class DDPG(LocalPlanner):
 
             # get the particular point on the path at the lookahead distance to track
             lookahead_pt, theta_trj, kappa = self.getLookaheadPoint()
-            self.history_lookahead.append((lookahead_pt[0], lookahead_pt[1], theta_trj))
             s[5:7] = torch.tensor(lookahead_pt, device=self.device)
             s[7] = torch.tensor(theta_trj, device=self.device)
 
@@ -329,6 +327,7 @@ class DDPG(LocalPlanner):
             self.robot.px, self.robot.py, self.robot.theta, self.robot.v, self.robot.w = tuple(s[0:5].cpu().numpy())
 
         return True, self.robot.history_pose
+        # return False, None
 
     def run(self) -> None:
         """
@@ -342,7 +341,7 @@ class DDPG(LocalPlanner):
         path = np.array(history_pose)[:, 0:2]
         cost = np.sum(np.sqrt(np.sum(np.diff(path, axis=0)**2, axis=1, keepdims=True)))
         self.plot.plotPath(self.path, path_color="r", path_style="--")
-        self.plot.animation(path, str(self), cost, history_pose=history_pose, lookahead_pts=self.history_lookahead)
+        self.plot.animation(path, str(self), cost, history_pose=history_pose)
 
     def select_action(self, s: torch.Tensor) -> torch.Tensor:
         """
