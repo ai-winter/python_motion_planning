@@ -155,9 +155,9 @@ class Critic(nn.Module):
         self.max_action = max_action
 
         self.hidden_depth = hidden_depth
-        self.input_layer = nn.Linear(state_dim, hidden_width)
+        self.input_layer = nn.Linear(state_dim + action_dim, hidden_width)
         self.hidden_layers = nn.ModuleList([nn.Linear(hidden_width, hidden_width) for _ in range(self.hidden_depth)])
-        self.output_layer = nn.Linear(hidden_width, action_dim)
+        self.output_layer = nn.Linear(hidden_width, 1)
 
     def forward(self, s: torch.Tensor, a: torch.Tensor) -> torch.Tensor:
         """
@@ -271,7 +271,7 @@ class DDPG(LocalPlanner):
             self.actor.load_state_dict(torch.load(actor_load_path))
         self.actor_target = copy.deepcopy(self.actor)
 
-        self.critic = Critic(self.n_observations + self.n_actions, 1, self.hidden_depth, self.hidden_width,
+        self.critic = Critic(self.n_observations, self.n_actions, self.hidden_depth, self.hidden_width,
                              self.min_state, self.max_state, self.min_action, self.max_action).to(self.device)
         if critic_load_path:
             self.critic.load_state_dict(torch.load(critic_load_path))

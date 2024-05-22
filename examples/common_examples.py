@@ -25,13 +25,13 @@ from python_motion_planning import *
 # plt.run()
 
 # -------------local planners-------------
-plt = PID(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
+# plt = PID(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
 # plt = DWA(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
 # plt = APF(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
 # plt = LQR(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
 # plt = RPP(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
 # plt = MPC(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
-plt.run()
+# plt.run()
 
 
 # Train the model, only for learning-based planners, such as DDPG
@@ -39,9 +39,9 @@ plt.run()
 # If you want a faster training, try reducing num_episodes and batch_size,
 # or increasing update_steps and evaluate_episodes, or fine-tuning other hyperparameters
 # if you are familiar with them, usually in a cost of performance, however.
-# plt = DDPG(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31),
-#            actor_save_path="models/actor_best.pth", critic_save_path="models/critic_best.pth")
-# plt.train(num_episodes=10000)
+plt = DDPG(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31),
+           actor_save_path="models/actor_best.pth", critic_save_path="models/critic_best.pth")
+plt.train(num_episodes=10000)
 
 # load the trained model and run
 # plt = DDPG(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31),
