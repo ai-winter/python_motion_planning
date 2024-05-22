@@ -225,10 +225,10 @@ class DDPG(LocalPlanner):
         [1] Continuous control with deep reinforcement learning
     """
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean",
-                 hidden_depth: int = 3, hidden_width: int = 512, batch_size: int = 2e4, buffer_size: int = 2e6,
-                 gamma: float = 0.999, tau: float = 1e-3, lr: float = 5e-4, train_noise: float = 0.1,
-                 random_episodes: int = 100, max_episode_steps: int = 200,
-                 update_freq: int = 1, update_steps: int = 5, evaluate_freq: int = 50, evaluate_episodes: int = 50,
+                 hidden_depth: int = 5, hidden_width: int = 512, batch_size: int = 2000, buffer_size: int = 1e6,
+                 gamma: float = 0.999, tau: float = 1e-3, lr: float = 1e-4, train_noise: float = 0.1,
+                 random_episodes: int = 50, max_episode_steps: int = 200,
+                 update_freq: int = 1, update_steps: int = 1, evaluate_freq: int = 50, evaluate_episodes: int = 50,
                  actor_save_path: str = "models/actor_best.pth",
                  critic_save_path: str = "models/critic_best.pth",
                  actor_load_path: str = None,
@@ -455,6 +455,7 @@ class DDPG(LocalPlanner):
             s = self.reset(random_sg=True)
             episode_actor_loss = 0
             episode_critic_loss = 0
+            optimize_times = 0
             for episode_steps in tqdm(range(1, self.max_episode_steps+1)):
                 if episode <= self.random_episodes:
                     # Take the random actions in the beginning for the better exploration
@@ -473,29 +474,30 @@ class DDPG(LocalPlanner):
 
                 self.replay_buffer.store(s, a, r, s_, win)  # Store the transition
 
+                # update the networks if enough samples are available
+                if episode > self.random_episodes and (episode_steps % self.update_steps == 0 or done):
+                    for _ in range(self.update_freq):
+                        actor_loss, critic_loss = self.optimize_model()
+                        episode_actor_loss += actor_loss
+                        episode_critic_loss += critic_loss
+                        optimize_times += 1
+
                 if win:
                     print(f"Goal reached! State: {s}, Action: {a}, Reward: {r:.4f}, Next State: {s_}")
                     break
-                elif done:  # lose
+                elif done:  # lose (collide)
                     print(f"Collision! State: {s}, Action: {a}, Reward: {r:.4f}, Next State: {s_}")
                     break
 
                 s = s_  # Move to the next state
 
-                # update the networks if enough samples are available
-                if episode > self.random_episodes and (episode_steps - 1) % self.update_steps == 0:
-                    for _ in range(self.update_freq):
-                        actor_loss, critic_loss = self.optimize_model()
-                        episode_actor_loss += actor_loss
-                        episode_critic_loss += critic_loss
-
             if episode > self.random_episodes:
-                average_actor_loss = episode_actor_loss / (self.max_episode_steps + self.update_freq)
-                average_critic_loss = episode_critic_loss / (self.max_episode_steps + self.update_freq)
+                average_actor_loss = episode_actor_loss / optimize_times
+                average_critic_loss = episode_critic_loss / optimize_times
                 self.writer.add_scalar('Actor train loss', average_actor_loss, global_step=episode)
                 self.writer.add_scalar('Critic train loss', average_critic_loss, global_step=episode)
 
-            if episode % self.evaluate_episodes == 0:
+            if episode % self.evaluate_episodes == 0 and episode > self.random_episodes - self.evaluate_episodes:
                 print()
                 evaluate_reward = self.evaluate_policy()
                 print("Evaluate_reward:{}".format(evaluate_reward))
