@@ -215,9 +215,6 @@ class DDPG(LocalPlanner):
     Examples:
         >>> from python_motion_planning.utils import Grid
         >>> from python_motion_planning.local_planner import DDPG
-        >>> start = (5, 5, 0)
-        >>> goal = (45, 25, 0)
-        >>> env = Grid(51, 31)
         # Train the model, only for learning-based planners, such as DDPG
 	# It costs a lot of time to train the model, please be patient.
 	# If you want a faster training, try reducing num_episodes and batch_size,
