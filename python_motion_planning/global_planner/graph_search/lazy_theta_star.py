@@ -2,7 +2,7 @@
 @file: lazy_theta_star.py
 @breif: Lazy Theta* motion planning
 @author: Yang Haodong, Wu Maojia
-@update: 2024.2.11
+@update: 2024.6.22
 """
 import heapq
 
@@ -20,12 +20,9 @@ class LazyThetaStar(ThetaStar):
         heuristic_type (str): heuristic function type
 
     Examples:
-        >>> from python_motion_planning.utils import Grid
-        >>> from graph_search import LazyThetaStar
-        >>> start = (5, 5)
-        >>> goal = (45, 25)
-        >>> env = Grid(51, 31)
-        >>> planner = LazyThetaStar(start, goal, env)
+        >>> import python_motion_planning as pmp
+        >>> planner = pmp.LazyThetaStar((5, 5), (45, 25), (51, 31))
+        >>> cost, path, expand = planner.plan()
         >>> planner.run()
 
     References:
@@ -37,7 +34,7 @@ class LazyThetaStar(ThetaStar):
     def __str__(self) -> str:
         return "Lazy Theta*"
 
-    def plan(self):
+    def plan(self) -> tuple:
         """
         Lazy Theta* motion plan function.
 
@@ -46,52 +43,46 @@ class LazyThetaStar(ThetaStar):
             path (list): planning path
             expand (list): all nodes that planner has searched
         """
-        # OPEN set with priority and CLOSED set
+        # OPEN list (priority queue) and CLOSED list (hash table)
         OPEN = []
         heapq.heappush(OPEN, self.start)
-        CLOSED = []
+        CLOSED = dict()
 
         while OPEN:
             node = heapq.heappop(OPEN)
 
             # set vertex: path 1
-            try:
-                node_p = CLOSED[CLOSED.index(Node(node.parent))]
+            node_p = CLOSED.get(node.parent)
+            if node_p:
                 if not self.lineOfSight(node_p, node):
                     node.g = float("inf")
                     for node_n in self.getNeighbor(node):
-                        if node_n in CLOSED:
-                            node_n = CLOSED[CLOSED.index(node_n)]
+                        if node_n.current in CLOSED:
+                            node_n = CLOSED[node_n.current]
                             if node.g > node_n.g + self.dist(node_n, node):
                                 node.g = node_n.g + self.dist(node_n, node)
                                 node.parent = node_n.current
-            except:
-                pass
 
             # exists in CLOSED set
-            if node in CLOSED:
+            if node.current in CLOSED:
                 continue
 
             # goal found
             if node == self.goal:
-                CLOSED.append(node)
+                CLOSED[node.current] = node
                 cost, path = self.extractPath(CLOSED)
-                return cost, path, CLOSED
+                return cost, path, list(CLOSED.values())
 
             for node_n in self.getNeighbor(node):                
                 # exists in CLOSED set
-                if node_n in CLOSED:
+                if node_n.current in CLOSED:
                     continue
                 
                 # path1
                 node_n.parent = node.current
                 node_n.h = self.h(node_n, self.goal)
 
-                try:
-                    p_index = CLOSED.index(Node(node.parent))
-                    node_p = CLOSED[p_index]
-                except:
-                    node_p = None
+                node_p = CLOSED.get(node.parent)
 
                 if node_p:
                     # path2
@@ -105,7 +96,7 @@ class LazyThetaStar(ThetaStar):
                 # update OPEN set
                 heapq.heappush(OPEN, node_n)
             
-            CLOSED.append(node)
+            CLOSED[node.current] = node
         return [], [], []
     
     def updateVertex(self, node_p: Node, node_c: Node) -> None:

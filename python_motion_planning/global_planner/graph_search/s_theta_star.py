@@ -2,7 +2,7 @@
 @file: s_theta_star.py
 @breif: S-Theta* motion planning
 @author: Wu Maojia
-@update: 2024.3.6
+@update: 2024.6.22
 '''
 import heapq
 from math import acos
@@ -22,12 +22,9 @@ class SThetaStar(ThetaStar):
         heuristic_type (str): heuristic function type
 
     Examples:
-        >>> from python_motion_planning.utils import Grid
-        >>> from graph_search import SThetaStar
-        >>> start = (5, 5)
-        >>> goal = (45, 25)
-        >>> env = Grid(51, 31)
-        >>> planner = SThetaStar(start, goal, env)
+        >>> import python_motion_planning as pmp
+        >>> planner = pmp.SThetaStar((5, 5), (45, 25), (51, 31))
+        >>> cost, path, expand = planner.plan()
         >>> planner.run()
 
     References:
@@ -40,7 +37,7 @@ class SThetaStar(ThetaStar):
     def __str__(self) -> str:
         return "S-Theta*"
 
-    def plan(self):
+    def plan(self) -> tuple:
         """
         S-Theta* motion plan function.
 
@@ -49,27 +46,27 @@ class SThetaStar(ThetaStar):
             path (list): planning path
             expand (list): all nodes that planner has searched
         """
-        # OPEN set with priority and CLOSED set
+        # OPEN list (priority queue) and CLOSED list (hash table)
         OPEN = []
         heapq.heappush(OPEN, self.start)
-        CLOSED = []
+        CLOSED = dict()
 
         while OPEN:
             node = heapq.heappop(OPEN)
 
             # exists in CLOSED set
-            if node in CLOSED:
+            if node.current in CLOSED:
                 continue
 
             # goal found
             if node == self.goal:
-                CLOSED.append(node)
+                CLOSED[node.current] = node
                 cost, path = self.extractPath(CLOSED)
-                return cost, path, CLOSED
+                return cost, path, list(CLOSED.values())
 
             for node_n in self.getNeighbor(node):
                 # exists in CLOSED set
-                if node_n in CLOSED:
+                if node_n.current in CLOSED:
                     continue
 
                 # path1
@@ -77,13 +74,10 @@ class SThetaStar(ThetaStar):
                 node_n.h = self.h(node_n, self.goal)
 
                 alpha = 0.0
-                try:
-                    p_index = CLOSED.index(Node(node.parent))
-                    node_p = CLOSED[p_index]
+                node_p = CLOSED.get(node.parent)
+                if node_p:
                     alpha = self.getAlpha(node_p, node_n)
                     node_n.g += alpha
-                except:
-                    node_p = None
 
                 if node_p:
                     self.updateVertex(node_p, node_n, alpha)
@@ -96,7 +90,7 @@ class SThetaStar(ThetaStar):
                 # update OPEN set
                 heapq.heappush(OPEN, node_n)
 
-            CLOSED.append(node)
+            CLOSED[node.current] = node
         return [], [], []
 
     def updateVertex(self, node_p: Node, node_c: Node, alpha: float) -> None:
