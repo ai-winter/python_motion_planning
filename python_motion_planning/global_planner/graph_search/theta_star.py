@@ -2,7 +2,7 @@
 @file: theta_star.py
 @breif: Theta* motion planning
 @author: Yang Haodong, Wu Maojia
-@update: 2024.6.22
+@update: 2024.6.23
 """
 import heapq
 
@@ -26,7 +26,7 @@ class ThetaStar(AStar):
 
     Examples:
         >>> import python_motion_planning as pmp
-        >>> planner = pmp.ThetaStar((5, 5), (45, 25), (51, 31))
+        >>> planner = pmp.ThetaStar((5, 5), (45, 25), pmp.Grid(51, 31))
         >>> cost, path, expand = planner.plan()
         >>> planner.run()
 
@@ -57,7 +57,7 @@ class ThetaStar(AStar):
         while OPEN:
             node = heapq.heappop(OPEN)
 
-            # exists in CLOSED set
+            # exists in CLOSED list
             if node.current in CLOSED:
                 continue
 
@@ -68,7 +68,7 @@ class ThetaStar(AStar):
                 return cost, path, list(CLOSED.values())
 
             for node_n in self.getNeighbor(node):                
-                # exists in CLOSED set
+                # exists in CLOSED list
                 if node_n.current in CLOSED:
                     continue
                 
@@ -86,7 +86,7 @@ class ThetaStar(AStar):
                     heapq.heappush(OPEN, node_n)
                     break
                 
-                # update OPEN set
+                # update OPEN list
                 heapq.heappush(OPEN, node_n)
 
             CLOSED[node.current] = node

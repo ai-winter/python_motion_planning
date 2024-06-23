@@ -2,7 +2,7 @@
 @file: a_star.py
 @breif: A* motion planning
 @author: Yang Haodong, Wu Maojia
-@update: 2024.6.22
+@update: 2024.6.23
 """
 import heapq
 
@@ -22,7 +22,7 @@ class AStar(GraphSearcher):
 
     Examples:
         >>> import python_motion_planning as pmp
-        >>> planner = pmp.AStar((5, 5), (45, 25), (51, 31))
+        >>> planner = pmp.AStar((5, 5), (45, 25), pmp.Grid(51, 31))
         >>> cost, path, expand = planner.plan()     # planning results only
         >>> planner.run()       # run the animation
 

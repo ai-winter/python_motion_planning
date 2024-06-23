@@ -2,7 +2,7 @@
 @file: lazy_theta_star.py
 @breif: Lazy Theta* motion planning
 @author: Yang Haodong, Wu Maojia
-@update: 2024.6.22
+@update: 2024.6.23
 """
 import heapq
 
@@ -21,7 +21,7 @@ class LazyThetaStar(ThetaStar):
 
     Examples:
         >>> import python_motion_planning as pmp
-        >>> planner = pmp.LazyThetaStar((5, 5), (45, 25), (51, 31))
+        >>> planner = pmp.LazyThetaStar((5, 5), (45, 25), pmp.Grid(51, 31))
         >>> cost, path, expand = planner.plan()
         >>> planner.run()
 
@@ -63,7 +63,7 @@ class LazyThetaStar(ThetaStar):
                                 node.g = node_n.g + self.dist(node_n, node)
                                 node.parent = node_n.current
 
-            # exists in CLOSED set
+            # exists in CLOSED list
             if node.current in CLOSED:
                 continue
 
@@ -74,7 +74,7 @@ class LazyThetaStar(ThetaStar):
                 return cost, path, list(CLOSED.values())
 
             for node_n in self.getNeighbor(node):                
-                # exists in CLOSED set
+                # exists in CLOSED list
                 if node_n.current in CLOSED:
                     continue
                 
@@ -93,7 +93,7 @@ class LazyThetaStar(ThetaStar):
                     heapq.heappush(OPEN, node_n)
                     break
                 
-                # update OPEN set
+                # update OPEN list
                 heapq.heappush(OPEN, node_n)
             
             CLOSED[node.current] = node

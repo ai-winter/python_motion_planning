@@ -28,13 +28,13 @@ if __name__ == '__main__':
     # planner = search_factory("gbfs", start=start, goal=goal, env=env)
     # planner = search_factory("theta_star", start=start, goal=goal, env=env)
     # planner = search_factory("lazy_theta_star", start=start, goal=goal, env=env)
-    planner = search_factory("s_theta_star", start=start, goal=goal, env=env)
+    # planner = search_factory("s_theta_star", start=start, goal=goal, env=env)
     # planner = search_factory("jps", start=start, goal=goal, env=env)
     # planner = search_factory("d_star", start=start, goal=goal, env=env)
     # planner = search_factory("lpa_star", start=start, goal=goal, env=env)
     # planner = search_factory("d_star_lite", start=start, goal=goal, env=env)
-    # planner = search_factory("voronoi", start=start, goal=goal, env=env, n_knn=4,
-    #                             max_edge_len=10.0, inflation_r=1.0)
+    planner = search_factory("voronoi", start=start, goal=goal, env=env, n_knn=4,
+                                max_edge_len=10.0, inflation_r=1.0)
 
     # animation
     planner.run()

@@ -2,7 +2,7 @@
 @file: s_theta_star.py
 @breif: S-Theta* motion planning
 @author: Wu Maojia
-@update: 2024.6.22
+@update: 2024.6.23
 '''
 import heapq
 from math import acos
@@ -23,7 +23,7 @@ class SThetaStar(ThetaStar):
 
     Examples:
         >>> import python_motion_planning as pmp
-        >>> planner = pmp.SThetaStar((5, 5), (45, 25), (51, 31))
+        >>> planner = pmp.SThetaStar((5, 5), (45, 25), pmp.Grid(51, 31))
         >>> cost, path, expand = planner.plan()
         >>> planner.run()
 
@@ -54,7 +54,7 @@ class SThetaStar(ThetaStar):
         while OPEN:
             node = heapq.heappop(OPEN)
 
-            # exists in CLOSED set
+            # exists in CLOSED list
             if node.current in CLOSED:
                 continue
 
@@ -65,7 +65,7 @@ class SThetaStar(ThetaStar):
                 return cost, path, list(CLOSED.values())
 
             for node_n in self.getNeighbor(node):
-                # exists in CLOSED set
+                # exists in CLOSED list
                 if node_n.current in CLOSED:
                     continue
 
@@ -87,7 +87,7 @@ class SThetaStar(ThetaStar):
                     heapq.heappush(OPEN, node_n)
                     break
 
-                # update OPEN set
+                # update OPEN list
                 heapq.heappush(OPEN, node_n)
 
             CLOSED[node.current] = node
