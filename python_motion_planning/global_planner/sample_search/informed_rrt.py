@@ -1,8 +1,8 @@
 """
 @file: informed_rrt.py
 @breif: Informed RRT* motion planning
-@author: Winter
-@update: 2023.1.18
+@author: Yang Haodong, Wu Maojia
+@update: 2024.6.23
 """
 import numpy as np
 from functools import partial
@@ -11,7 +11,8 @@ import matplotlib.pyplot as plt
 from .rrt_star import RRTStar
 from python_motion_planning.utils import Env, Node
 
-class ellipse:
+
+class Ellipse:
     """
     Ellipse sampling.
     """
@@ -31,6 +32,7 @@ class ellipse:
                       [                 0,                 0,        1]])
         return T
 
+
 class InformedRRT(RRTStar):
     """
     Class for Informed RRT* motion planning.
@@ -45,19 +47,17 @@ class InformedRRT(RRTStar):
         goal_sample_rate (float): heuristic sample
 
     Examples:
-        >>> from python_motion_planning.utils import Map
-        >>> from sample_search import InformedRRT
-        >>> start = (5, 5)
-        >>> goal = (45, 25)
-        >>> env = Map(51, 31)
-        >>> planner = InformedRRT(start, goal, env)
-        >>> planner.run()
+        >>> import python_motion_planning as pmp
+        >>> planner = pmp.InformedRRT((5, 5), (45, 25), pmp.Map(51, 31))
+        >>> cost, path, expand = planner.plan()     # planning results only
+        >>> planner.plot.animation(path, str(planner), cost, expand)  # animation
+        >>> planner.run()       # run both planning and animation
 
     References:
         [1] Optimal Sampling-based Path Planning Focused via Direct Sampling of an Admissible Ellipsoidal heuristic
     """
-    def __init__(self, start: tuple, goal: tuple, env: Env, max_dist: float,
-                 sample_num: int, r: float, goal_sample_rate: float = 0.05) -> None:
+    def __init__(self, start: tuple, goal: tuple, env: Env, max_dist: float = 0.5,
+                 sample_num: int = 1500, r: float = 12.0, goal_sample_rate: float = 0.05) -> None:
         super().__init__(start, goal, env, max_dist, sample_num, goal_sample_rate)
         # optimization radius
         self.r = r
@@ -66,56 +66,64 @@ class InformedRRT(RRTStar):
         # distance between start and goal
         self.c_min = self.dist(self.start, self.goal)
         # ellipse sampling
-        self.transform = partial(ellipse.transform, c=self.c_min / 2, p1=start, p2=goal)
+        self.transform = partial(Ellipse.transform, c=self.c_min / 2, p1=start, p2=goal)
     
     def __str__(self) -> str:
         return "Informed RRT*"
 
-    def plan(self):
+    def plan(self) -> tuple:
         """
         Informed-RRT* motion plan function.
 
         Returns:
             cost (float): path cost
             path (list): planning path
+            expand (list): expanded (sampled) nodes list
         """
-        # generate a random node in the map
-        node_rand = self.generateRandomNode()
+        # Sampled list
+        sample_list = {self.start.current: self.start}
 
-        # visited
-        if node_rand in self.sample_list:
-            return 0, None
+        best_cost, best_path = float("inf"), None
 
-        # generate new node
-        node_new = self.getNearest(self.sample_list, node_rand)
-        if node_new:
-            self.sample_list.append(node_new)
-            dist = self.dist(node_new, self.goal)
-            # goal found
-            if dist <= self.max_dist and not self.isCollision(node_new, self.goal):
-                self.goal.parent = node_new.current
-                self.goal.g = node_new.g + self.dist(self.goal, node_new)
-                self.sample_list.append(self.goal)
-                return self.extractPath(self.sample_list)
-        return 0, None
+        # main loop
+        for i in range(self.sample_num):
+            # generate a random node in the map
+            node_rand = self.generateRandomNode()
+
+            # visited
+            if node_rand.current in sample_list:
+                continue
+
+            # generate new node
+            node_new = self.getNearest(list(sample_list.values()), node_rand)
+            if node_new:
+                sample_list[node_new.current] = node_new
+                dist = self.dist(node_new, self.goal)
+                # goal found
+                if dist <= self.max_dist and not self.isCollision(node_new, self.goal):
+                    self.goal.parent = node_new.current
+                    self.goal.g = node_new.g + self.dist(self.goal, node_new)
+                    sample_list[self.goal.current] = self.goal
+                    cost, path = self.extractPath(sample_list)
+                    if path and cost < best_cost:
+                        best_cost, best_path = cost, path
+                        self.c_best = best_cost
+
+        return best_cost, best_path, list(sample_list.values())
 
     def run(self) -> None:
         """
         Running both plannig and animation.
         """
-        best_cost, best_path = float("inf"), None
-
-        # main loop
-        for i in range(self.sample_num):
-            cost, path = self.plan()
-            # update
-            if path and cost < best_cost:
-                self.c_best = best_cost = cost
-                best_path = path
-            # animation
-            if  i % 30 == 0:
-                self.animation(best_path, best_cost)
-        plt.show()
+        cost, path, expand = self.plan()
+        t = np.arange(0, 2 * np.pi + 0.1, 0.1)
+        x = [np.cos(it) for it in t]
+        y = [np.sin(it) for it in t]
+        z = [1 for _ in t]
+        fx = self.transform(self.c_best / 2) @ np.array([x, y, z])
+        fx[0, :] += x
+        fx[1, :] += y
+        self.plot.animation(path, str(self), cost, expand, ellipse=fx)
 
     def generateRandomNode(self) -> Node:
         """
@@ -142,25 +150,3 @@ class InformedRRT(RRTStar):
         # random sample
         else:
             return super().generateRandomNode()
-
-    def animation(self, path, cost):
-        self.plot.clean()
-        name = str(self) + "\ncost: " + str(cost)
-        self.plot.plotEnv(name)
-        for s_node in self.sample_list:
-            if s_node.parent:
-                plt.plot([s_node.px, s_node.x], [s_node.py, s_node.y], 
-                    color="#dddddd", linestyle="-")
-        if self.c_best < float("inf"):
-            self.drawEllipse()
-        if path:
-            self.plot.plotPath(path)
-        plt.pause(0.01)
-
-    def drawEllipse(self):
-        t = np.arange(0, 2 * np.pi + 0.1, 0.1)
-        x = [np.cos(it) for it in t]
-        y = [np.sin(it) for it in t]
-        z = [1 for _ in t]
-        fx = self.transform(self.c_best / 2) @ np.array([x, y, z])
-        plt.plot(fx[0, :], fx[1, :], linestyle='--', color='darkorange', linewidth=2)

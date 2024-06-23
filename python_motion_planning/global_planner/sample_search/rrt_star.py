@@ -1,11 +1,12 @@
 """
 @file: rrt_star.py
 @breif: RRT-Star motion planning
-@author: Winter
-@update: 2023.1.18
+@author: Yang Haodong, Wu Maojia
+@update: 2024.6.23
 """
 from .rrt import RRT
 from python_motion_planning.utils import Env, Node
+
 
 class RRTStar(RRT):
     """
@@ -21,19 +22,17 @@ class RRTStar(RRT):
         goal_sample_rate (float): heuristic sample
 
     Examples:
-        >>> from python_motion_planning.utils import Map
-        >>> from sample_search import RRTStar
-        >>> start = (5, 5)
-        >>> goal = (45, 25)
-        >>> env = Map(51, 31)
-        >>> planner = RRTStar(start, goal, env)
-        >>> planner.run()
+        >>> import python_motion_planning as pmp
+        >>> planner = pmp.RRTStar((5, 5), (45, 25), pmp.Map(51, 31))
+        >>> cost, path, expand = planner.plan()     # planning results only
+        >>> planner.plot.animation(path, str(planner), cost, expand)  # animation
+        >>> planner.run()       # run both planning and animation
 
     References:
         [1] Sampling-based algorithms for optimal motion planning
     """
-    def __init__(self, start: tuple, goal: tuple, env: Env, max_dist: float,
-                 sample_num: int, r: float, goal_sample_rate: float = 0.05) -> None:
+    def __init__(self, start: tuple, goal: tuple, env: Env, max_dist: float = 0.5,
+                 sample_num: int = 10000, r: float = 10.0, goal_sample_rate: float = 0.05) -> None:
         super().__init__(start, goal, env, max_dist, sample_num, goal_sample_rate)
         # optimization radius
         self.r = r

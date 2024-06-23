@@ -12,17 +12,16 @@ from python_motion_planning import *
 # plt = SThetaStar(start=(5, 5), goal=(45, 25), env=Grid(51, 31))
 # plt = LPAStar(start=(5, 5), goal=(45, 25), env=Grid(51, 31))
 # plt = VoronoiPlanner(start=(5, 5), goal=(45, 25), env=Grid(51, 31))
-# plt = HybridAStar(start=(5, 5), goal=(45, 25), env=Grid(51, 31))
 
-# plt = RRT(start=(18, 8), goal=(37, 18), env=Map(51, 31), max_dist=0.5, sample_num=10000)
-# plt = RRTConnect(start=(18, 8), goal=(37, 18), env=Map(51, 31), max_dist=0.5, sample_num=10000)
-# plt = RRTStar(start=(18, 8), goal=(37, 18), env=Map(51, 31), max_dist=0.5, r=10, sample_num=10000)
-# plt = InformedRRT(start=(18, 8), goal=(37, 18), env=Map(51, 31), max_dist=0.5, r=12, sample_num=1500)
+# plt = RRT(start=(18, 8), goal=(37, 18), env=Map(51, 31))
+# plt = RRTConnect(start=(18, 8), goal=(37, 18), env=Map(51, 31))
+# plt = RRTStar(start=(18, 8), goal=(37, 18), env=Map(51, 31))
+# plt = InformedRRT(start=(18, 8), goal=(37, 18), env=Map(51, 31))
 
-# plt = ACO(start=(5, 5), goal=(45, 25), env=Grid(51, 31))
+plt = ACO(start=(5, 5), goal=(45, 25), env=Grid(51, 31))
 # plt = PSO(start=(5, 5), goal=(45, 25), env=Grid(51, 31))
 
-# plt.run()
+plt.run()
 
 # -------------local planners-------------
 # plt = PID(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
@@ -39,9 +38,9 @@ from python_motion_planning import *
 # If you want a faster training, try reducing num_episodes and batch_size,
 # or increasing update_steps and evaluate_episodes, or fine-tuning other hyperparameters
 # if you are familiar with them, usually in a cost of performance, however.
-plt = DDPG(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31),
-           actor_save_path="models/actor_best.pth", critic_save_path="models/critic_best.pth")
-plt.train(num_episodes=10000)
+# plt = DDPG(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31),
+#            actor_save_path="models/actor_best.pth", critic_save_path="models/critic_best.pth")
+# plt.train(num_episodes=10000)
 
 # load the trained model and run
 # plt = DDPG(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31),
