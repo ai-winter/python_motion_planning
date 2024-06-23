@@ -23,7 +23,8 @@ class JPS(AStar):
         >>> import python_motion_planning as pmp
         >>> planner = pmp.JPS((5, 5), (45, 25), pmp.Grid(51, 31))
         >>> cost, path, expand = planner.plan()     # planning results only
-        >>> planner.run()       # run the animation
+        >>> planner.plot.animation(path, str(planner), cost, expand)  # animation
+        >>> planner.run()       # run both planning and animation
 
     References:
         [1] Online Graph Pruning for Pathfinding On Grid Maps

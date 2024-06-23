@@ -28,7 +28,8 @@ class ThetaStar(AStar):
         >>> import python_motion_planning as pmp
         >>> planner = pmp.ThetaStar((5, 5), (45, 25), pmp.Grid(51, 31))
         >>> cost, path, expand = planner.plan()
-        >>> planner.run()
+        >>> planner.plot.animation(path, str(planner), cost, expand)  # animation
+        >>> planner.run()       # run both planning and animation
 
     References:
         [1] Theta*: Any-Angle Path Planning on Grids

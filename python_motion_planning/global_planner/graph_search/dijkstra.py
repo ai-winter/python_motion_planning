@@ -31,7 +31,8 @@ class Dijkstra(AStar):
             >>> import python_motion_planning as pmp
             >>> planner = pmp.Dijkstra((5, 5), (45, 25), pmp.Grid(51, 31))
             >>> cost, path, expand = planner.plan()     # planning results only
-            >>> planner.run()       # run the animation
+            >>> planner.plot.animation(path, str(planner), cost, expand)  # animation
+            >>> planner.run()       # run both planning and animation
         """
         # OPEN list (priority queue) and CLOSED list (hash table)
         OPEN = []
