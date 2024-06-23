@@ -1,8 +1,8 @@
 """
 @file: aco.py
 @breif: Ant Colony Optimization(ACO) motion planning
-@author: Winter
-@update: 2023.1.13
+@author: Yang Haodong, Wu Maojia
+@update: 2024.6.23
 """
 import random
 from bisect import bisect_left
@@ -28,13 +28,11 @@ class ACO(EvolutionarySearcher):
         max_iter (int): maximum iterations
 
     Examples:
-        >>> from python_motion_planning.utils import Grid
-        >>> from evolutionary_search import ACO
-        >>> start = (5, 5)
-        >>> goal = (45, 25)
-        >>> env = Grid(51, 31)
-        >>> planner = ACO(start, goal, env)
-        >>> planner.run()
+        >>> import python_motion_planning as pmp
+        >>> planner = pmp.ACO((5, 5), (45, 25), pmp.Grid(51, 31))
+        >>> cost, path, cost_list = planner.plan()     # planning results only
+        >>> planner.plot.animation(path, str(planner), cost, cost_curve=cost_list)  # animation
+        >>> planner.run()       # run both planning and animation
 
     References:
         [1] Ant Colony Optimization: A New Meta-Heuristic
@@ -57,13 +55,14 @@ class ACO(EvolutionarySearcher):
         def __init__(self) -> None:
             self.reset()
         
-        def reset(self):
+        def reset(self) -> None:
             self.found_goal = False
             self.current_node = None
             self.path = []
+            self.path_set = set()
             self.steps = 0
 
-    def plan(self):
+    def plan(self) -> tuple:
         """
         Ant Colony Optimization(ACO) motion plan function.
 
@@ -76,7 +75,7 @@ class ACO(EvolutionarySearcher):
         # pheromone initialization
         pheromone_edges = {}
         for i in range(self.env.x_range):
-            for j in  range(self.env.y_range):
+            for j in range(self.env.y_range):
                 if (i, j) in self.obstacles:
                     continue
                 cur_node = Node((i, j), (i, j), 0, 0)
@@ -95,13 +94,14 @@ class ACO(EvolutionarySearcher):
                 ant.current_node = self.start
                 while ant.current_node is not self.goal and ant.steps < max_steps:
                     ant.path.append(ant.current_node)
+                    ant.path_set.add(ant.current_node.current)
 
                     # candidate
                     prob_sum = 0.0
                     next_positions, next_probabilities = [], []
                     for node_n in self.getNeighbor(ant.current_node):                
                         # existed
-                        if node_n in ant.path:
+                        if node_n.current in ant.path_set:
                             continue
                         
                         node_n.parent = ant.current_node.current
@@ -109,6 +109,7 @@ class ACO(EvolutionarySearcher):
                         # goal found
                         if node_n == self.goal:
                             ant.path.append(node_n)
+                            ant.path_set.add(node_n.current)
                             ant.found_goal = True
                             break
 
@@ -156,9 +157,13 @@ class ACO(EvolutionarySearcher):
                     best_path = bp
 
         if best_path:
-            return self.extractPath(best_path), cost_list
-        return ([], []), []
-
+            cost = 0
+            path = [self.start.current]
+            for i in range(len(best_path) - 1):
+                cost += self.dist(best_path[i], best_path[i + 1])
+                path.append(best_path[i + 1].current)
+            return cost, path, cost_list
+        return [], [], []
 
     def getNeighbor(self, node: Node) -> list:
         """
@@ -173,30 +178,9 @@ class ACO(EvolutionarySearcher):
         return [node + motion for motion in self.motions
                 if not self.isCollision(node, node + motion)]
 
-    def extractPath(self, closed_set):
-        """
-        Extract the path based on the CLOSED set.
-
-        Parameters:
-            closed_set (list): CLOSED set
-
-        Returns:
-            cost (float): path cost
-            path (list): planning path
-        """
-        cost = 0
-        node = closed_set[closed_set.index(self.goal)]
-        path = [node.current]
-        while node != self.start:
-            node_parent = closed_set[closed_set.index(Node(node.parent, None, None, None))]
-            cost += self.dist(node, node_parent)
-            node = node_parent
-            path.append(node.current)
-        return cost, path
-
-    def run(self):
+    def run(self) -> None:
         """
         Running both plannig and animation.
         """
-        (cost, path), cost_list = self.plan()
+        cost, path, cost_list = self.plan()
         self.plot.animation(path, str(self), cost, cost_curve=cost_list)

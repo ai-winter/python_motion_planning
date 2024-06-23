@@ -1,8 +1,8 @@
 """
 @file: pso.py
 @breif: Particle Swarm Optimization (PSO) motion planning
-@author: Winter
-@update: 2024.2.8
+@author: Yang Haodong, Wu Maojia
+@update: 2024.6.23
 """
 import random, math
 
@@ -12,6 +12,7 @@ from python_motion_planning.curve_generation import BSpline
 
 GEN_MODE_CIRCLE = 0
 GEN_MODE_RANDOM = 1
+
 
 class PSO(EvolutionarySearcher):
     """
@@ -32,13 +33,11 @@ class PSO(EvolutionarySearcher):
         init_mode (int): Set the generation mode for the initial position points of the particle swarm
 
     Examples:
-        >>> from utils import Grid
-        >>> from evolutionary_search import PSO
-        >>> start = (5, 5)
-        >>> goal = (45, 25)
-        >>> env = Grid(51, 31)
-        >>> planner = PSO(start, goal, env)
-        >>> planner.run()
+        >>> import python_motion_planning as pmp
+        >>> planner = pmp.PSO((5, 5), (45, 25), pmp.Grid(51, 31))
+        >>> cost, path = planner.plan()     # planning results only
+        >>> planner.plot.animation(path, str(planner), cost)  # animation
+        >>> planner.run()       # run both planning and animation
     """
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean", 
         n_particles: int = 30, point_num: int = 6, w_inertial: float = 0.5,
@@ -112,7 +111,6 @@ class PSO(EvolutionarySearcher):
         points = sorted(set(points), key=points.index)
         path = self.b_spline_gen.run(points, display=False)
         return self.b_spline_gen.length(path), path
-
 
     def initializePositions(self) -> list:
         """
