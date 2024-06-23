@@ -119,8 +119,5 @@ class AStar(GraphSearcher):
         """
         Running both planning and animation.
         """
-        import time
-        start_time = time.time()
         cost, path, expand = self.plan()
-        print("Planning time: ", time.time() - start_time)
         self.plot.animation(path, str(self), cost, expand)
