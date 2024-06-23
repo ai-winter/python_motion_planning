@@ -2,7 +2,7 @@
 @file: jps.py
 @breif: Jump Point Search motion planning
 @author: Yang Haodong, Wu Maojia
-@update: 2024.2.11
+@update: 2024.6.23
 """
 import heapq
 
@@ -20,13 +20,10 @@ class JPS(AStar):
         heuristic_type (str): heuristic function type
 
     Examples:
-        >>> from python_motion_planning.utils import Grid
-        >>> from graph_search import JPS
-        >>> start = (5, 5)
-        >>> goal = (45, 25)
-        >>> env = Grid(51, 31)
-        >>> planner = JPS(start, goal, env)
-        >>> planner.run()
+        >>> import python_motion_planning as pmp
+        >>> planner = pmp.JPS((5, 5), (45, 25), pmp.Grid(51, 31))
+        >>> cost, path, expand = planner.plan()     # planning results only
+        >>> planner.run()       # run the animation
 
     References:
         [1] Online Graph Pruning for Pathfinding On Grid Maps
@@ -37,7 +34,7 @@ class JPS(AStar):
     def __str__(self) -> str:
         return "Jump Point Search(JPS)"
 
-    def plan(self):
+    def plan(self) -> tuple:
         """
         JPS motion plan function.
 
@@ -46,42 +43,42 @@ class JPS(AStar):
             path (list): planning path
             expand (list): all nodes that planner has searched
         """
-        # OPEN set with priority and CLOSED set
+        # OPEN list (priority queue) and CLOSED list (hash table)
         OPEN = []
         heapq.heappush(OPEN, self.start)
-        CLOSED = []
+        CLOSED = dict()
 
         while OPEN:
             node = heapq.heappop(OPEN)
 
-            # exists in CLOSED set
-            if node in CLOSED:
+            # exists in CLOSED list
+            if node.current in CLOSED:
                 continue
 
             # goal found
             if node == self.goal:
-                CLOSED.append(node)
+                CLOSED[node.current] = node
                 cost, path = self.extractPath(CLOSED)
-                return cost, path, CLOSED
+                return cost, path, list(CLOSED.values())
 
             jp_list = []
             for motion in self.motions:
                 jp = self.jump(node, motion)
-                # exists and not in CLOSED set
-                if jp and jp not in CLOSED:
+                # exists and not in CLOSED list
+                if jp and jp.current not in CLOSED:
                     jp.parent = node.current
                     jp.h = self.h(jp, self.goal)
                     jp_list.append(jp)
 
             for jp in jp_list:
-                # update OPEN set
+                # update OPEN list
                 heapq.heappush(OPEN, jp)
 
                 # goal found
                 if jp == self.goal:
                     break
-            
-            CLOSED.append(node)
+
+            CLOSED[node.current] = node
         return [], [], []
 
     def jump(self, node: Node, motion: Node):

@@ -2,7 +2,7 @@
 @file: voronoi.py
 @breif: Voronoi-based motion planning
 @author: Yang Haodong, Wu Maojia
-@update: 2024.2.11
+@update: 2024.6.23
 """
 import heapq, math
 import numpy as np
@@ -25,13 +25,10 @@ class VoronoiPlanner(GraphSearcher):
         inflation_r (float): inflation range
 
     Examples:
-        >>> from python_motion_planning.utils import Grid
-        >>> from graph_search import VoronoiPlanner
-        >>> start = (5, 5)
-        >>> goal = (45, 25)
-        >>> env = Grid(51, 31)
-        >>> planner = VoronoiPlanner(start, goal, env)
-        >>> planner.run()
+        >>> import python_motion_planning as pmp
+        >>> planner = pmp.VoronoiPlanner((5, 5), (45, 25), pmp.Grid(51, 31))
+        >>> cost, path, _ = planner.plan()     # planning results only
+        >>> planner.run()       # run the animation
     """
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean", \
                  n_knn: int = 10, max_edge_len: float = 10.0, inflation_r: float = 1.0) -> None:
@@ -104,26 +101,26 @@ class VoronoiPlanner(GraphSearcher):
             cost (float): path cost
             path (list): planning path
         """
-        # OPEN set with priority and CLOSED set
+        # OPEN list (priority queue) and CLOSED list (hash table)
         OPEN = []
         heapq.heappush(OPEN, self.start)
-        CLOSED = []
+        CLOSED = dict()
 
         while OPEN:
             node = heapq.heappop(OPEN)
 
-            # exists in CLOSED set
-            if node in CLOSED:
+            # exists in CLOSED list
+            if node.current in CLOSED:
                 continue
 
             # goal found
             if node == self.goal:
-                CLOSED.append(node)
+                CLOSED[node.current] = node
                 return self.extractPath(CLOSED)
 
             for node_n in road_map[node]:                
                 # exists in CLOSED set
-                if node_n in CLOSED:
+                if node_n.current in CLOSED:
                     continue
                 
                 node_n.parent = node.current
@@ -138,26 +135,26 @@ class VoronoiPlanner(GraphSearcher):
                 
                 # update OPEN set
                 heapq.heappush(OPEN, node_n)
-            
-            CLOSED.append(node)
-        return ([], [])
 
-    def extractPath(self, closed_set):
+            CLOSED[node.current] = node
+        return [], []
+
+    def extractPath(self, closed_list: dict):
         """
-        Extract the path based on the CLOSED set.
+        Extract the path based on the CLOSED list.
 
         Parameters:
-            closed_set (list): CLOSED set
+            closed_list (dict): CLOSED list
 
         Returns:
             cost (float): the cost of planning path
             path (list): the planning path
         """
         cost = 0
-        node = closed_set[closed_set.index(self.goal)]
+        node = closed_list[self.goal.current]
         path = [node.current]
         while node != self.start:
-            node_parent = closed_set[closed_set.index(Node(node.parent, None, None, None))]
+            node_parent = closed_list[node.parent]
             cost += self.dist(node, node_parent)
             node = node_parent
             path.append(node.current)

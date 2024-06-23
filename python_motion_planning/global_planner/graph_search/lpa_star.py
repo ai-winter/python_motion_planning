@@ -2,7 +2,7 @@
 @file: lpa_star.py
 @breif: Lifelong Planning A* motion planning
 @author: Yang Haodong, Wu Maojia
-@update: 2024.2.11
+@update: 2024.6.23
 """
 import heapq
 
@@ -47,13 +47,10 @@ class LPAStar(GraphSearcher):
         heuristic_type (str): heuristic function type
 
     Examples:
-        >>> from python_motion_planning.utils import Grid
-        >>> from graph_search import LPAStar
-        >>> start = (5, 5)
-        >>> goal = (45, 25)
-        >>> env = Grid(51, 31)
-        >>> planner = LPAStar(start, goal, env)
-        >>> planner.run()
+        >>> import python_motion_planning as pmp
+        >>> planner = pmp.LPAStar((5, 5), (45, 25), pmp.Grid(51, 31))
+        >>> cost, path, _ = planner.plan()     # planning results only
+        >>> planner.run()       # run the animation
 
     References:
         [1] Lifelong Planning A*
@@ -67,9 +64,9 @@ class LPAStar(GraphSearcher):
         self.U, self.EXPAND = [], []
 
         # intialize global information, record history infomation of map grids
-        self.map = [LNode(s, float("inf"), float("inf"), None) for s in self.env.grid_map]
-        self.map[self.map.index(self.goal)] = self.goal
-        self.map[self.map.index(self.start)] = self.start
+        self.map = {s: LNode(s, float('inf'), float('inf'), None) for s in self.env.grid_map}
+        self.map[self.goal.current] = self.goal
+        self.map[self.start.current] = self.start
         # OPEN set with priority
         self.start.key = self.calculateKey(self.start)
         heapq.heappush(self.U, self.start)
@@ -77,9 +74,14 @@ class LPAStar(GraphSearcher):
     def __str__(self) -> str:
         return "Lifelong Planning A*"
 
-    def plan(self):
+    def plan(self) -> tuple:
         """
         LPA* dynamic motion planning function.
+
+        Returns:
+            cost (float): path cost
+            path (list): planning path
+            _ (None): None
         """
         self.computeShortestPath()
         cost, path = self.extractPath()
@@ -99,6 +101,9 @@ class LPAStar(GraphSearcher):
     def OnPress(self, event):
         """
         Mouse button callback function.
+
+        Parameters:
+            event (MouseEvent): mouse event
         """
         x, y = int(event.xdata), int(event.ydata)
         if x < 0 or x > self.env.x_range - 1 or y < 0 or y > self.env.y_range - 1:
@@ -106,7 +111,7 @@ class LPAStar(GraphSearcher):
         else:
             print("Change position: x = {}, y = {}".format(x, y))
             self.EXPAND = []
-            node_change = self.map[self.map.index(LNode((x, y), None, None, None))]
+            node_change = self.map[(x, y)]
 
             if (x, y) not in self.obstacles:
                 self.obstacles.add((x, y))
@@ -119,7 +124,7 @@ class LPAStar(GraphSearcher):
             for node_n in self.getNeighbor(node_change):
                 self.updateVertex(node_n)
 
-            (cost, path), _ = self.plan()        
+            cost, path, _ = self.plan()
         
             # animation
             self.plot.clean()
@@ -153,6 +158,9 @@ class LPAStar(GraphSearcher):
     def updateVertex(self, node: LNode) -> None:
         """
         Update the status and the current cost to node and it's neighbor.
+
+        Parameters:
+            node (LNode): current node
         """
         # greed correction
         if node != self.start:
@@ -170,6 +178,12 @@ class LPAStar(GraphSearcher):
     def calculateKey(self, node: LNode) -> list:
         """
         Calculate priority of node.
+
+        Parameters:
+            node (LNode): current node
+
+        Returns:
+            key (list): priority of node
         """
         return [min(node.g, node.rhs) + self.h(node, self.goal),
                 min(node.g, node.rhs)]
@@ -178,19 +192,15 @@ class LPAStar(GraphSearcher):
         """
         Find neighbors of node.
 
-        Parameters
-        ----------
-        node: DNode
-            current node
+        Parameters:
+            node (LNode): current node
 
-        Return
-        ----------
-        neighbors: list
-            neighbors of current node
+        Returns:
+            neighbors (list): neighbors of node
         """
         neighbors = []
         for motion in self.motions:
-            n = self.map[self.map.index(node + motion)]
+            n = self.map[(node + motion).current]
             if n.current not in self.obstacles:
                 neighbors.append(n)
         return neighbors
@@ -199,12 +209,9 @@ class LPAStar(GraphSearcher):
         """
         Extract the path based on greedy policy.
 
-        Return
-        ----------
-        cost: float
-            the cost of planning path
-        path: list
-            the planning path
+        Return:
+            cost (float): the cost of planning path
+            path (list): the planning path
         """
         node = self.goal
         path = [node.current]

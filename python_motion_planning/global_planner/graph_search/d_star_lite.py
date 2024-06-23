@@ -1,8 +1,8 @@
 """
 @file: d_star_lite.py
 @breif: D* Lite motion planning
-@author: Winter
-@update: 2023.1.17
+@author: Yang Haodong, Wu Maojia
+@update: 2024.6.23
 """
 import heapq
 
@@ -22,13 +22,10 @@ class DStarLite(LPAStar):
         heuristic_type (str): heuristic function type
 
     Examples:
-        >>> from python_motion_planning.utils import Grid
-        >>> from graph_search import DStarLite
-        >>> start = (5, 5)
-        >>> goal = (45, 25)
-        >>> env = Grid(51, 31)
-        >>> planner = DStarLite(start, goal, env)
-        >>> planner.run()
+        >>> import python_motion_planning as pmp
+        >>> planner = pmp.DStarLite((5, 5), (45, 25), pmp.Grid(51, 31))
+        >>> cost, path, _ = planner.plan()     # planning results only
+        >>> planner.run()       # run the animation
 
     References:
         [1] D* Lite
@@ -44,9 +41,9 @@ class DStarLite(LPAStar):
         self.U, self.EXPAND = [], []
 
         # intialize global information, record history infomation of map grids
-        self.map = [LNode(s, float("inf"), float("inf"), None) for s in self.env.grid_map]
-        self.map[self.map.index(self.goal)] = self.goal
-        self.map[self.map.index(self.start)] = self.start
+        self.map = {s: LNode(s, float('inf'), float('inf'), None) for s in self.env.grid_map}
+        self.map[self.goal.current] = self.goal
+        self.map[self.start.current] = self.start
         # OPEN set with priority
         self.goal.key = self.calculateKey(self.goal)
         heapq.heappush(self.U, self.goal)
@@ -54,12 +51,12 @@ class DStarLite(LPAStar):
     def __str__(self) -> str:
         return "D* Lite"
 
-    def OnPress(self, event):
+    def OnPress(self, event) -> None:
         """
         Mouse button callback function.
 
         Parameters:
-            event (Event): mouse event
+            event (MouseEvent): mouse event
         """
         x, y = int(event.xdata), int(event.ydata)
         if x < 0 or x > self.env.x_range - 1 or y < 0 or y > self.env.y_range - 1:
@@ -87,7 +84,7 @@ class DStarLite(LPAStar):
                     self.km = self.h(cur_start, new_start)
                     new_start = cur_start
 
-                    node_change = self.map[self.map.index(LNode((x, y), None, None, None))]
+                    node_change = self.map[(x, y)]
                     if (x, y) not in self.obstacles:
                         self.obstacles.add((x, y))
                     else:
@@ -167,7 +164,7 @@ class DStarLite(LPAStar):
         return [min(node.g, node.rhs) + self.h(node, self.start) + self.km,
                 min(node.g, node.rhs)]
 
-    def extractPath(self):
+    def extractPath(self) -> tuple:
         """
         Extract the path based on greedy policy.
 

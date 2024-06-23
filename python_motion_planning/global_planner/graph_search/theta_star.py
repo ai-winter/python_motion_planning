@@ -2,12 +2,13 @@
 @file: theta_star.py
 @breif: Theta* motion planning
 @author: Yang Haodong, Wu Maojia
-@update: 2024.2.11
+@update: 2024.6.23
 """
 import heapq
 
 from .a_star import AStar
 from python_motion_planning.utils import Env, Node
+
 
 class ThetaStar(AStar):
     """
@@ -24,12 +25,9 @@ class ThetaStar(AStar):
             heuristic function type
 
     Examples:
-        >>> from python_motion_planning.utils import Grid
-        >>> from graph_search import ThetaStar
-        >>> start = (5, 5)
-        >>> goal = (45, 25)
-        >>> env = Grid(51, 31)
-        >>> planner = ThetaStar(start, goal, env)
+        >>> import python_motion_planning as pmp
+        >>> planner = pmp.ThetaStar((5, 5), (45, 25), pmp.Grid(51, 31))
+        >>> cost, path, expand = planner.plan()
         >>> planner.run()
 
     References:
@@ -42,7 +40,7 @@ class ThetaStar(AStar):
     def __str__(self) -> str:
         return "Theta*"
 
-    def plan(self):
+    def plan(self) -> tuple:
         """
         Theta* motion plan function.
 
@@ -51,38 +49,34 @@ class ThetaStar(AStar):
             path (list): planning path
             expand (list): all nodes that planner has searched
         """
-        # OPEN set with priority and CLOSED set
+        # OPEN list (priority queue) and CLOSED list (hash table)
         OPEN = []
         heapq.heappush(OPEN, self.start)
-        CLOSED = []
+        CLOSED = dict()
 
         while OPEN:
             node = heapq.heappop(OPEN)
 
-            # exists in CLOSED set
-            if node in CLOSED:
+            # exists in CLOSED list
+            if node.current in CLOSED:
                 continue
 
             # goal found
             if node == self.goal:
-                CLOSED.append(node)
+                CLOSED[node.current] = node
                 cost, path = self.extractPath(CLOSED)
-                return cost, path, CLOSED
+                return cost, path, list(CLOSED.values())
 
             for node_n in self.getNeighbor(node):                
-                # exists in CLOSED set
-                if node_n in CLOSED:
+                # exists in CLOSED list
+                if node_n.current in CLOSED:
                     continue
                 
                 # path1
                 node_n.parent = node.current
                 node_n.h = self.h(node_n, self.goal)
 
-                try:
-                    p_index = CLOSED.index(Node(node.parent))
-                    node_p = CLOSED[p_index]
-                except:
-                    node_p = None
+                node_p = CLOSED.get(node.parent)
 
                 if node_p:
                     self.updateVertex(node_p, node_n)
@@ -92,12 +86,11 @@ class ThetaStar(AStar):
                     heapq.heappush(OPEN, node_n)
                     break
                 
-                # update OPEN set
+                # update OPEN list
                 heapq.heappush(OPEN, node_n)
-            
-            CLOSED.append(node)
-        return [], [], []
 
+            CLOSED[node.current] = node
+        return [], [], []
 
     def updateVertex(self, node_p: Node, node_c: Node) -> None:
         """
@@ -112,7 +105,6 @@ class ThetaStar(AStar):
             if node_p.g + self.dist(node_c, node_p) <= node_c.g:
                 node_c.g = node_p.g + self.dist(node_c, node_p)
                 node_c.parent = node_p.current
-            
 
     def lineOfSight(self, node1: Node, node2: Node) -> bool:
         """

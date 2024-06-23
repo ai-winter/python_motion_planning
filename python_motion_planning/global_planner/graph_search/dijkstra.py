@@ -2,7 +2,7 @@
 @file: dijkstra.py
 @breif: Dijkstra motion planning
 @author: Yang Haodong, Wu Maojia
-@update: 2024.2.11
+@update: 2024.6.23
 """
 import heapq
 
@@ -17,7 +17,7 @@ class Dijkstra(AStar):
     def __str__(self) -> str:
         return "Dijkstra"
 
-    def plan(self):
+    def plan(self) -> tuple:
         """
         Class for Dijkstra motion planning.
 
@@ -28,31 +28,28 @@ class Dijkstra(AStar):
             heuristic_type (str): heuristic function type
 
         Examples:
-            >>> from python_motion_planning.utils import Grid
-            >>> from graph_search import Dijkstra
-            >>> start = (5, 5)
-            >>> goal = (45, 25)
-            >>> env = Grid(51, 31)
-            >>> planner = Dijkstra(start, goal, env)
-            >>> planner.run()
+            >>> import python_motion_planning as pmp
+            >>> planner = pmp.Dijkstra((5, 5), (45, 25), pmp.Grid(51, 31))
+            >>> cost, path, expand = planner.plan()     # planning results only
+            >>> planner.run()       # run the animation
         """
-        # OPEN set with priority and CLOSED set
+        # OPEN list (priority queue) and CLOSED list (hash table)
         OPEN = []
         heapq.heappush(OPEN, self.start)
-        CLOSED = []
+        CLOSED = dict()
 
         while OPEN:
             node = heapq.heappop(OPEN)
 
-            # exists in CLOSED set
-            if node in CLOSED:
+            # exists in CLOSED list
+            if node.current in CLOSED:
                 continue
 
             # goal found
             if node == self.goal:
-                CLOSED.append(node)
+                CLOSED[node.current] = node
                 cost, path = self.extractPath(CLOSED)
-                return cost, path, CLOSED
+                return cost, path, list(CLOSED.values())
 
             for node_n in self.getNeighbor(node):
              
@@ -60,8 +57,8 @@ class Dijkstra(AStar):
                 if node_n.current in self.obstacles:
                     continue
                 
-                # exists in CLOSED set
-                if node_n in CLOSED:
+                # exists in CLOSED list
+                if node_n.current in CLOSED:
                     continue
                 
                 node_n.parent = node.current
@@ -74,6 +71,6 @@ class Dijkstra(AStar):
                 
                 # update OPEN set
                 heapq.heappush(OPEN, node_n)
-            
-            CLOSED.append(node)
+
+            CLOSED[node.current] = node
         return [], [], []

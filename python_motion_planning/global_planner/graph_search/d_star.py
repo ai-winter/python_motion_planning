@@ -2,7 +2,7 @@
 @file: d_star.py
 @breif: Dynamic A* motion planning
 @author: Yang Haodong, Wu Maojia
-@update: 2024.2.11
+@update: 2024.6.23
 """
 from .graph_search import GraphSearcher
 from python_motion_planning.utils import Env, Node
@@ -44,13 +44,10 @@ class DStar(GraphSearcher):
         env (Env): environment
 
     Examples:
-        >>> from python_motion_planning.utils import Grid
-        >>> from graph_search import DStar
-        >>> start = (5, 5)
-        >>> goal = (45, 25)
-        >>> env = Grid(51, 31)
-        >>> planner = DStar(start, goal, env)
-        >>> planner.run()
+        >>> import python_motion_planning as pmp
+        >>> planner = pmp.DStar((5, 5), (45, 25), pmp.Grid(51, 31))
+        >>> cost, path, _ = planner.plan()     # planning results only
+        >>> planner.run()       # run the animation
 
     References:
         [1]Optimal and Efficient Path Planning for Partially-Known Environments
@@ -59,25 +56,29 @@ class DStar(GraphSearcher):
         super().__init__(start, goal, env, None)
         self.start = DNode(start, None, 'NEW', float('inf'), float("inf"))
         self.goal = DNode(goal, None, 'NEW', 0, float('inf'))
-        # record history infomation of map grids
-        self.map = None
         # allowed motions
         self.motions = [DNode(motion.current, None, None, motion.g, 0) for motion in self.env.motions]
-        # OPEN set and EXPAND set
+        # OPEN list and EXPAND list
         self.OPEN = []
         self.EXPAND = []
+        # record history infomation of map grids
+        self.map = {s: DNode(s, None, 'NEW', float("inf"), float("inf")) for s in self.env.grid_map}
+        self.map[self.goal.current] = self.goal
+        self.map[self.start.current] = self.start
+        # intialize OPEN list
+        self.insert(self.goal, 0)
 
     def __str__(self) -> str:
         return "Dynamic A*(D*)"
 
-    def plan(self):
+    def plan(self) -> tuple:
         """
         D* static motion planning function.
 
         Returns:
             cost (float): path cost
             path (list): planning path
-            expand (list): all nodes that planner has searched
+            _ (None): None
         """
         while True:
             self.processState()
@@ -86,18 +87,10 @@ class DStar(GraphSearcher):
         cost, path = self.extractPath(self.map)
         return cost, path, None
 
-    def run(self):
+    def run(self) -> None:
         """
         Running both plannig and animation.
         """
-        # intialize global information
-        self.map = [DNode(s, None, 'NEW', float("inf"), float("inf")) for s in self.env.grid_map]
-        self.map[self.map.index(self.goal)] = self.goal
-        self.map[self.map.index(self.start)] = self.start
-
-        # intialize OPEN set
-        self.insert(self.goal, 0)
-
         # static planning
         cost, path, _ = self.plan()
 
@@ -105,9 +98,12 @@ class DStar(GraphSearcher):
         self.plot.connect('button_press_event', self.OnPress)
         self.plot.animation(path, str(self), cost=cost)
 
-    def OnPress(self, event):
+    def OnPress(self, event) -> None:
         """
         Mouse button callback function.
+
+        Parameters:
+            event (MouseEvent): mouse event
         """
         x, y = int(event.xdata), int(event.ydata)
         if x < 0 or x > self.env.x_range - 1 or y < 0 or y > self.env.y_range - 1:
@@ -123,7 +119,7 @@ class DStar(GraphSearcher):
                 node = self.start
                 self.EXPAND, path, cost = [], [], 0
                 while node != self.goal:
-                    node_parent = self.map[self.map.index(DNode(node.parent, None, None, None, None))]
+                    node_parent = self.map[node.parent]
                     if self.isCollision(node, node_parent):
                         self.modify(node, node_parent)
                         continue
@@ -136,12 +132,12 @@ class DStar(GraphSearcher):
 
             self.plot.update()
 
-    def extractPath(self, closed_set):
+    def extractPath(self, closed_list: dict) -> tuple:
         """
-        Extract the path based on the CLOSED set.
+        Extract the path based on the CLOSED list.
 
         Parameters:
-            closed_set (list): CLOSED set
+            closed_list (dict): CLOSED list
 
         Returns:
             cost (float): the cost of planning path
@@ -151,7 +147,7 @@ class DStar(GraphSearcher):
         node = self.start
         path = [node.current]
         while node != self.goal:
-            node_parent = closed_set[closed_set.index(DNode(node.parent, None, None, None, None))]
+            node_parent = closed_list[node.parent]
             cost += self.cost(node, node_parent)
             node = node_parent
             path.append(node.current)
@@ -165,7 +161,7 @@ class DStar(GraphSearcher):
         Returns:
             min_k (float): minimum k value of map
         """
-        # get node in OPEN set with min k value
+        # get node in OPEN list with min k value
         node = self.min_state
         self.EXPAND.append(node)
 
@@ -174,7 +170,7 @@ class DStar(GraphSearcher):
 
         # record the min k value of this iteration
         k_old = self.min_k
-        # move node from OPEN set to CLOSED set
+        # move node from OPEN list to CLOSED list
         self.delete(node)  
 
         # k_min < h[x] --> x: RAISE state (try to reduce k value by neighbor)
@@ -209,21 +205,21 @@ class DStar(GraphSearcher):
                 else:
                     if node_n.parent != node.current and \
                         node_n.h > node.h + self.cost(node, node_n):
-                        # Condition: LOWER happened in OPEN set (s), s should be explored again
+                        # Condition: LOWER happened in OPEN list (s), s should be explored again
                         self.insert(node, node.h)
                     else:
                         if node_n.parent != node.current and \
                             node.h > node_n.h + self.cost(node, node_n) and \
                             node_n.t == 'CLOSED' and \
                             node_n.h > k_old:
-                            # Condition: LOWER happened in CLOSED set (s_n), s_n should be explored again
+                            # Condition: LOWER happened in CLOSED list (s_n), s_n should be explored again
                             self.insert(node_n, node_n.h)
         return self.min_k
 
     @property
     def min_state(self) -> DNode:
         """
-        Choose the node with the minimum k value in OPEN set.
+        Choose the node with the minimum k value in OPEN list.
         """
         if not self.OPEN:
             return None
@@ -232,13 +228,13 @@ class DStar(GraphSearcher):
     @property
     def min_k(self) -> float:
         """
-        Choose the minimum k value for nodes in OPEN set.
+        Choose the minimum k value for nodes in OPEN list.
         """
         return self.min_state.k
 
     def insert(self, node: DNode, h_new: float) -> None:
         """
-        Insert node into OPEN set.
+        Insert node into OPEN list.
 
         Parameters:
             node (DNode): the node to insert
@@ -252,7 +248,7 @@ class DStar(GraphSearcher):
 
     def delete(self, node: DNode) -> None:
         """
-        Delete node from OPEN set.
+        Delete node from OPEN list.
 
         Parameters:
             node (DNode): the node to delete
@@ -288,7 +284,7 @@ class DStar(GraphSearcher):
         """
         neighbors = []
         for motion in self.motions:
-            n = self.map[self.map.index(node + motion)]
+            n = self.map[(node + motion).current]
             if not self.isCollision(node, n):
                 neighbors.append(n)
         return neighbors
