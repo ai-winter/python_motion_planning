@@ -50,7 +50,8 @@ class LPAStar(GraphSearcher):
         >>> import python_motion_planning as pmp
         >>> planner = pmp.LPAStar((5, 5), (45, 25), pmp.Grid(51, 31))
         >>> cost, path, _ = planner.plan()     # planning results only
-        >>> planner.run()       # run the animation
+        >>> planner.plot.animation(path, str(planner), cost)  # animation
+        >>> planner.run()       # run both planning and animation
 
     References:
         [1] Lifelong Planning A*

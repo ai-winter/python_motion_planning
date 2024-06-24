@@ -28,7 +28,8 @@ class ThetaStar(AStar):
         >>> import python_motion_planning as pmp
         >>> planner = pmp.ThetaStar((5, 5), (45, 25), pmp.Grid(51, 31))
         >>> cost, path, expand = planner.plan()
-        >>> planner.run()
+        >>> planner.plot.animation(path, str(planner), cost, expand)  # animation
+        >>> planner.run()       # run both planning and animation
 
     References:
         [1] Theta*: Any-Angle Path Planning on Grids
@@ -115,13 +116,18 @@ class ThetaStar(AStar):
             node2 (Node): end node
 
         Returns:
-            collision (bool): True if line of sight exists ( no collision ) else False
+            line_of_sight (bool): True if line of sight exists ( no collision ) else False
         """
         if node1.current in self.obstacles or node2.current in self.obstacles:
             return False
         
         x1, y1 = node1.current
         x2, y2 = node2.current
+
+        if x1 < 0 or x1 >= self.env.x_range or y1 < 0 or y1 >= self.env.y_range:
+            return False
+        if x2 < 0 or x2 >= self.env.x_range or y2 < 0 or y2 >= self.env.y_range:
+            return False
 
         d_x = abs(x2 - x1)
         d_y = abs(y2 - y1)
@@ -131,12 +137,12 @@ class ThetaStar(AStar):
 
         # check if any obstacle exists between node1 and node2
         if d_x > d_y:
-            tao = (d_y - d_x) / 2
+            tau = (d_y - d_x) / 2
             while not x == x2:
-                if e > tao:
+                if e > tau:
                     x = x + s_x
                     e = e - d_y
-                elif e < tao:
+                elif e < tau:
                     y = y + s_y
                     e = e + d_x
                 else:
@@ -147,12 +153,12 @@ class ThetaStar(AStar):
                     return False
         # swap x and y
         else:
-            tao = (d_x - d_y) / 2
+            tau = (d_x - d_y) / 2
             while not y == y2:
-                if e > tao:
+                if e > tau:
                     y = y + s_y
                     e = e - d_x
-                elif e < tao:
+                elif e < tau:
                     x = x + s_x
                     e = e + d_y
                 else:

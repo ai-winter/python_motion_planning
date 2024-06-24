@@ -1,14 +1,15 @@
 """
 @file: rrt.py
 @breif: RRT motion planning
-@author: Winter
-@update: 2023.1.17
+@author: Yang Haodong, Wu Maojia
+@update: 2024.6.23
 """
 import math
 import numpy as np
 
 from .sample_search import SampleSearcher
 from python_motion_planning.utils import Env, Node
+
 
 class RRT(SampleSearcher):
     """
@@ -23,19 +24,17 @@ class RRT(SampleSearcher):
         goal_sample_rate (float): heuristic sample
 
     Examples:
-        >>> from python_motion_planning.utils import Map
-        >>> from sample_search import RRT
-        >>> start = (5, 5)
-        >>> goal = (45, 25)
-        >>> env = Map(51, 31)
-        >>> planner = RRT(start, goal, env)
-        >>> planner.run()
+        >>> import python_motion_planning as pmp
+        >>> planner = pmp.RRT((5, 5), (45, 25), pmp.Map(51, 31))
+        >>> cost, path, expand = planner.plan()     # planning results only
+        >>> planner.plot.animation(path, str(planner), cost, expand)  # animation
+        >>> planner.run()       # run both planning and animation
 
     References:
         [1] Rapidly-Exploring Random Trees: A New Tool for Path Planning
     """
-    def __init__(self, start: tuple, goal: tuple, env: Env, max_dist: float, 
-        sample_num: int, goal_sample_rate: float=0.05) -> None:
+    def __init__(self, start: tuple, goal: tuple, env: Env, max_dist: float = 0.5,
+        sample_num: int = 10000, goal_sample_rate: float = 0.05) -> None:
         super().__init__(start, goal, env)
         # Maximum expansion distance one step
         self.max_dist = max_dist
@@ -43,48 +42,52 @@ class RRT(SampleSearcher):
         self.sample_num = sample_num
         # heuristic sample
         self.goal_sample_rate = goal_sample_rate
-        # Sampled list
-        self.sample_list = [self.start]
 
     def __str__(self) -> str:
         return "Rapidly-exploring Random Tree(RRT)"
 
-    def plan(self):
+    def plan(self) -> tuple:
         """
         RRT motion plan function.
 
         Returns:
             cost (float): path cost
             path (list): planning path
+            expand (list): expanded (sampled) nodes list
         """
+        # Sampled list
+        sample_list = {self.start.current: self.start}
+
         # main loop
         for _ in range(self.sample_num):
             # generate a random node in the map
             node_rand = self.generateRandomNode()
 
             # visited
-            if node_rand in self.sample_list:
+            if node_rand.current in sample_list:
                 continue
             
             # generate new node
-            node_new = self.getNearest(self.sample_list, node_rand)
+            node_new = self.getNearest(list(sample_list.values()), node_rand)
             if node_new:
-                self.sample_list.append(node_new)
+                sample_list[node_new.current] = node_new
                 dist = self.dist(node_new, self.goal)
                 # goal found
                 if dist <= self.max_dist and not self.isCollision(node_new, self.goal):
                     self.goal.parent = node_new.current
                     self.goal.g = node_new.g + self.dist(self.goal, node_new)
-                    self.sample_list.append(self.goal)
-                    return self.extractPath(self.sample_list)
-        return 0, None
+                    sample_list[self.goal.current] = self.goal
+                    cost, path = self.extractPath(sample_list)
+                    return cost, path, list(sample_list.values())
+
+        return 0, None, list(sample_list.values())
 
     def run(self) -> None:
         """
         Running both plannig and animation.
         """
-        cost, path = self.plan()
-        self.plot.animation(path, str(self), cost, self.sample_list)
+        cost, path, expand = self.plan()
+        self.plot.animation(path, str(self), cost, expand)
 
     def generateRandomNode(self) -> Node:
         """
@@ -126,22 +129,22 @@ class RRT(SampleSearcher):
             return None
         return node_new
 
-    def extractPath(self, closed_set):
+    def extractPath(self, closed_list: dict) -> tuple:
         """
-        Extract the path based on the CLOSED set.
+        Extract the path based on the CLOSED list.
 
         Parameters:
-            closed_set (list): CLOSED set
+            closed_list (dict): CLOSED list
 
         Returns
             cost (float): the cost of planning path
             path (list): the planning path
         """
-        node = closed_set[closed_set.index(self.goal)]
+        node = closed_list[self.goal.current]
         path = [node.current]
         cost = node.g
         while node != self.start:
-            node_parent = closed_set[closed_set.index(Node(node.parent, None, None, None))]
+            node_parent = closed_list[node.parent]
             node = node_parent
             path.append(node.current)
 

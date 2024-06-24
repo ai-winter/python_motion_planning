@@ -50,10 +50,10 @@ if __name__ == '__main__':
     # env = Map(51, 31)
 
     # # creat planner
-    # planner = search_factory("rrt", start=start, goal=goal, env=env, max_dist=0.5, sample_num=10000)
-    # # planner = search_factory("rrt_connect", start=start, goal=goal, env=env, max_dist=0.5, sample_num=10000)
-    # # planner = search_factory("rrt_star", start=start, goal=goal, env=env, max_dist=0.5, r=10, sample_num=10000)
-    # # planner = search_factory("informed_rrt", start=start, goal=goal, env=env, max_dist=0.5, r=12, sample_num=1500)
+    # planner = search_factory("rrt", start=start, goal=goal, env=env)
+    # planner = search_factory("rrt_connect", start=start, goal=goal, env=env)
+    # planner = search_factory("rrt_star", start=start, goal=goal, env=env)
+    # planner = search_factory("informed_rrt", start=start, goal=goal, env=env)
 
     # # animation
     # planner.run()
@@ -63,5 +63,6 @@ if __name__ == '__main__':
     '''
     evolutionary search
     '''
+    # planner = search_factory("aco", start=start, goal=goal, env=env)
     # planner = search_factory("pso", start=start, goal=goal, env=env)
     # planner.run()

@@ -23,7 +23,8 @@ class LazyThetaStar(ThetaStar):
         >>> import python_motion_planning as pmp
         >>> planner = pmp.LazyThetaStar((5, 5), (45, 25), pmp.Grid(51, 31))
         >>> cost, path, expand = planner.plan()
-        >>> planner.run()
+        >>> planner.plot.animation(path, str(planner), cost, expand)  # animation
+        >>> planner.run()       # run both planning and animation
 
     References:
         [1] Lazy Theta*: Any-Angle Path Planning and Path Length Analysis in 3D
