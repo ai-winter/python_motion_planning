@@ -18,8 +18,9 @@ class Plot:
         self.fig = plt.figure("planning")
         self.ax = self.fig.add_subplot()
 
-    def animation(self, path, name, cost=None, expand=None, history_pose=None, predict_path=None, 
-        lookahead_pts=None, cost_curve=None, ellipse=None) -> None:
+    def animation(self, path: list, name: str, cost: float = None, expand: list = None, history_pose: list = None,
+                  predict_path: list = None, lookahead_pts: list = None, cost_curve: list = None,
+                  ellipse: np.ndarray = None) -> None:
         name = name + "\ncost: " + str(cost) if cost else name
         self.plotEnv(name)
         if expand:
@@ -211,8 +212,6 @@ class Plot:
 
     def plotEllipse(self, ellipse: np.ndarray, color: str = 'darkorange', linestyle: str = '--', linewidth: float = 2):
         plt.plot(ellipse[0, :], ellipse[1, :], linestyle=linestyle, color=color, linewidth=linewidth)
-        # fx = self.transform(self.c_best / 2) @ np.array([x, y, z])
-        # plt.plot(fx[0, :], fx[1, :], linestyle='--', color='darkorange', linewidth=2)
 
     def connect(self, name: str, func) -> None:
         self.fig.canvas.mpl_connect(name, func)

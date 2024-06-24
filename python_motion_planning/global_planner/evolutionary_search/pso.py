@@ -2,12 +2,13 @@
 @file: pso.py
 @breif: Particle Swarm Optimization (PSO) motion planning
 @author: Yang Haodong, Wu Maojia
-@update: 2024.6.23
+@update: 2024.6.24
 """
 import random, math
+from copy import deepcopy
 
 from .evolutionary_search import EvolutionarySearcher
-from python_motion_planning.utils import Env
+from python_motion_planning.utils import Env, MathHelper
 from python_motion_planning.curve_generation import BSpline
 
 GEN_MODE_CIRCLE = 0
@@ -25,8 +26,8 @@ class PSO(EvolutionarySearcher):
         heuristic_type (str): heuristic function type
         n_particles (int): number of particles
         w_inertial (float): inertial weight
-        w_social (float): social weight
         w_cognitive (float): cognitive weight
+        w_social (float): social weight
         point_num (int): number of position points contained in each particle
         max_speed (int): The maximum velocity of particle motion
         max_iter (int): maximum iterations
@@ -35,14 +36,15 @@ class PSO(EvolutionarySearcher):
     Examples:
         >>> import python_motion_planning as pmp
         >>> planner = pmp.PSO((5, 5), (45, 25), pmp.Grid(51, 31))
-        >>> cost, path = planner.plan()     # planning results only
-        >>> planner.plot.animation(path, str(planner), cost)  # animation
+        >>> cost, path, fitness_history = planner.plan(verbose=True)     # planning results only
+        >>> cost_curve = [-f for f in fitness_history]
+        >>> planner.plot.animation(path, str(planner), cost, cost_curve=cost_curve)  # animation
         >>> planner.run()       # run both planning and animation
     """
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean", 
-        n_particles: int = 30, point_num: int = 6, w_inertial: float = 0.5,
-        w_social: float = 1.0, w_cognitive: float = 0.6, max_speed: int = 8,
-        max_iter: int = 100, init_mode: int = GEN_MODE_RANDOM) -> None:
+        n_particles: int = 300, point_num: int = 5, w_inertial: float = 1.0,
+        w_cognitive: float = 1.0, w_social: float = 1.0, max_speed: int = 6,
+        max_iter: int = 200, init_mode: int = GEN_MODE_RANDOM) -> None:
         super().__init__(start, goal, env, heuristic_type)
         self.max_iter = max_iter
         self.n_particles = n_particles
@@ -72,9 +74,12 @@ class PSO(EvolutionarySearcher):
             self.best_pos = []
             self.best_fitness = -1
         
-    def plan(self):
+    def plan(self, verbose: bool = False):
         """
         Particle Swarm Optimization (PSO) motion plan function.
+
+        Parameters:
+            verbose (bool): print the best fitness value of each iteration
 
         Returns:
             cost (float): path cost
@@ -90,7 +95,7 @@ class PSO(EvolutionarySearcher):
 
             if i == 0 or init_fitness > self.best_particle.fitness:
                 self.best_particle.fitness = init_fitness
-                self.best_particle.position = init_positions[i]
+                self.best_particle.position = deepcopy(init_positions[i])
             
             # Create and add particle objects to containers
             p = self.Particle()
@@ -102,15 +107,20 @@ class PSO(EvolutionarySearcher):
             self.particles.append(p)
 
         # Iterative optimization
+        fitness_history = []
         for _ in range(self.max_iter):
             for p in self.particles:
                 self.optimizeParticle(p)
+            fitness_history.append(self.best_particle.fitness)
+            if verbose:
+                print(f"iteration {_}: best fitness = {self.best_particle.fitness}")
 
         # Generating Paths from Optimal Particles
         points = [self.start.current] + self.best_particle.position + [self.goal.current]
         points = sorted(set(points), key=points.index)
         path = self.b_spline_gen.run(points, display=False)
-        return self.b_spline_gen.length(path), path
+
+        return self.b_spline_gen.length(path), path, fitness_history
 
     def initializePositions(self) -> list:
         """
@@ -186,20 +196,20 @@ class PSO(EvolutionarySearcher):
         points = [self.start.current] + position + [self.goal.current]
         points = sorted(set(points), key=points.index)
         try:
-            points = self.b_spline_gen.run(points, display=False)
+            path = self.b_spline_gen.run(points, display=False)
         except:
             return float("inf")
 
         # collision detection
         obs_cost = 0
-        for p in points:
-            px, py = int(p[0]), int(p[1])
-            if (px, py) in self.env.obstacles or px < 0 or px >= self.env.x_range \
-                or py < 0 or py >= self.env.y_range:
+        for i in range(len(path) - 1):
+            p1 = (round(path[i][0]), round(path[i][1]))
+            p2 = (round(path[i+1][0]), round(path[i+1][1]))
+            if self.isCollision(p1, p2):
                 obs_cost = obs_cost + 1
 
         # Calculate particle fitness
-        return 100000.0 / (self.b_spline_gen.length(points) + 50000 * obs_cost)
+        return 100000.0 / (self.b_spline_gen.length(path) + 50000 * obs_cost)
 
     def updateParticleVelocity(self, particle):
         """
@@ -213,19 +223,21 @@ class PSO(EvolutionarySearcher):
             rand1, rand2 = random.random(), random.random()
             vx, vy = particle.velocity[i]
             px, py = particle.position[i]
-            vx_new = self.w_inertial * vx + self.w_social * rand1 * (particle.best_pos[i][0] - px) \
-                + self.w_cognitive * rand2 * (self.best_particle.position[i][0] - px)
+            vx_new = self.w_inertial * vx + self.w_cognitive * rand1 * (particle.best_pos[i][0] - px) \
+                + self.w_social * rand2 * (self.best_particle.position[i][0] - px)
 
-            vy_new = self.w_inertial * vy + self.w_social * rand1 * (particle.best_pos[i][1] - py) \
-                + self.w_cognitive * rand2 * (self.best_particle.position[i][1] - py)
-            
-            vy_new *= 1.3
- 
+            vy_new = self.w_inertial * vy + self.w_cognitive * rand1 * (particle.best_pos[i][1] - py) \
+                + self.w_social * rand2 * (self.best_particle.position[i][1] - py)
+
+            # Velocity Scaling
+            if self.env.x_range > self.env.y_range:
+                vx_new *= self.env.x_range / self.env.y_range
+            else:
+                vy_new *= self.env.y_range / self.env.x_range
+
             # Velocity limit
-            vx_new = vx_new if vx_new < self.max_speed else self.max_speed
-            vx_new = vx_new if vx_new > -self.max_speed else -self.max_speed
-            vy_new = vy_new if vy_new < self.max_speed else self.max_speed
-            vy_new = vy_new if vy_new > -self.max_speed else -self.max_speed
+            vx_new = MathHelper.clamp(vx_new, -self.max_speed, self.max_speed)
+            vy_new = MathHelper.clamp(vy_new, -self.max_speed, self.max_speed)
             particle.velocity[i] = (vx_new, vy_new)
 
     def updateParticlePosition(self, particle):
@@ -241,10 +253,8 @@ class PSO(EvolutionarySearcher):
             py = particle.position[i][1] + int(particle.velocity[i][1])
 
             # Position limit
-            px = px if px < self.goal.x else self.goal.x
-            px = px if px > self.start.x else self.start.x
-            py = py if py < self.goal.y else self.goal.y
-            py = py if py > self.start.y else self.start.y
+            px = MathHelper.clamp(px, 0, self.env.x_range - 1)
+            py = MathHelper.clamp(py, 0, self.env.y_range - 1)
 
             particle.position[i] = (px, py)
         particle.position.sort(key=lambda p: p[0])
@@ -272,11 +282,75 @@ class PSO(EvolutionarySearcher):
         # Update global optimal particles
         if particle.best_fitness > self.best_particle.fitness:
             self.best_particle.fitness = particle.best_fitness
-            self.best_particle.position = particle.position
+            self.best_particle.position = deepcopy(particle.position)
 
     def run(self):
         """
         Running both plannig and animation.
         """
-        cost, path = self.plan()
-        self.plot.animation(path, str(self), cost)
+        cost, path, fitness_history = self.plan(verbose=True)
+        cost_curve = [-f for f in fitness_history]
+        self.plot.animation(path, str(self), cost, cost_curve=cost_curve)
+
+    def isCollision(self, p1: tuple, p2: tuple) -> bool:
+        """
+        Judge collision when moving from node1 to node2 using Bresenham.
+
+        Parameters:
+            p1 (tuple): start point
+            p2 (tuple): end point
+
+        Returns:
+            collision (bool): True if collision exists, False otherwise.
+        """
+        if p1 in self.obstacles or p2 in self.obstacles:
+            return True
+
+        x1, y1 = p1
+        x2, y2 = p2
+
+        if x1 < 0 or x1 >= self.env.x_range or y1 < 0 or y1 >= self.env.y_range:
+            return True
+        if x2 < 0 or x2 >= self.env.x_range or y2 < 0 or y2 >= self.env.y_range:
+            return True
+
+        d_x = abs(x2 - x1)
+        d_y = abs(y2 - y1)
+        s_x = 0 if (x2 - x1) == 0 else (x2 - x1) / d_x
+        s_y = 0 if (y2 - y1) == 0 else (y2 - y1) / d_y
+        x, y, e = x1, y1, 0
+
+        # check if any obstacle exists between node1 and node2
+        if d_x > d_y:
+            tau = (d_y - d_x) / 2
+            while not x == x2:
+                if e > tau:
+                    x = x + s_x
+                    e = e - d_y
+                elif e < tau:
+                    y = y + s_y
+                    e = e + d_x
+                else:
+                    x = x + s_x
+                    y = y + s_y
+                    e = e + d_x - d_y
+                if (x, y) in self.obstacles:
+                    return True
+        # swap x and y
+        else:
+            tau = (d_x - d_y) / 2
+            while not y == y2:
+                if e > tau:
+                    y = y + s_y
+                    e = e - d_x
+                elif e < tau:
+                    x = x + s_x
+                    e = e + d_y
+                else:
+                    x = x + s_x
+                    y = y + s_y
+                    e = e + d_y - d_x
+                if (x, y) in self.obstacles:
+                    return True
+
+        return False
