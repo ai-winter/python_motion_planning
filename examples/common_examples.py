@@ -18,10 +18,10 @@ from python_motion_planning import *
 # plt = RRTStar(start=(18, 8), goal=(37, 18), env=Map(51, 31))
 # plt = InformedRRT(start=(18, 8), goal=(37, 18), env=Map(51, 31))
 
-plt = ACO(start=(5, 5), goal=(45, 25), env=Grid(51, 31))
+# plt = ACO(start=(5, 5), goal=(45, 25), env=Grid(51, 31))
 # plt = PSO(start=(5, 5), goal=(45, 25), env=Grid(51, 31))
 
-plt.run()
+# plt.run()
 
 # -------------local planners-------------
 # plt = PID(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
@@ -43,9 +43,9 @@ plt.run()
 # plt.train(num_episodes=10000)
 
 # load the trained model and run
-# plt = DDPG(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31),
-#            actor_load_path="models/actor_best_5_21.pth", critic_load_path="models/critic_best_5_21.pth")
-# plt.run()
+plt = DDPG(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31),
+           actor_load_path="models/actor_best_example.pth", critic_load_path="models/critic_best_example.pth")
+plt.run()
 
 # -------------curve generators-------------
 # points = [(0, 0, 0), (10, 10, -90), (20, 5, 60), (30, 10, 120),

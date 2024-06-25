@@ -2,7 +2,7 @@
 @file: dwa.py
 @breif: Dynamic Window Approach(DWA) motion planning
 @author: Yang Haodong, Wu Maojia
-@update: 2024.5.22
+@update: 2024.6.25
 """
 import numpy as np
 from itertools import product
@@ -44,7 +44,7 @@ class DWA(LocalPlanner):
     """
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean",
                  heading_weight: float = 0.2, obstacle_weight: float = 0.1, velocity_weight: float = 0.05,
-                 predict_time: float = 3.0, obstacle_inflation_radius: float = 1.0,
+                 predict_time: float = 1.5, obstacle_inflation_radius: float = 1.0,
                  v_resolution: float = 0.05, w_resolution: float = 0.05, **params) -> None:
         super().__init__(start, goal, env, heuristic_type, **params)
         self.heading_weight = heading_weight

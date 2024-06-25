@@ -2,7 +2,7 @@
 @file: mpc.py
 @breif: Model Predicted Control (MPC) motion planning
 @author: Yang Haodong, Wu Maojia
-@update: 2024.5.21
+@update: 2024.6.25
 """
 import osqp
 import numpy as np
@@ -32,7 +32,7 @@ class MPC(LocalPlanner):
         >>> planner.run()
     """
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean", **params) -> None:
-        super().__init__(start, goal, env, heuristic_type, MIN_LOOKAHEAD_DIST=1.0, MIN_W=-0.78, MAX_ITERATION=2000, **params)
+        super().__init__(start, goal, env, heuristic_type, **params)
         # MPC parameters
         self.p = 12
         self.m = 8

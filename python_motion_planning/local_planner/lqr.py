@@ -2,7 +2,7 @@
 @file: lqr.py
 @breif: Linear Quadratic Regulator(LQR) motion planning
 @author: Yang Haodong, Wu Maojia
-@update: 2024.5.21
+@update: 2024.6.25
 """
 import numpy as np
 
@@ -30,7 +30,7 @@ class LQR(LocalPlanner):
         >>> planner.run()
     """
     def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean", **params) -> None:
-        super().__init__(start, goal, env, heuristic_type, MIN_LOOKAHEAD_DIST=1.0, **params)
+        super().__init__(start, goal, env, heuristic_type, **params)
         # LQR parameters
         self.Q = np.diag([1, 1, 1])
         self.R = np.diag([1, 1])

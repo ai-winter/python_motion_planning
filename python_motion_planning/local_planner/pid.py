@@ -2,7 +2,7 @@
 @file: pid.py
 @breif: PID motion planning
 @author: Yang Haodong, Wu Maojia
-@update: 2024.5.21
+@update: 2024.6.25
 """
 import numpy as np
 import math
@@ -31,11 +31,17 @@ class PID(LocalPlanner):
         >>> planner = PID(start, goal, env)
         >>> planner.run()
     """
-    def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean", **params) -> None:
-        super().__init__(start, goal, env, heuristic_type, **params)
+    def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean",
+                 k_v_p: float = 1.00, k_v_i: float = 0.10, k_v_d: float = 0.10,
+                 k_w_p: float = 1.00, k_w_i: float = 0.10, k_w_d: float = 0.10,
+                 k_theta: float = 0.75, **params) -> None:
+        super().__init__(start, goal, env, heuristic_type, MIN_LOOKAHEAD_DIST=0.75, **params)
         # PID parameters
         self.e_w, self.i_w = 0.0, 0.0
         self.e_v, self.i_v = 0.0, 0.0
+        self.k_v_p, self.k_v_i, self.k_v_d = k_v_p, k_v_i, k_v_d
+        self.k_w_p, self.k_w_i, self.k_w_d = k_w_p, k_w_i, k_w_d
+        self.k_theta = k_theta
 
         # global planner
         g_start = (start[0], start[1])
@@ -64,14 +70,13 @@ class PID(LocalPlanner):
             lookahead_pt, theta_trj, _ = self.getLookaheadPoint()
 
             # desired angle
-            k_theta = 0.5
             theta_err = self.angle(self.robot.position, lookahead_pt)
             if abs(theta_err - theta_trj) > np.pi:
                 if theta_err > theta_trj:
                     theta_trj += 2 * np.pi
                 else:
                     theta_err += 2 * np.pi
-            theta_d = k_theta * theta_err + (1 - k_theta) * theta_trj
+            theta_d = self.k_theta * theta_err + (1 - self.k_theta) * theta_trj
     
             # calculate velocity command
             e_theta = self.regularizeAngle(self.robot.theta - self.goal[2])
@@ -121,10 +126,7 @@ class PID(LocalPlanner):
         d_v = (e_v - self.e_v) / self.params["TIME_STEP"]
         self.e_v = e_v
 
-        k_v_p = 1.00
-        k_v_i = 0.00
-        k_v_d = 0.00
-        v_inc = k_v_p * e_v + k_v_i * self.i_v + k_v_d * d_v
+        v_inc = self.k_v_p * e_v + self.k_v_i * self.i_v + self.k_v_d * d_v
         v_inc = MathHelper.clamp(v_inc, self.params["MIN_V_INC"], self.params["MAX_V_INC"])
 
         v = self.robot.v + v_inc
@@ -147,10 +149,7 @@ class PID(LocalPlanner):
         d_w = (e_w - self.e_w) / self.params["TIME_STEP"]
         self.e_w = e_w
 
-        k_w_p = 1.00
-        k_w_i = 0.00
-        k_w_d = 0.01
-        w_inc = k_w_p * e_w + k_w_i * self.i_w + k_w_d * d_w
+        w_inc = self.k_w_p * e_w + self.k_w_i * self.i_w + self.k_w_d * d_w
 
         if abs(w_inc) > self.params["MAX_W_INC"]:
             w_inc = math.copysign(self.params["MAX_W_INC"], w_inc)
