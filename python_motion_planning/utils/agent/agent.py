@@ -72,7 +72,6 @@ class Robot(Agent):
         Parameters:
             u (np.ndarray): control command with [v, w]
             dt (float): simulation time
-            obstacles (set): set of obstacles with (x, y)
             replace (bool): update-self if true else return a new Robot object
 
         Returns:
@@ -113,12 +112,6 @@ class Robot(Agent):
                       [                      1,  0],
                       [                      0,  1]])
         new_state = F @ state + B @ u
-
-        # # if collide with obstacles, reset the position and stop the robot
-        # if (round(new_state[0][0]), round(new_state[1][0])) in obstacles:
-        #     new_state[0][0] = state[0][0]
-        #     new_state[1][0] = state[1][0]
-        #     new_state[3][0] = 0
 
         return new_state
 

@@ -150,15 +150,9 @@ class PID(LocalPlanner):
         self.e_w = e_w
 
         w_inc = self.k_w_p * e_w + self.k_w_i * self.i_w + self.k_w_d * d_w
-
-        if abs(w_inc) > self.params["MAX_W_INC"]:
-            w_inc = math.copysign(self.params["MAX_W_INC"], w_inc)
+        w_inc = MathHelper.clamp(w_inc, self.params["MIN_W_INC"], self.params["MAX_W_INC"])
 
         w = self.robot.w + w_inc
-
-        if abs(w) > self.params["MAX_W"]:
-            w = math.copysign(self.params["MAX_W"], w)
-        if abs(w) < self.params["MIN_W"]:
-            w = math.copysign(self.params["MIN_W"], w)
+        w = MathHelper.clamp(w, self.params["MIN_W"], self.params["MAX_W"])
 
         return w
