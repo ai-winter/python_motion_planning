@@ -71,7 +71,7 @@ class DWA(LocalPlanner):
         history_traj = []
         for _ in range(self.params["MAX_ITERATION"]):
             # break until goal reached
-            if self.reach_goal(tuple(self.robot.state.squeeze(axis=1)[0:3]), self.goal):
+            if self.reachGoal(tuple(self.robot.state.squeeze(axis=1)[0:3]), self.goal):
                 return True, history_traj, self.robot.history_pose
 
             # get the particular point on the path at the lookahead distance to track

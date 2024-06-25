@@ -114,12 +114,6 @@ class Robot(Agent):
                       [                      0,  1]])
         new_state = F @ state + B @ u
 
-        # # if collide with obstacles, reset the position and stop the robot
-        # if (round(new_state[0][0]), round(new_state[1][0])) in obstacles:
-        #     new_state[0][0] = state[0][0]
-        #     new_state[1][0] = state[1][0]
-        #     new_state[3][0] = 0
-
         return new_state
 
     def reset(self) -> None:

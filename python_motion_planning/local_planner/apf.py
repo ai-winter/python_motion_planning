@@ -58,7 +58,7 @@ class APF(LocalPlanner):
         dt = self.params["TIME_STEP"]
         for _ in range(self.params["MAX_ITERATION"]):
             # break until goal reached
-            if not self.shouldMoveToGoal(self.robot.position, self.goal):
+            if self.reachGoal(tuple(self.robot.state.squeeze(axis=1)[0:3]), self.goal):
                 return True, self.robot.history_pose
             
             # compute the tatget pose and force at the current step

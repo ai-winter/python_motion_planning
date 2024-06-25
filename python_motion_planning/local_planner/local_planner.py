@@ -230,7 +230,7 @@ class LocalPlanner(Planner):
         """
         return angle_to_path > self.params["ROTATE_TOL"]
 
-    def reach_goal(self, cur: tuple, goal: tuple) -> bool:
+    def reachGoal(self, cur: tuple, goal: tuple) -> bool:
         """
         Whether the robot has reached the goal pose
 
@@ -245,7 +245,7 @@ class LocalPlanner(Planner):
         return not (self.shouldMoveToGoal((cur[0], cur[1]), (goal[0], goal[1]))
                     or self.shouldRotateToPath(abs(e_theta)))
 
-    def in_collision(self, cur_pos: tuple):
+    def isCollision(self, cur_pos: tuple):
         """
         Whether the robot is in collision with obstacles
 

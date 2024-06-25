@@ -321,7 +321,7 @@ class DDPG(LocalPlanner):
         s = self.reset()
         for _ in range(self.params["MAX_ITERATION"]):
             # break until goal reached
-            if self.reach_goal(tuple(s[0:3]), tuple(s[5:8])):
+            if self.reachGoal(tuple(s[0:3]), tuple(s[5:8])):
                 return True, self.robot.history_pose
 
             # get the particular point on the path at the lookahead distance to track
@@ -542,7 +542,7 @@ class DDPG(LocalPlanner):
         if random_sg:   # random start and goal
             start = (random.uniform(0, self.env.x_range), random.uniform(0, self.env.y_range), random.uniform(-math.pi, math.pi))
             # generate random start and goal until they are not in collision
-            while self.in_collision(start):
+            while self.isCollision(start):
                 start = (random.uniform(0, self.env.x_range), random.uniform(0, self.env.y_range), random.uniform(-math.pi, math.pi))
 
             # goal is on the circle with radius self.params["MAX_LOOKAHEAD_DIST"] centered at start
@@ -552,7 +552,7 @@ class DDPG(LocalPlanner):
             goal_y = start[1] + goal_dist * math.sin(goal_angle)
             goal = (goal_x, goal_y, goal_angle)
 
-            while self.in_collision(goal):
+            while self.isCollision(goal):
                 goal_angle = random.uniform(-math.pi, math.pi)
                 goal_dist = self.params["MAX_LOOKAHEAD_DIST"]
                 goal_x = start[0] + goal_dist * math.cos(goal_angle)
@@ -594,8 +594,8 @@ class DDPG(LocalPlanner):
         next_state[2] = self.regularizeAngle(next_state[2].item())
         next_state[3] = MathHelper.clamp(next_state[3].item(), self.params["MIN_V"], self.params["MAX_V"])
         next_state[4] = MathHelper.clamp(next_state[4].item(), self.params["MIN_W"], self.params["MAX_W"])
-        win = self.reach_goal(tuple(next_state[0:3]), tuple(next_state[5:8]))
-        lose = self.in_collision(tuple(next_state[0:2]))
+        win = self.reachGoal(tuple(next_state[0:3]), tuple(next_state[5:8]))
+        lose = self.isCollision(tuple(next_state[0:2]))
         reward = self.reward(next_state, win, lose)
         done = win or lose
         return next_state, reward, done, win
