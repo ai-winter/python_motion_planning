@@ -23,11 +23,11 @@ class Plot:
                   ellipse: np.ndarray = None) -> None:
         name = name + "\ncost: " + str(cost) if cost else name
         self.plotEnv(name)
-        if expand:
+        if expand is not None:
             self.plotExpand(expand)
-        if history_pose:
+        if history_pose is not None:
             self.plotHistoryPose(history_pose, predict_path, lookahead_pts)
-        if path:
+        if path is not None:
             self.plotPath(path)
 
         if cost_curve:

@@ -42,7 +42,7 @@ class LocalPlanner(Planner):
         self.params["MAX_ITERATION"] = params["MAX_ITERATION"] if "MAX_ITERATION" in params.keys() else 1500
         self.params["LOOKAHEAD_TIME"] = params["LOOKAHEAD_TIME"] if "LOOKAHEAD_TIME" in params.keys() else 1.0
         self.params["MAX_LOOKAHEAD_DIST"] = params["MAX_LOOKAHEAD_DIST"] if "MAX_LOOKAHEAD_DIST" in params.keys() else 2.5
-        self.params["MIN_LOOKAHEAD_DIST"] = params["MIN_LOOKAHEAD_DIST"] if "MIN_LOOKAHEAD_DIST" in params.keys() else 1.5
+        self.params["MIN_LOOKAHEAD_DIST"] = params["MIN_LOOKAHEAD_DIST"] if "MIN_LOOKAHEAD_DIST" in params.keys() else 1.0
         self.params["MAX_V_INC"] = params["MAX_V_INC"] if "MAX_V_INC" in params.keys() else 1.0
         self.params["MIN_V_INC"] = params["MIN_V_INC"] if "MIN_V_INC" in params.keys() else -1.0
         self.params["MAX_V"] = params["MAX_V"] if "MAX_V" in params.keys() else 0.5
