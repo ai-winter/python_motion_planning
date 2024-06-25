@@ -72,7 +72,6 @@ class Robot(Agent):
         Parameters:
             u (np.ndarray): control command with [v, w]
             dt (float): simulation time
-            obstacles (set): set of obstacles with (x, y)
             replace (bool): update-self if true else return a new Robot object
 
         Returns:
