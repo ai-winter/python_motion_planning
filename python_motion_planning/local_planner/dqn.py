@@ -8,13 +8,10 @@ import numpy as np
 import itertools
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.tensorboard import SummaryWriter
 import random
 from tqdm import tqdm
 import math
-import copy
 import datetime
 import os
 from collections import namedtuple, deque
@@ -25,24 +22,33 @@ from python_motion_planning.utils import Env, MathHelper, Robot
 ActionRot = namedtuple("ActionRot", ["v", "w"])
 
 class BasicBuffer:
-    '''
-    * @breif: 基础经验回放池
-    '''
+    """
+    Basic replay buffer.
+
+    Parameters:
+        max_size (int): buffer capacity
+    """
     def __init__(self, max_size):
         self.max_size = max_size
         self.buffer = deque(maxlen=max_size)
 
-    '''
-    * @breif: 向经验池推入一条经验
-    '''
     def push(self, *experience):
+        """
+        Injecting an experience into the replay buffer.
+
+        Parameters:
+            experience (tuple): five-element tuple including state, action, reward, next_state and done flag
+        """
         state, action, reward, next_state, done = experience
         self.buffer.append((state, action, np.array([reward]), next_state, done))
 
-    '''
-    * @breif: 采样一个batch的数据
-    '''
     def sample(self, batch_size):
+        """
+        Sampling a batch of data.
+
+        Parameters:
+            batch_size (int): the size of sampling batch
+        """
         state_batch, action_batch, reward_batch, next_state_batch, done_batch = [], [], [], [], []
         batch = random.sample(self.buffer, batch_size)
 
@@ -56,10 +62,13 @@ class BasicBuffer:
 
         return (state_batch, action_batch, reward_batch, next_state_batch, done_batch)
 
-    '''
-    * @breif: 采样一个batch的数据, 且这个batch是连续的
-    '''
     def sampleSequence(self, batch_size):
+        """
+        Sampling a contiguous batch of data.
+
+        Parameters:
+            batch_size (int): the size of sampling batch
+        """
         state_batch, action_batch, reward_batch, next_state_batch, done_batch = [], [], [], [], []
         start = np.random.randint(0, len(self.buffer) - batch_size)
 
@@ -77,47 +86,51 @@ class BasicBuffer:
         return len(self.buffer)
 
 class SumTree:
-    '''
-    * @breif: 求和树
-    * @attention: 容量只能为偶数
-    '''
+    """
+    Sum tree structure.
+
+    Parameters:
+        capacity (int): buffer capacity (must be even)
+    """
     def __init__(self, capacity):
-        # 求和树容量
         self.capacity = capacity
-        # 树结构
         self.tree = np.zeros(2 * capacity - 1)
-        # 树叶节点
         self.data = np.zeros(capacity, dtype=object)
-        # 指向当前树叶节点的指针
+        # pointer to the current leaf node
         self.write = 0
-        # 求和树缓存的数据量
+        # the amount of data cached in the sum tree
         self.size = 0
 
-    '''
-    * @breif: 递归更新树的优先级
-    * @param[in]: idx   ->  索引
-    * @param[in]: change->  优先级增量
-    * @example: 六节点求和树的索引
-    *               0
-    *              / \
-    *             1   2
-    *            / \ / \
-    *           3  4 5  6
-    *          / \ / \
-    *         7  8 9 10
-    '''    
     def _propagate(self, idx, change):
+        """
+        Recursively updating the priority of the tree.
+
+        Parameters:
+            idx (int): tree node index
+            change (int): priority incrementation
+        
+        Example: index of the six-node sum tree
+                    0
+                   / \
+                  1   2
+                 / \ / \
+                3  4 5  6
+               / \ / \
+              7  8 9 10 
+        """
         parent = (idx - 1) // 2
         self.tree[parent] += change
         if parent != 0:
             self._propagate(parent, change)
 
-    '''
-    * @breif: 递归求叶节点(s落在某个节点区间内)
-    * @param[in]: idx   ->  子树根节点索引
-    * @param[in]: s     ->  采样优先级
-    '''    
     def _retrieve(self, idx, s):
+        """
+        Recursively finding leaf nodes (where s falls within a node interval).
+
+        Parameters:
+            idx (int): index of the subtree root node
+            s (int): sampling priority
+        """
         left = 2 * idx + 1
         right = left + 1
         if left >= len(self.tree):
@@ -127,18 +140,20 @@ class SumTree:
         else:
             return self._retrieve(right, s - self.tree[left])
 
-    '''
-    * @breif: 返回根节点, 即总优先级权重
-    '''    
     def total(self):
+        """
+        Returning the root node, i.e., the total priority weight.
+        """
         return self.tree[0]
 
-    '''
-    * @breif: 添加带优先级的数据到求和树
-    * @param[in]: p   ->  优先级
-    * @param[in]: data->  数据
-    '''    
     def add(self, p, data):
+        """
+        Adding data with priorities to the sum tree.
+
+        Parameters:
+            p (int): priority
+            data (tuple): data
+        """
         idx = self.write + self.capacity - 1
         self.data[self.write] = data
         self.update(idx, p)
@@ -147,50 +162,60 @@ class SumTree:
         if self.write >= self.capacity:
             self.write = 0
 
-    '''
-    * @breif: 更新求和树数据
-    * @param[in]: idx   ->  索引
-    * @param[in]: p   ->  优先级
-    '''    
     def update(self, idx, p):
+        """
+        Update data of the sum tree.
+
+        Parameters:
+            idx (int): tree node index
+            p (int): priority
+        """
         change = p - self.tree[idx]
         self.tree[idx] = p
         self._propagate(idx, change)
         self.tree = self.tree / self.tree.max()
 
-    '''
-    * @breif: 根据采样值求叶节点数据
-    * @param[in]: s     ->  采样优先级
-    '''    
     def get(self, s):
+        """
+        Obtaining leaf node data based on the sampled value.
+
+        Parameters:
+            s (int): sampling priority
+        """
         idx = self._retrieve(0, s)
         dataIdx = idx - self.capacity + 1
         return (idx, self.tree[idx], self.data[dataIdx])
 
 
 class PrioritizedBuffer:
-    '''
-    * @breif: 优先级经验回放池
-    '''
     def __init__(self, max_size, alpha=0.6, beta=0.4):
+        """
+        Priority replay buffer.
+        """
         self.sum_tree = SumTree(max_size)
         self.alpha = alpha
         self.beta = beta
         self.cur_size = 0
-
-    '''
-    * @breif: 向经验池推入一条经验
-    '''    
+   
     def push(self, *experience):
+        """
+        Injecting an experience into the replay buffer.
+
+        Parameters:
+            experience (tuple): five-element tuple including state, action, reward, next_state and done flag
+        """
         priority = 1.0 if self.cur_size == 0 else self.sum_tree.tree.max()
         self.cur_size = self.cur_size + 1
         state, action, reward, next_state, done = experience
         self.sum_tree.add(priority, (state, action, np.array([reward]), next_state, done))
 
-    '''
-    * @breif: 采样一个batch的数据
-    '''
     def sample(self, batch_size):
+        """
+        Sampling a batch of data.
+
+        Parameters:
+            batch_size (int): the size of sampling batch
+        """
         batch_idx, batch, probs = [], [], []
         segment = self.sum_tree.total() / batch_size
 
@@ -217,10 +242,10 @@ class PrioritizedBuffer:
 
         return (state_batch, action_batch, reward_batch, next_state_batch, done_batch), batch_idx, weights
 
-    '''
-    * @breif: 根据时序差分误差更新经验池
-    '''
     def updatePriority(self, idx, td_error):
+        """
+        Updating priorities based on temporal-difference
+        """
         priority = td_error ** self.alpha
         self.sum_tree.update(idx, priority)
 
@@ -415,11 +440,11 @@ class DQNPlanner(LocalPlanner):
             critic_loss (float): critic loss
         """
         # basic buffer
-        # states, actions, rewards, next_states, dones = self.replay_buffer.sample(self.batch_size)
+        states, actions, rewards, next_states, dones = self.replay_buffer.sample(self.batch_size)
         
-        # priority buffer
-        transitions, idxs, weights = self.replay_buffer.sample(self.batch_size)
-        states, actions, rewards, next_states, dones = transitions
+        # # priority buffer
+        # transitions, idxs, weights = self.replay_buffer.sample(self.batch_size)
+        # states, actions, rewards, next_states, dones = transitions
 
         states = torch.stack(states).to(self.device)
         actions = torch.LongTensor(actions).to(self.device)
@@ -429,35 +454,35 @@ class DQNPlanner(LocalPlanner):
         weights = torch.FloatTensor(weights).to(self.device)
 
         # basic buffer
-        # curr_Q = self.model(states).gather(1, actions.unsqueeze(1)).squeeze(1)
-        # next_Q = self.target_model(next_states)
-        # max_next_Q = torch.max(next_Q, 1)[0]
-        # expected_Q = rewards.squeeze(1) + self.gamma * max_next_Q * dones
-        # loss = self.criterion(curr_Q, expected_Q.detach())
+        curr_Q = self.model(states).gather(1, actions.unsqueeze(1)).squeeze(1)
+        next_Q = self.target_model(next_states)
+        max_next_Q = torch.max(next_Q, 1)[0]
+        expected_Q = rewards.squeeze(1) + self.gamma * max_next_Q * dones
+        loss = self.criterion(curr_Q, expected_Q.detach())
 
-        # priority buffer
-        curr_Q = self.model.forward(states).gather(1, actions.unsqueeze(1)).squeeze(1)
-        next_a = torch.argmax(self.model.forward(next_states), dim=1)
-        next_Q = self.target_model.forward(next_states).gather(1, next_a.unsqueeze(1)).squeeze(1)
-        expected_Q = rewards.squeeze(1) + self.gamma * next_Q * dones
+        # # priority buffer
+        # curr_Q = self.model.forward(states).gather(1, actions.unsqueeze(1)).squeeze(1)
+        # next_a = torch.argmax(self.model.forward(next_states), dim=1)
+        # next_Q = self.target_model.forward(next_states).gather(1, next_a.unsqueeze(1)).squeeze(1)
+        # expected_Q = rewards.squeeze(1) + self.gamma * next_Q * dones
 
-        td_errors = torch.abs(curr_Q - expected_Q)
-        loss = self.criterion(torch.sqrt(weights) * curr_Q, torch.sqrt(weights) * expected_Q.detach())
+        # td_errors = torch.abs(curr_Q - expected_Q)
+        # loss = self.criterion(torch.sqrt(weights) * curr_Q, torch.sqrt(weights) * expected_Q.detach())
 
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
 
-        # 更新target网络
+        # update target network
         for target_param, param in zip(self.target_model.parameters(), self.model.parameters()):
             target_param.data.copy_(self.tau * param + (1 - self.tau) * target_param)
 
         self.epsilon = self.epsilon + self.epsilon_delta \
                 if self.epsilon < self.epsilon_max else self.epsilon_max
         
-        # 根据时序差分更新优先级
-        for idx, td_error in zip(idxs, td_errors.cpu().detach().numpy()):
-            self.replay_buffer.updatePriority(idx, td_error)
+        # # updating priorities based on temporal-difference
+        # for idx, td_error in zip(idxs, td_errors.cpu().detach().numpy()):
+        #     self.replay_buffer.updatePriority(idx, td_error)
 
         return loss.item()
 
