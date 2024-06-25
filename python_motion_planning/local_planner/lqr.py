@@ -57,7 +57,7 @@ class LQR(LocalPlanner):
         dt = self.params["TIME_STEP"]
         for _ in range(self.params["MAX_ITERATION"]):
             # break until goal reached
-            if not self.shouldMoveToGoal(self.robot.position, self.goal):
+            if self.reachGoal(tuple(self.robot.state.squeeze(axis=1)[0:3]), self.goal):
                 return True, self.robot.history_pose
 
             # get the particular point on the path at the lookahead distance
