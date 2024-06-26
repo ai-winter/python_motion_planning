@@ -66,23 +66,23 @@ class RRTConnect(RRT):
                     sample_list_b[node_new_b.current] = node_new_b
 
                     # greedy extending
-
                     while True:
+                        if node_new_b == node_new:
+                            cost, path = self.extractPath(node_new, sample_list_b, sample_list_f)
+                            expand = self.getExpand(list(sample_list_b.values()), list(sample_list_f.values()))
+                            return cost, path, expand
+
                         dist = min(self.max_dist, self.dist(node_new, node_new_b))
                         theta = self.angle(node_new_b, node_new)
                         node_new_b2 = Node((node_new_b.x + dist * math.cos(theta),
                                            (node_new_b.y + dist * math.sin(theta))),
                                             node_new_b.current, node_new_b.g + dist, 0)
+
                         if not self.isCollision(node_new_b2, node_new_b):
                             sample_list_b[node_new_b2.current] = node_new_b2
                             node_new_b = node_new_b2
                         else:
                             break
-
-                        if node_new_b == node_new:
-                            cost, path = self.extractPath(node_new, sample_list_b, sample_list_f)
-                            expand = self.getExpand(list(sample_list_b.values()), list(sample_list_f.values()))
-                            return cost, path, expand
 
             if len(sample_list_b) < len(sample_list_f):
                 sample_list_f, sample_list_b = sample_list_b, sample_list_f
