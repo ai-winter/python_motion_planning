@@ -1,3 +1,9 @@
+"""
+@file: generate_mkdocs.py
+@breif: Used to automatically generate MkDocs documentation for Python libraries.
+@author: Wu Maojia
+@update: 2024.11.21
+"""
 import os
 import ast
 import yaml
