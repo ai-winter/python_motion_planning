@@ -16,6 +16,7 @@ We also provide [ROS C++](https://github.com/ai-winter/ros_motion_planning) vers
 
 # Quick Start
 
+## Overview
 The file structure is shown below
 
 ```
@@ -41,12 +42,14 @@ python_motion_planning
 * The local planning algorithm implementation is in the folder `local_planner`.
 * The curve generation algorithm implementation is in the folder `curve_generation`.
 
+## Dependencies
 The code was tested in python=3.10. To install other dependencies, please run the following command in shell.
 
 ```shell
 pip install -r requirements.txt
 ```
 
+## Run Example
 To start simulation, open the folder `example` and select the algorithm, for example
 
 ```python
@@ -69,6 +72,9 @@ if __name__ == '__main__':
     # animation
     planner.run()
 ```
+
+You can also refer to the examples in the documentations generated using the following method.
+## Documentation
 
 This repository also support auto-generated documentation using mkdocs. Enter the root directory and run
 
