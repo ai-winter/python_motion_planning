@@ -70,6 +70,15 @@ if __name__ == '__main__':
     planner.run()
 ```
 
+This repository also support auto-generated documentation using mkdocs. Enter the root directory and run
+
+```shell
+python generate_mkdocs.py
+mkdocs serve
+```
+
+Then open the browser and go to `http://127.0.0.1:8000`. That is the generated documentation.
+
 # Version
 ## Global Planner
 

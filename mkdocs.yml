@@ -1,121 +1,226 @@
-# ---------------------------------------------------------------------
-
-# below is default configuration
-
 theme:
   name: material
   language: en
   palette:
-    # Palette toggle for light mode
-    - scheme: default
-      toggle:
-        icon: material/weather-night
-        name: change to dark mode
-    # Palette toggle for dark mode
-    - scheme: slate
-      toggle:
-        icon: material/weather-sunny
-        name: change to light mode
+  - scheme: default
+    toggle:
+      icon: material/weather-night
+      name: change to dark mode
+  - scheme: slate
+    toggle:
+      icon: material/weather-sunny
+      name: change to light mode
   features:
-    - announce.dismiss
-    - content.action.edit
-    - content.action.view
-    - content.code.annotate
-    - content.code.copy
-    - content.code.select
-    - content.tabs.link
-    - content.tooltips
-    - header.autohide
-    - navigation.expand
-    - navigation.footer
-    - navigation.indexes
-    - navigation.instant
-    - navigation.instant.prefetch
-    - navigation.instant.progress
-    - navigation.prune
-    - navigation.sections
-    - navigation.tabs
-    - navigation.top
-    - navigation.tracking
-    - search.highlight
-    - search.share
-    - search.suggest
-    - toc.follow
-
+  - announce.dismiss
+  - content.action.edit
+  - content.action.view
+  - content.code.annotate
+  - content.code.copy
+  - content.code.select
+  - content.tabs.link
+  - content.tooltips
+  - header.autohide
+  - navigation.expand
+  - navigation.footer
+  - navigation.indexes
+  - navigation.instant
+  - navigation.instant.prefetch
+  - navigation.instant.progress
+  - navigation.prune
+  - navigation.sections
+  - navigation.tabs
+  - navigation.top
+  - navigation.tracking
+  - search.highlight
+  - search.share
+  - search.suggest
+  - toc.follow
 markdown_extensions:
-    - admonition
-    - def_list
-    - footnotes
-    - abbr
-    - pymdownx.caret
-    - pymdownx.mark
-    - pymdownx.tilde
-    - md_in_html
-    - pymdownx.arithmatex:
-          generic: true
-    - toc:
-          permalink: true
-          toc_depth: 3
-    - pymdownx.highlight:
-          anchor_linenums: true
-          linenums: true
-          use_pygments: true
-          pygments_lang_class: true
-          auto_title: true
-          linenums_style: pymdownx-inline
-    - pymdownx.betterem
-    - pymdownx.caret
-    - pymdownx.mark
-    - pymdownx.tilde
-    - pymdownx.keys
-    - pymdownx.critic
-    - pymdownx.details
-    - pymdownx.inlinehilite
-    - pymdownx.snippets
-    - pymdownx.superfences
-    - pymdownx.magiclink
-    - pymdownx.smartsymbols
-    - pymdownx.snippets
-    - pymdownx.tasklist:
-          custom_checkbox: true
-    - attr_list
-    - pymdownx.emoji:
-          emoji_index: !!python/name:material.extensions.emoji.twemoji
-          emoji_generator: !!python/name:material.extensions.emoji.to_svg
-    - pymdownx.superfences:
-          custom_fences:
-              - name: mermaid
-                class: mermaid
-                format: !!python/name:pymdownx.superfences.fence_code_format
-    - pymdownx.tabbed:
-          alternate_style: true
-          combine_header_slug: true
-    - pymdownx.tasklist:
-          custom_checkbox: true
-          clickable_checkbox: true
-    - meta
-    - tables
-
-# ---------------------------------------------------------------------
-
-# below is custom configuration
-
+- admonition
+- def_list
+- footnotes
+- abbr
+- pymdownx.caret
+- pymdownx.mark
+- pymdownx.tilde
+- md_in_html
+- pymdownx.arithmatex:
+    generic: true
+- toc:
+    permalink: true
+    toc_depth: 3
+- pymdownx.highlight:
+    anchor_linenums: true
+    linenums: true
+    use_pygments: true
+    pygments_lang_class: true
+    auto_title: true
+    linenums_style: pymdownx-inline
+- pymdownx.betterem
+- pymdownx.caret
+- pymdownx.mark
+- pymdownx.tilde
+- pymdownx.keys
+- pymdownx.critic
+- pymdownx.details
+- pymdownx.inlinehilite
+- pymdownx.snippets
+- pymdownx.superfences
+- pymdownx.magiclink
+- pymdownx.smartsymbols
+- pymdownx.snippets
+- pymdownx.tasklist:
+    custom_checkbox: true
+- attr_list
+- pymdownx.emoji:
+    emoji_index: !!python/name:material.extensions.emoji.twemoji ''
+    emoji_generator: !!python/name:material.extensions.emoji.to_svg ''
+- pymdownx.superfences:
+    custom_fences:
+    - name: mermaid
+      class: mermaid
+      format: !!python/name:pymdownx.superfences.fence_code_format ''
+- pymdownx.tabbed:
+    alternate_style: true
+    combine_header_slug: true
+- pymdownx.tasklist:
+    custom_checkbox: true
+    clickable_checkbox: true
+- meta
+- tables
 site_name: Python-Motion-Planning
 site_description: Motion planning algorithms for Python.
 site_author: Yang Haodong, Wu Maojia
 site_url: http://localhost:8000
 copyright: Copyright @ 2023-2024, Yang Haodong, Wu Maojia.
 repo_url: https://github.com/ai-winter/python_motion_planning/
-
 nav:
-  - Home: index.md
-  - Cookbook: "cookbook.md"
-  - API: "reference.md"
-  - Changlog: "changlog.md"
-
+- Home: index.md
+- curve_generation:
+  - bezier_curve:
+    - Bezier: curve_generation\bezier_curve\Bezier.md
+  - bspline_curve:
+    - BSpline: curve_generation\bspline_curve\BSpline.md
+  - cubic_spline:
+    - CubicSpline: curve_generation\cubic_spline\CubicSpline.md
+  - curve:
+    - Curve: curve_generation\curve\Curve.md
+  - dubins_curve:
+    - Dubins: curve_generation\dubins_curve\Dubins.md
+  - fem_pos_smooth:
+    - FemPosSmoother: curve_generation\fem_pos_smooth\FemPosSmoother.md
+  - polynomial_curve:
+    - Polynomial: curve_generation\polynomial_curve\Polynomial.md
+  - reeds_shepp:
+    - ReedsShepp: curve_generation\reeds_shepp\ReedsShepp.md
+- global_planner:
+  - evolutionary_search:
+    - aco:
+      - ACO: global_planner\evolutionary_search\aco\ACO.md
+    - evolutionary_search:
+      - EvolutionarySearcher: global_planner\evolutionary_search\evolutionary_search\EvolutionarySearcher.md
+    - pso:
+      - PSO: global_planner\evolutionary_search\pso\PSO.md
+  - graph_search:
+    - a_star:
+      - AStar: global_planner\graph_search\a_star\AStar.md
+    - d_star:
+      - DNode: global_planner\graph_search\d_star\DNode.md
+      - DStar: global_planner\graph_search\d_star\DStar.md
+    - d_star_lite:
+      - DStarLite: global_planner\graph_search\d_star_lite\DStarLite.md
+    - dijkstra:
+      - Dijkstra: global_planner\graph_search\dijkstra\Dijkstra.md
+    - gbfs:
+      - GBFS: global_planner\graph_search\gbfs\GBFS.md
+    - graph_search:
+      - GraphSearcher: global_planner\graph_search\graph_search\GraphSearcher.md
+    - jps:
+      - JPS: global_planner\graph_search\jps\JPS.md
+    - lazy_theta_star:
+      - LazyThetaStar: global_planner\graph_search\lazy_theta_star\LazyThetaStar.md
+    - lpa_star:
+      - LNode: global_planner\graph_search\lpa_star\LNode.md
+      - LPAStar: global_planner\graph_search\lpa_star\LPAStar.md
+    - s_theta_star:
+      - SThetaStar: global_planner\graph_search\s_theta_star\SThetaStar.md
+    - theta_star:
+      - ThetaStar: global_planner\graph_search\theta_star\ThetaStar.md
+    - voronoi:
+      - VoronoiPlanner: global_planner\graph_search\voronoi\VoronoiPlanner.md
+  - sample_search:
+    - informed_rrt:
+      - Ellipse: global_planner\sample_search\informed_rrt\Ellipse.md
+      - InformedRRT: global_planner\sample_search\informed_rrt\InformedRRT.md
+    - rrt:
+      - RRT: global_planner\sample_search\rrt\RRT.md
+    - rrt_connect:
+      - RRTConnect: global_planner\sample_search\rrt_connect\RRTConnect.md
+    - rrt_star:
+      - RRTStar: global_planner\sample_search\rrt_star\RRTStar.md
+    - sample_search:
+      - SampleSearcher: global_planner\sample_search\sample_search\SampleSearcher.md
+- local_planner:
+  - apf:
+    - APF: local_planner\apf\APF.md
+  - ddpg:
+    - ReplayBuffer: local_planner\ddpg\ReplayBuffer.md
+    - Actor: local_planner\ddpg\Actor.md
+    - Critic: local_planner\ddpg\Critic.md
+    - DDPG: local_planner\ddpg\DDPG.md
+  - dqn:
+    - BasicBuffer: local_planner\dqn\BasicBuffer.md
+    - SumTree: local_planner\dqn\SumTree.md
+    - PrioritizedBuffer: local_planner\dqn\PrioritizedBuffer.md
+    - DQN: local_planner\dqn\DQN.md
+    - DQNPlanner: local_planner\dqn\DQNPlanner.md
+  - dwa:
+    - DWA: local_planner\dwa\DWA.md
+  - local_planner:
+    - LocalPlanner: local_planner\local_planner\LocalPlanner.md
+  - lqr:
+    - LQR: local_planner\lqr\LQR.md
+  - mpc:
+    - MPC: local_planner\mpc\MPC.md
+  - pid:
+    - PID: local_planner\pid\PID.md
+  - rpp:
+    - RPP: local_planner\rpp\RPP.md
+- utils:
+  - agent:
+    - agent:
+      - Agent: utils\agent\agent\Agent.md
+      - Robot: utils\agent\agent\Robot.md
+  - environment:
+    - env:
+      - Env: utils\environment\env\Env.md
+      - Grid: utils\environment\env\Grid.md
+      - Map: utils\environment\env\Map.md
+    - node:
+      - Node: utils\environment\node\Node.md
+    - point2d:
+      - Point2D: utils\environment\point2d\Point2D.md
+    - pose2d:
+      - Pose2D: utils\environment\pose2d\Pose2D.md
+  - helper:
+    - math_helper:
+      - MathHelper: utils\helper\math_helper\MathHelper.md
+  - planner:
+    - control_factory:
+      - ControlFactory: utils\planner\control_factory\ControlFactory.md
+    - curve_factory:
+      - CurveFactory: utils\planner\curve_factory\CurveFactory.md
+    - planner:
+      - Planner: utils\planner\planner\Planner.md
+    - search_factory:
+      - SearchFactory: utils\planner\search_factory\SearchFactory.md
+  - plot:
+    - plot:
+      - Plot: utils\plot\plot\Plot.md
 plugins:
-  - mkdocstrings:
-      handlers:
-        python:
-          paths: [ src ]
-  - search
+- mkdocstrings:
+    handlers:
+      python:
+        paths:
+        - src
+- search
