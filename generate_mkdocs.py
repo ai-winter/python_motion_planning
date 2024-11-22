@@ -2,7 +2,7 @@
 @file: generate_mkdocs.py
 @breif: Used to automatically generate MkDocs documentation for Python libraries.
 @author: Wu Maojia
-@update: 2024.11.21
+@update: 2024.11.22
 """
 import os
 import ast
@@ -109,10 +109,11 @@ def generate_api_docs(root_folder: str, output_folder: str, index_file: str, mkd
             yaml.dump(mkdocs_config, f, allow_unicode=True, sort_keys=False)
 
 
-# Example usage
-generate_api_docs(
-    root_folder='python_motion_planning',  # Code directory
-    output_folder='docs/',  # Directory for the generated documentation
-    index_file='docs/index.md',  # Path to the homepage file
-    mkdocs_file='mkdocs.yml'  # Path to the mkdocs.yml file
-)
+if __name__ == '__main__':
+    # Example usage
+    generate_api_docs(
+        root_folder='python_motion_planning',  # Code directory
+        output_folder='docs/',  # Directory for the generated documentation
+        index_file='docs/index.md',  # Path to the homepage file
+        mkdocs_file='mkdocs.yml'  # Path to the mkdocs.yml file
+    )

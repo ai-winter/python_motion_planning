@@ -49,31 +49,34 @@ The code was tested in python=3.10. To install other dependencies, please run th
 pip install -r requirements.txt
 ```
 
-## Run Example
-To start simulation, open the folder `example` and select the algorithm, for example
+## Run
+Below are some simple examples.
 
+1. Run planning and animation separately
 ```python
-if __name__ == '__main__':
-    '''
-    path searcher constructor
-    '''
-    search_factory = SearchFactory()
-    
-    '''
-    graph search
-    '''
-    # build environment
-    start = (5, 5)
-    goal = (45, 25)
-    env = Grid(51, 31)
-
-    # creat planner
-    planner = search_factory("a_star", start=start, goal=goal, env=env)
-    # animation
-    planner.run()
+import python_motion_planning as pmp
+planner = pmp.AStar(start=(5, 5), goal=(45, 25), env=pmp.Grid(51, 31))
+cost, path, expand = planner.plan()
+planner.plot.animation(path, str(planner), cost, expand)  # animation
 ```
 
-You can also refer to the examples in the documentations generated using the following method.
+2. Run planning and animation in one step
+```python
+import python_motion_planning as pmp
+planner = pmp.AStar(start=(5, 5), goal=(45, 25), env=pmp.Grid(51, 31))
+planner.run()       # run both planning and animation
+```
+
+3. Create planner in factory mode
+```python
+import python_motion_planning as pmp
+search_factory = pmp.SearchFactory()
+planner = search_factory("a_star", start=(5, 5), goal=(45, 25), env=pmp.Grid(51, 31))
+planner.run()       # run both planning and animation
+```
+
+More examples can be found in the folder `examples`. You can also refer to the examples in the documentations generated using the following method.
+
 ## Documentation
 
 This repository also support auto-generated documentation using mkdocs. Enter the root directory and run
@@ -83,7 +86,7 @@ python generate_mkdocs.py
 mkdocs serve
 ```
 
-Then open the browser and go to `http://127.0.0.1:8000`. That is the generated documentation.
+Then open the browser and go to [http://127.0.0.1:8000](http://127.0.0.1:8000). That is the generated documentation.
 
 # Version
 ## Global Planner

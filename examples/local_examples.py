@@ -1,9 +1,11 @@
 """
-@file: local_example.py
+@file: local_examples.py
 @breif: local planner application examples
-@author: Winter
-@update: 2023.10.24
+@author: Yang Haodong, Wu Maojia
+@update: 2024.11.22
 """
+import sys, os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from python_motion_planning.utils import Grid, ControlFactory
 
 if __name__ == '__main__':

@@ -218,9 +218,18 @@ nav:
     - plot:
       - Plot: utils\plot\plot\Plot.md
 plugins:
+- search
+- autorefs
 - mkdocstrings:
+    default_handler: python
     handlers:
       python:
         paths:
-        - src
-- search
+        - pykit_tools
+        options:
+          heading_level: 3
+          show_root_heading: true
+          show_symbol_type_heading: true
+          show_source: false
+        selection:
+          docstring_style: google
