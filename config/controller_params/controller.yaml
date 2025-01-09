@@ -1,0 +1,122 @@
+dwa:
+  time_step: 0.1
+  max_iteration: 1700
+  lookahead_time: 1.5
+  min_lookahead_dist: 1.0
+  max_lookahead_dist: 2.5
+  min_v_inc: -1.0
+  max_v_inc: 1.0
+  min_v: 0.0
+  max_v: 0.5
+  min_w_inc: -3.141592653589793
+  max_w_inc: 3.141592653589793
+  min_w: -1.5707963267948966
+  max_w: 1.5707963267948966
+  goal_dist_tol: 0.5
+  rotate_tol: 0.5
+  heading_weight: 0.2
+  obstacle_weight: 0.1
+  velocity_weight: 0.05
+  predict_time: 1.5
+  obstacle_inflation_radius: 1.0
+  v_resolution: 0.05
+  w_resolution: 0.05
+
+apf:
+  time_step: 0.1
+  max_iteration: 1700
+  lookahead_time: 1.5
+  min_lookahead_dist: 1.0
+  max_lookahead_dist: 2.5
+  min_v_inc: -1.0
+  max_v_inc: 1.0
+  min_v: 0.0
+  max_v: 0.5
+  min_w_inc: -3.141592653589793
+  max_w_inc: 3.141592653589793
+  min_w: -1.5707963267948966
+  max_w: 1.5707963267948966
+  goal_dist_tol: 0.5
+  rotate_tol: 0.5
+  zeta: 1.0
+  eta: 1.5
+  d_0: 1.5
+
+rpp:
+  time_step: 0.1
+  max_iteration: 1700
+  lookahead_time: 1.5
+  min_lookahead_dist: 1.0
+  max_lookahead_dist: 2.5
+  min_v_inc: -1.0
+  max_v_inc: 1.0
+  min_v: 0.0
+  max_v: 0.5
+  min_w_inc: -3.141592653589793
+  max_w_inc: 3.141592653589793
+  min_w: -1.5707963267948966
+  max_w: 1.5707963267948966
+  goal_dist_tol: 0.5
+  rotate_tol: 0.5
+  regulated_radius_min: 0.9
+  scaling_dist: 0.6
+  scaling_gain: 1.0
+
+pid:
+  time_step: 0.1
+  max_iteration: 1700
+  lookahead_time: 1.5
+  min_lookahead_dist: 1.0
+  max_lookahead_dist: 2.5
+  min_v_inc: -1.0
+  max_v_inc: 1.0
+  min_v: 0.0
+  max_v: 0.5
+  min_w_inc: -3.141592653589793
+  max_w_inc: 3.141592653589793
+  min_w: -1.5707963267948966
+  max_w: 1.5707963267948966
+  goal_dist_tol: 0.5
+  rotate_tol: 0.5
+
+lqr:
+  time_step: 0.1
+  max_iteration: 1700
+  lookahead_time: 1.5
+  min_lookahead_dist: 1.0
+  max_lookahead_dist: 2.5
+  min_v_inc: -1.0
+  max_v_inc: 1.0
+  min_v: 0.0
+  max_v: 0.5
+  min_w_inc: -3.141592653589793
+  max_w_inc: 3.141592653589793
+  min_w: -1.5707963267948966
+  max_w: 1.5707963267948966
+  goal_dist_tol: 0.5
+  rotate_tol: 0.5
+  Q_diag: [1, 1, 1]
+  R_diag: [1, 1]
+  lqr_iterations: 100
+  lqr_solve_eps: 1.e-1
+
+mpc:
+  time_step: 0.1
+  max_iteration: 1700
+  lookahead_time: 1.5
+  min_lookahead_dist: 1.0
+  max_lookahead_dist: 2.5
+  min_v_inc: -1.0
+  max_v_inc: 1.0
+  min_v: 0.0
+  max_v: 0.5
+  min_w_inc: -3.141592653589793
+  max_w_inc: 3.141592653589793
+  min_w: -0.78
+  max_w: 1.5707963267948966
+  goal_dist_tol: 0.5
+  rotate_tol: 0.5
+  p: 12
+  m: 8
+  Q_diag: [0.8, 0.8, 0.5]
+  R_diag: [2, 2]

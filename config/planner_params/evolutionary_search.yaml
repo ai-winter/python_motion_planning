@@ -1,0 +1,20 @@
+pso:
+  heuristic_type: euclidean
+  # number of particles
+  n_particles: 300
+  # number of position points contained in each particle
+  point_num: 5
+  # inertial weight
+  w_inertial: 1.0
+  # cognitive weight
+  w_cognitive: 1.0
+  # social weight
+  w_social: 1.0
+  # The maximum velocity of particle motion
+  max_speed: 6
+  # maximum iterations
+  max_iter: 200
+  # Set the generation mode for the initial position points of the particle swarm (0 for circle and 1 for random)
+  init_mode: 1
+  # show process
+  verbose: true
