@@ -38,6 +38,7 @@ python_motion_planning
         ├─planner
         └─plot
 ```
+
 * The global planning algorithm implementation is in the folder `global_planner` with `graph_search`, `sample_search` and `evolutionary search`.
 * The local planning algorithm implementation is in the folder `local_planner`.
 * The curve generation algorithm implementation is in the folder `curve_generation`.
@@ -124,6 +125,7 @@ Planner      | Version                                                          
 
 
 ## Local Planner
+
 | Planner     | Version                                                                                                                                                | Animation                                     
 |-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------| -------------------------------------------------- 
 | **PID**     | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/local_planner/pid.py)  | ![pid_python.svg](assets/pid_python.svg) 
@@ -155,6 +157,7 @@ Planner      | Version                                                          
 
 # Papers
 ## Global Planning
+
 * [A*: ](https://ieeexplore.ieee.org/document/4082128) A Formal Basis for the heuristic Determination of Minimum Cost Paths
 * [JPS:](https://ojs.aaai.org/index.php/AAAI/article/view/7994) Online Graph Pruning for Pathfinding On Grid Maps
 * [Lifelong Planning A*: ](https://www.cs.cmu.edu/~maxim/files/aij04.pdf) Lifelong Planning A*
@@ -178,7 +181,9 @@ Planner      | Version                                                          
 * [DDPG: ](https://arxiv.org/abs/1509.02971) Continuous control with deep reinforcement learning
 
 ## Curve Generation
+
 * [Dubins: ]() On curves of minimal length with a constraint on average curvature, and with prescribed initial and terminal positions and tangents
 
 # Acknowledgment
+
 * Our visualization and animation framework of Python Version refers to [https://github.com/zhm-real/PathPlanning](https://github.com/zhm-real/PathPlanning). Thanks sincerely.
