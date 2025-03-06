@@ -90,6 +90,7 @@ site_name: Python-Motion-Planning
 site_description: Motion planning algorithms for Python.
 site_author: Yang Haodong, Wu Maojia
 site_url: http://localhost:8000
+use_directory_urls: false
 copyright: Copyright @ 2023-2024, Yang Haodong, Wu Maojia.
 repo_url: https://github.com/ai-winter/python_motion_planning/
 nav:
