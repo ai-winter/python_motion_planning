@@ -762,7 +762,7 @@
 <h1 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h1>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
 <p>The file structure is shown below</p>
-<p><div class="language-text highlight"><span class="filename">Text Only</span><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a><a href="#__codelineno-0-1"><span class="linenos" data-linenos=" 1 "></span></a>python_motion_planning
+<div class="language-text highlight"><span class="filename">Text Only</span><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a><a href="#__codelineno-0-1"><span class="linenos" data-linenos=" 1 "></span></a>python_motion_planning
 <a id="__codelineno-0-2" name="__codelineno-0-2"></a><a href="#__codelineno-0-2"><span class="linenos" data-linenos=" 2 "></span></a>├─assets
 <a id="__codelineno-0-3" name="__codelineno-0-3"></a><a href="#__codelineno-0-3"><span class="linenos" data-linenos=" 3 "></span></a>├─docs
 <a id="__codelineno-0-4" name="__codelineno-0-4"></a><a href="#__codelineno-0-4"><span class="linenos" data-linenos=" 4 "></span></a>├─examples
@@ -780,9 +780,11 @@
 <a id="__codelineno-0-16" name="__codelineno-0-16"></a><a href="#__codelineno-0-16"><span class="linenos" data-linenos="16 "></span></a>        ├─planner
 <a id="__codelineno-0-17" name="__codelineno-0-17"></a><a href="#__codelineno-0-17"><span class="linenos" data-linenos="17 "></span></a>        └─plot
 </code></pre></div>
-* The global planning algorithm implementation is in the folder <code>global_planner</code> with <code>graph_search</code>, <code>sample_search</code> and <code>evolutionary search</code>.
-* The local planning algorithm implementation is in the folder <code>local_planner</code>.
-* The curve generation algorithm implementation is in the folder <code>curve_generation</code>.</p>
+<ul>
+<li>The global planning algorithm implementation is in the folder <code>global_planner</code> with <code>graph_search</code>, <code>sample_search</code> and <code>evolutionary search</code>.</li>
+<li>The local planning algorithm implementation is in the folder <code>local_planner</code>.</li>
+<li>The curve generation algorithm implementation is in the folder <code>curve_generation</code>.</li>
+</ul>
 <h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link">&para;</a></h2>
 <p><em>(Optional)</em> The code was tested in python=3.10. We recommend using <code>conda</code> to install the dependencies.</p>
 <div class="language-shell highlight"><span class="filename">Bash</span><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1"></a><a href="#__codelineno-1-1"><span class="linenos" data-linenos="1 "></span></a>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>pmp<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.10
