@@ -226,3 +226,6 @@ plugins:
           show_submodules: true
         selection:
           docstring_style: google
+extra:
+  version:
+    provider: mike
