@@ -17,26 +17,22 @@ We also provide [ROS C++](https://github.com/ai-winter/ros_motion_planning) vers
 # Quick Start
 
 ## Overview
-The file structure is shown below
+The source file structure is shown below
 
 ```
 python_motion_planning
-├─assets
-├─docs
-├─examples
-└─python_motion_planning
-    ├─global_planner
-    |   ├─graph_search
-    |   ├─sample_search
-    |   └─evolutionary_search
-    ├─local_planner
-    ├─curve_generation
-    └─utils
-        ├─agent
-        ├─environment
-        ├─helper
-        ├─planner
-        └─plot
+├─global_planner
+|   ├─graph_search
+|   ├─sample_search
+|   └─evolutionary_search
+├─local_planner
+├─curve_generation
+└─utils
+    ├─agent
+    ├─environment
+    ├─helper
+    ├─planner
+    └─plot
 ```
 
 * The global planning algorithm implementation is in the folder `global_planner` with `graph_search`, `sample_search` and `evolutionary search`.
