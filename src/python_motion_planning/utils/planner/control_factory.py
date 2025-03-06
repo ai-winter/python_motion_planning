@@ -23,9 +23,5 @@ class ControlFactory(object):
             return LQR(**config)
         elif planner_name == "mpc":
             return MPC(**config)
-        elif planner_name == "ddpg":
-            return DDPG(actor_load_path="models/actor_best_example.pth",
-                        critic_load_path="models/critic_best_example.pth",
-                        **config)
         else:
             raise ValueError("The `planner_name` must be set correctly.")

@@ -4,8 +4,6 @@ from .apf import APF
 from .rpp import RPP
 from .lqr import LQR
 from .mpc import MPC
-from .ddpg import DDPG
-from .dqn import DQNPlanner
 
 __all__ = [
     "DWA",
@@ -13,7 +11,5 @@ __all__ = [
     "APF",
     "RPP",
     "LQR",
-    "MPC",
-    "DDPG",
-    "DQNPlanner"
+    "MPC"
 ]

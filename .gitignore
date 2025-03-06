@@ -2,6 +2,8 @@
 __pycache__/
 build/
 devel/
+docs/
+tmp/
 python_motion_planning.egg-info/
 # local env files
 .env.local
@@ -25,6 +27,7 @@ examples/models/*
 # Editor directories and files
 .idea
 .vscode
+.pypirc
 *.suo
 *.ntvs*
 *.njsproj
@@ -34,4 +37,6 @@ examples/models/*
 *.log
 
 # auto generated files
-site/
+site/ 
+dist/
+logs/
