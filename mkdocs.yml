@@ -209,6 +209,7 @@ nav:
 plugins:
 - search
 - autorefs
+- mike
 - mkdocstrings:
     default_handler: python
     handlers:

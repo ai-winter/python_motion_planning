@@ -37,5 +37,6 @@ examples/models/*
 *.log
 
 # auto generated files
+site/
 dist/
 logs/
