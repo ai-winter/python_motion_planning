@@ -131,21 +131,6 @@
 
 - [APF](local_planner/apf/APF.md)
 
-## Ddpg
-
-- [Actor](local_planner/ddpg/Actor.md)
-- [Critic](local_planner/ddpg/Critic.md)
-- [DDPG](local_planner/ddpg/DDPG.md)
-- [ReplayBuffer](local_planner/ddpg/ReplayBuffer.md)
-
-## Dqn
-
-- [BasicBuffer](local_planner/dqn/BasicBuffer.md)
-- [DQN](local_planner/dqn/DQN.md)
-- [DQNPlanner](local_planner/dqn/DQNPlanner.md)
-- [PrioritizedBuffer](local_planner/dqn/PrioritizedBuffer.md)
-- [SumTree](local_planner/dqn/SumTree.md)
-
 ## Dwa
 
 - [DWA](local_planner/dwa/DWA.md)

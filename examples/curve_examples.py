@@ -4,8 +4,6 @@
 @author: Yang Haodong, Wu Maojia
 @update: 2024.11.22
 """
-import sys, os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from python_motion_planning.utils import CurveFactory
 
 if __name__ == '__main__':

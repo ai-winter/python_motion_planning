@@ -42,11 +42,18 @@ python_motion_planning
 * The local planning algorithm implementation is in the folder `local_planner`.
 * The curve generation algorithm implementation is in the folder `curve_generation`.
 
-## Dependencies
-The code was tested in python=3.10. To install other dependencies, please run the following command in shell.
+## Install
+*(Optional)* The code was tested in python=3.10. We recommend using `conda` to install the dependencies.
 
 ```shell
-pip install -r requirements.txt
+conda create -n pmp python=3.10
+conda activate pmp
+```
+
+To install the repository, please run the following command in shell.
+
+```shell
+pip install python-motion-planning
 ```
 
 ## Run
@@ -75,7 +82,7 @@ planner = search_factory("a_star", start=(5, 5), goal=(45, 25), env=pmp.Grid(51,
 planner.run()       # run both planning and animation
 ```
 
-More examples can be found in the folder `examples`. You can also refer to the examples in the documentations generated using the following method.
+More examples can be found in the folder `examples` in the repository. You can also refer to the examples in the documentations generated using the following method.
 
 ## Documentation
 
@@ -126,7 +133,8 @@ Planner      | Version                                                          
 | **MPC**     | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/local_planner/mpc.py)  | ![mpc_python.svg](assets/mpc_python.svg)
 | **MPPI**    | ![Status](https://img.shields.io/badge/develop-v1.0-red)                                                                                               |![Status](https://img.shields.io/badge/gif-none-yellow)
 | **Lattice** | ![Status](https://img.shields.io/badge/develop-v1.0-red)                                                                                               |![Status](https://img.shields.io/badge/gif-none-yellow)
-| **DDPG**    | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/local_planner/ddpg.py) |![ddpg_python.svg](assets/ddpg_python.svg)
+| **DQN**    | ![Status](https://img.shields.io/badge/develop-v1.0-red)                                                                                               |![Status](https://img.shields.io/badge/gif-none-yellow)
+| **DDPG**    | ![Status](https://img.shields.io/badge/develop-v1.0-red)                                                                                               |![Status](https://img.shields.io/badge/gif-none-yellow)
 
 ## Curve Generation
 

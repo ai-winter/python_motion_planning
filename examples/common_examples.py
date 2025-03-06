@@ -41,23 +41,6 @@ if __name__ == '__main__':
     # plt = MPC(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31))
     # plt.run()
 
-
-    # Train the model, only for learning-based planners, such as DDPG
-    # It costs a lot of time to train the model, please be patient.
-    # If you want a faster training, try reducing num_episodes and batch_size,
-    # or increasing update_steps and evaluate_episodes, or fine-tuning other hyperparameters
-    # if you are familiar with them, usually in a cost of performance, however.
-
-    # plt = DDPG(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31),
-    #            actor_save_path="models/actor_best.pth", critic_save_path="models/critic_best.pth")
-    # plt.train(num_episodes=10000)
-
-    # load the trained model and run
-
-    # plt = DDPG(start=(5, 5, 0), goal=(45, 25, 0), env=Grid(51, 31),
-    #            actor_load_path="models/actor_best_example.pth", critic_load_path="models/critic_best_example.pth")
-    # plt.run()
-
     # -------------curve generators-------------
     # points = [(0, 0, 0), (10, 10, -90), (20, 5, 60), (30, 10, 120),
     #           (35, -5, 30), (25, -10, -120), (15, -15, 100), (0, -10, -90)]

@@ -1,3 +1,3 @@
 # LNode
 
-::: python_motion_planning.global_planner.graph_search.lpa_star.LNode
+::: src.python_motion_planning.global_planner.graph_search.lpa_star.LNode

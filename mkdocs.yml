@@ -12,8 +12,8 @@ theme:
       name: change to light mode
   features:
   - announce.dismiss
-  - content.action.edit
-  - content.action.view
+  # - content.action.edit 
+  # - content.action.view     
   - content.code.annotate
   - content.code.copy
   - content.code.select
@@ -163,17 +163,6 @@ nav:
 - local_planner:
   - apf:
     - APF: local_planner\apf\APF.md
-  - ddpg:
-    - ReplayBuffer: local_planner\ddpg\ReplayBuffer.md
-    - Actor: local_planner\ddpg\Actor.md
-    - Critic: local_planner\ddpg\Critic.md
-    - DDPG: local_planner\ddpg\DDPG.md
-  - dqn:
-    - BasicBuffer: local_planner\dqn\BasicBuffer.md
-    - SumTree: local_planner\dqn\SumTree.md
-    - PrioritizedBuffer: local_planner\dqn\PrioritizedBuffer.md
-    - DQN: local_planner\dqn\DQN.md
-    - DQNPlanner: local_planner\dqn\DQNPlanner.md
   - dwa:
     - DWA: local_planner\dwa\DWA.md
   - local_planner:
@@ -227,9 +216,12 @@ plugins:
         paths:
         - pykit_tools
         options:
-          heading_level: 3
+          heading_level: 2
           show_root_heading: true
+          show_symbol_type: true
+          show_symbol_type_toc: true
           show_symbol_type_heading: true
           show_source: false
+          show_submodules: true
         selection:
           docstring_style: google

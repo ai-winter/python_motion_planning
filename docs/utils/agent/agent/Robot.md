@@ -1,3 +1,3 @@
 # Robot
 
-::: python_motion_planning.utils.agent.agent.Robot
+::: src.python_motion_planning.utils.agent.agent.Robot

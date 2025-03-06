@@ -1,3 +1,3 @@
 # Grid
 
-::: python_motion_planning.utils.environment.env.Grid
+::: src.python_motion_planning.utils.environment.env.Grid

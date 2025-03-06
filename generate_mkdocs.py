@@ -40,6 +40,9 @@ def generate_api_docs(root_folder: str, output_folder: str, index_file: str, mkd
     """
     nav_structure = {}
 
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+
     for root, dirs, files in os.walk(root_folder):
         relative_root = os.path.relpath(root, root_folder)  # Get the relative path of the current directory
         for file in files:
@@ -50,7 +53,7 @@ def generate_api_docs(root_folder: str, output_folder: str, index_file: str, mkd
                     print(f"Warning: No class found in {file_path}. Skipping...")
                     continue
 
-                module_path = file_path.replace('/', '.').replace('\\', '.').replace('.py', '')
+                module_path = file_path.replace('.py', '').replace('/', '.').replace('\\', '.')
                 # Create a corresponding output directory that mirrors the input directory's structure
                 output_dir = os.path.join(output_folder, relative_root, file.replace('.py', ''))
                 os.makedirs(output_dir, exist_ok=True)
@@ -112,7 +115,7 @@ def generate_api_docs(root_folder: str, output_folder: str, index_file: str, mkd
 if __name__ == '__main__':
     # Example usage
     generate_api_docs(
-        root_folder='python_motion_planning',  # Code directory
+        root_folder='src/python_motion_planning',  # Code directory
         output_folder='docs/',  # Directory for the generated documentation
         index_file='docs/index.md',  # Path to the homepage file
         mkdocs_file='mkdocs.yml'  # Path to the mkdocs.yml file
