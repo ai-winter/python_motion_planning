@@ -20,11 +20,7 @@ dependencies = [
     "cvxopt",
     "osqp",
     "tqdm",
-    "tensorboard==2.12.0",
-    "mkdocs",
-    "mkdocstrings",
-    "mkdocstrings-python==1.12.2",
-    "mkdocs-material"
+    "tensorboard==2.12.0"
 ]
 classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
