@@ -12,8 +12,6 @@ theme:
       name: change to light mode
   features:
   - announce.dismiss
-  # - content.action.edit 
-  # - content.action.view     
   - content.code.annotate
   - content.code.copy
   - content.code.select
@@ -209,6 +207,9 @@ nav:
 plugins:
 - search
 - autorefs
+- mike:
+    alias_type: symlink
+    version_selector: true
 - mkdocstrings:
     default_handler: python
     handlers:
