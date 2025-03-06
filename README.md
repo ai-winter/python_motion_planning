@@ -40,7 +40,9 @@ python_motion_planning
 ```
 
 * The global planning algorithm implementation is in the folder `global_planner` with `graph_search`, `sample_search` and `evolutionary search`.
+
 * The local planning algorithm implementation is in the folder `local_planner`.
+
 * The curve generation algorithm implementation is in the folder `curve_generation`.
 
 ## Install
