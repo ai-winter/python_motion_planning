@@ -81,7 +81,7 @@ planner = search_factory("a_star", start=(5, 5), goal=(45, 25), env=pmp.Grid(51,
 planner.run()       # run both planning and animation
 ```
 
-More examples can be found in the folder `examples` in the repository.
+More examples can be found in the folder `test` in the repository.
 
 ## Documentation
 
