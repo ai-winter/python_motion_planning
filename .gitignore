@@ -35,6 +35,7 @@ examples/models/*
 *.sw?
 *.pyc
 *.log
+*.prof
 
 # auto generated files
 site/ 
