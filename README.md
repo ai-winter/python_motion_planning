@@ -90,6 +90,7 @@ For more details, you can refer to [online documentation](https://ai-winter.gith
 The documentation is auto-generated using mkdocs. To do this, enter the root directory and run
 
 ```shell
+pip install -r requirements.txt
 python generate_mkdocs.py
 mkdocs serve
 ```

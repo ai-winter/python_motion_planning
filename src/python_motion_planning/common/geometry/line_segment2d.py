@@ -14,6 +14,10 @@ class LineSegment2d:
     def __init__(self, start: Vec2d, end: Vec2d) -> None:
         '''
         Constructor with start point and end point.
+
+        Parameters:
+            start (Vec2d): start point
+            end (Vec2d): end point
         '''
         self.start_ = start
         self.end_ = end
@@ -40,6 +44,12 @@ class LineSegment2d:
     def rotate(self, angle: float) -> Vec2d:
         '''
         Get a new line-segment with the same start point, but rotated counterclock-wise by the given amount.
+        
+        Parameters:
+            angle (float): rotation angle
+
+        Returns:
+            Vec2d: rotated line-segment
         '''
         diff_vec = self.end_ - self.start_
         diff_vec.selfRotate(angle)
@@ -49,6 +59,13 @@ class LineSegment2d:
         """
         Compute the shortest distance from a point on the line segment
         to a point in 2-D, and get the nearest point on the line segment.
+
+        Parameters:
+            point (Vec2d): point in 2-D
+            nearest_pt (Vec2d): nearest point on the line segment
+        
+        Returns:
+            float: shortest distance
         """
         if self.length_ < MathHelper.kMathEpsilon:
             return point.distanceTo(self.start_)
@@ -74,6 +91,13 @@ class LineSegment2d:
         """
         Compute the square of the shortest distance from a point on the line segment
         to a point in 2-D, and get the nearest point on the line segment.
+
+        Parameters:
+            point (Vec2d): point in 2-D
+            nearest_pt (Vec2d): nearest point on the line segment
+        
+        Returns:
+            float: square of the shortest distance
         """
         if self.length_ < MathHelper.kMathEpsilon:
             return point.distanceTo(self.start_)
@@ -98,6 +122,12 @@ class LineSegment2d:
     def isPointIn(self, point: Vec2d) -> bool:
         """
         Check if a point is within the line segment
+
+        Parameters:
+            point (Vec2d): point in 2-D
+        
+        Returns:
+            bool: True if the point is within the line segment, False otherwise.
         """
         if self.length_ <= MathHelper.kMathEpsilon:
             return abs(point.x() - self.start_.x()) <= MathHelper.kMathEpsilon and \
@@ -111,6 +141,12 @@ class LineSegment2d:
     def hasIntersect(self, other_segment: 'LineSegment2d') -> bool:
         """
         Check if the line segment has an intersect with another line segment in 2-D.
+
+        Parameters:
+            other_segment (LineSegment2d): another line segment
+        
+        Returns:
+            bool: True if the line segment has an intersect with another line segment, False otherwise.
         """
         point = Vec2d()
         return self.getIntersect(other_segment, point)
@@ -118,6 +154,13 @@ class LineSegment2d:
     def getIntersect(self, other_segment: 'LineSegment2d', point: Vec2d) -> bool:
         """
         Compute the intersect with another line segment in 2-D if any.
+
+        Parameters:
+            other_segment (LineSegment2d): another line segment
+            point (Vec2d): intersect point
+        
+        Returns:
+            bool: True if the line segment has an intersect with another line segment, False otherwise.
         """
         if self.isPointIn(other_segment.start()):
             point = other_segment.start()
@@ -154,18 +197,37 @@ class LineSegment2d:
     def projectOntoUnit(self, point: Vec2d) -> float:
         """
         Compute the projection of a vector onto the line segment
+
+        Parameters:
+            point (Vec2d): point in 2-D
+        
+        Returns:
+            float: projection of a vector onto the line segment
         """
         return self.unit_dir_.innerProduct(point - self.start_)
 
     def productOntoUnit(self, point: Vec2d) -> float:
         """
         Compute the cross product of a vector onto the line segment
+
+        Parameters:
+            point (Vec2d): point in 2-D
+        
+        Returns:
+            float: cross product of a vector onto the line segment
         """
         return self.unit_dir_.crossProduct(point - self.start_)
 
     def getPerpendicularFoot(self, point: Vec2d, foot_point: Vec2d) -> float:
         """
         Compute perpendicular foot of a point in 2-D on the straight line expanded from the line segment.
+
+        Parameters:
+            point (Vec2d): point in 2-D
+            foot_point (Vec2d): foot point
+        
+        Returns:
+            float: distance from the point to the foot point
         """
         if self.length_ <= MathHelper.kMathEpsilon:
             foot_point = self.start_

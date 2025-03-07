@@ -7,6 +7,13 @@
 from python_motion_planning.common.math import MathHelper
 
 class Point2d:
+    """
+    Class for 2D point.
+
+    Parameters:
+        x: x component of the point.
+        y: y component of the point.
+    """
     def __init__(self, x: float=0.0, y: float=0.0) -> None:
         self.x_ = x
         self.y_ = y
@@ -34,6 +41,14 @@ class Point2d:
         return hash((self.x_, self.y_))
 
 class Point3d:
+    """
+    Class for 3D point.
+
+    Parameters:
+        x: x component of the point.
+        y: y component of the point.
+        theta: theta component of the point.
+    """
     def __init__(self, x: float=0.0, y: float=0.0, theta: float=0.0) -> None:
         self.x_ = x
         self.y_ = y

@@ -7,6 +7,12 @@
 from python_motion_planning.common.geometry import Point3d
 
 class CollisionChecker:
+    """
+    Class for collision checking.
+
+    Parameters:
+        obstacles (list): list of obstacles
+    """
     def __init__(self, obstacles: list) -> None:
         self.obstacles = obstacles
 
@@ -19,6 +25,12 @@ class CollisionChecker:
             raise NotImplementedError
 
     def update(self, obstacles: list) -> None:
+        """
+        Update obstacles information.
+
+        Parameters:
+            obstacles (list): list of obstacles
+        """
         self.obstacles = obstacles
 
     def onestep(self, node1: Point3d, node2: Point3d) -> bool:

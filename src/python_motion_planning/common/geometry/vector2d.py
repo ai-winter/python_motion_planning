@@ -9,6 +9,13 @@ import math
 from python_motion_planning.common.math import MathHelper
 
 class Vec2d:
+    """
+    2D vector class.
+
+    Parameters:
+        x: x component of the vector
+        y: y component of the vector
+    """
     def __init__(self, x: float=0.0, y: float=0.0) -> None:
         self.x_ = x
         self.y_ = y

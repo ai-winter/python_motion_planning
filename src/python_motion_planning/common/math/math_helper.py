@@ -8,6 +8,9 @@ import math
 import numpy as np
 
 class MathHelper:
+	"""
+	Math helper class
+	"""
 	kMathEpsilon = 1e-10
 
 	def __init__(self) -> None:
