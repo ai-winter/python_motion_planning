@@ -17,36 +17,42 @@ We also provide [ROS C++](https://github.com/ai-winter/ros_motion_planning) vers
 # Quick Start
 
 ## Overview
-The file structure is shown below
+The source file structure is shown below
 
 ```
 python_motion_planning
-├─assets
-├─docs
-├─examples
-└─python_motion_planning
-    ├─global_planner
-    |   ├─graph_search
-    |   ├─sample_search
-    |   └─evolutionary_search
-    ├─local_planner
-    ├─curve_generation
-    └─utils
-        ├─agent
-        ├─environment
-        ├─helper
-        ├─planner
-        └─plot
+├─global_planner
+|   ├─graph_search
+|   ├─sample_search
+|   └─evolutionary_search
+├─local_planner
+├─curve_generation
+└─utils
+    ├─agent
+    ├─environment
+    ├─helper
+    ├─planner
+    └─plot
 ```
+
 * The global planning algorithm implementation is in the folder `global_planner` with `graph_search`, `sample_search` and `evolutionary search`.
+
 * The local planning algorithm implementation is in the folder `local_planner`.
+
 * The curve generation algorithm implementation is in the folder `curve_generation`.
 
-## Dependencies
-The code was tested in python=3.10. To install other dependencies, please run the following command in shell.
+## Install
+*(Optional)* The code was tested in python=3.10. We recommend using `conda` to install the dependencies.
 
 ```shell
-pip install -r requirements.txt
+conda create -n pmp python=3.10
+conda activate pmp
+```
+
+To install the repository, please run the following command in shell.
+
+```shell
+pip install python-motion-planning
 ```
 
 ## Run
@@ -75,11 +81,13 @@ planner = search_factory("a_star", start=(5, 5), goal=(45, 25), env=pmp.Grid(51,
 planner.run()       # run both planning and animation
 ```
 
-More examples can be found in the folder `examples`. You can also refer to the examples in the documentations generated using the following method.
+More examples can be found in the folder `examples` in the repository.
 
 ## Documentation
 
-This repository also support auto-generated documentation using mkdocs. Enter the root directory and run
+For more details, you can refer to [online documentation](https://ai-winter.github.io/python_motion_planning/).
+
+The documentation is auto-generated using mkdocs. To do this, enter the root directory and run
 
 ```shell
 python generate_mkdocs.py
@@ -115,6 +123,7 @@ Planner      | Version                                                          
 
 
 ## Local Planner
+
 | Planner     | Version                                                                                                                                                | Animation                                     
 |-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------| -------------------------------------------------- 
 | **PID**     | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/local_planner/pid.py)  | ![pid_python.svg](assets/pid_python.svg) 
@@ -126,7 +135,8 @@ Planner      | Version                                                          
 | **MPC**     | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/local_planner/mpc.py)  | ![mpc_python.svg](assets/mpc_python.svg)
 | **MPPI**    | ![Status](https://img.shields.io/badge/develop-v1.0-red)                                                                                               |![Status](https://img.shields.io/badge/gif-none-yellow)
 | **Lattice** | ![Status](https://img.shields.io/badge/develop-v1.0-red)                                                                                               |![Status](https://img.shields.io/badge/gif-none-yellow)
-| **DDPG**    | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/local_planner/ddpg.py) |![ddpg_python.svg](assets/ddpg_python.svg)
+| **DQN**    | ![Status](https://img.shields.io/badge/develop-v1.0-red)                                                                                               |![Status](https://img.shields.io/badge/gif-none-yellow)
+| **DDPG**    | ![Status](https://img.shields.io/badge/develop-v1.0-red)                                                                                               |![Status](https://img.shields.io/badge/gif-none-yellow)
 
 ## Curve Generation
 
@@ -145,6 +155,7 @@ Planner      | Version                                                          
 
 # Papers
 ## Global Planning
+
 * [A*: ](https://ieeexplore.ieee.org/document/4082128) A Formal Basis for the heuristic Determination of Minimum Cost Paths
 * [JPS:](https://ojs.aaai.org/index.php/AAAI/article/view/7994) Online Graph Pruning for Pathfinding On Grid Maps
 * [Lifelong Planning A*: ](https://www.cs.cmu.edu/~maxim/files/aij04.pdf) Lifelong Planning A*
@@ -168,7 +179,9 @@ Planner      | Version                                                          
 * [DDPG: ](https://arxiv.org/abs/1509.02971) Continuous control with deep reinforcement learning
 
 ## Curve Generation
+
 * [Dubins: ]() On curves of minimal length with a constraint on average curvature, and with prescribed initial and terminal positions and tangents
 
 # Acknowledgment
+
 * Our visualization and animation framework of Python Version refers to [https://github.com/zhm-real/PathPlanning](https://github.com/zhm-real/PathPlanning). Thanks sincerely.
