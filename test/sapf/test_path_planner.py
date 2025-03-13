@@ -1,5 +1,5 @@
 """
-@file: lw=linewidth.py
+@file: test_path_planner.py
 @breif: path planning application examples
 @author: Winter
 @update: 2024.4.22
@@ -10,7 +10,7 @@ from python_motion_planning.common.structure import Grid
 from python_motion_planning.common.geometry import Point3d
 from python_motion_planning.common.utils import ParamsManager
 from python_motion_planning.common.utils import Visualizer
-from python_motion_planning.planner import PlannerFactory
+from python_motion_planning.path_planner import PathPlannerFactory
 
 if __name__ == '__main__':
     '''
@@ -25,8 +25,8 @@ if __name__ == '__main__':
     '''
     path planning
     '''
-    planner_factory = PlannerFactory()
-    planner = planner_factory(params["strategy"]["planner"]["name"], params=params)
+    planner_factory = PathPlannerFactory()
+    planner = planner_factory(params["strategy"]["path_planner"]["name"], env=env, params=params)
     start = params["agents"][0]["start"]
     start = Point3d(start[0], start[1], start[2])
     goal = params["agents"][0]["goal"]

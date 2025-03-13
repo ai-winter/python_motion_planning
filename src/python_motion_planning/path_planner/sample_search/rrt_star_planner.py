@@ -1,24 +1,26 @@
 """
-@file: rrt_star.py
-@breif: RRT-Star motion planning
+@file: rrt_star_planner.py
+@breif: RRT* path planning
 @author: Winter
 @update: 2023.1.18
 """
-from .rrt import RRT
-from python_motion_planning.common.structure import Node
+from .rrt_planner import RRTPlanner
 
-class RRTStar(RRT):
+from python_motion_planning.common.structure import Node, Env
+
+class RRTStarPlanner(RRTPlanner):
     """
-    Class for RRT-Star motion planning.
+    Class for RRT* path planning.
 
     Parameters:
+        env (Env): environment object
         params (dict): parameters
 
     References:
         [1] Sampling-based algorithms for optimal motion planning
     """
-    def __init__(self, params: dict) -> None:
-        super().__init__(params)
+    def __init__(self, env: Env, params: dict) -> None:
+        super().__init__(env, params)
     
     def __str__(self) -> str:
         return "RRT*"

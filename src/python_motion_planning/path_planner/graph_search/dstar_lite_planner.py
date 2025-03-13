@@ -1,32 +1,35 @@
 """
-@file: d_star_lite.py
-@breif: D* Lite motion planning
+@file: dstar_lite_planner.py
+@breif: D* Lite path planning
 @author: Winter
 @update: 2023.1.17
 """
 import math
 import heapq
 
-from .lpa_star import LNode
+from typing import List, Tuple, Dict
 
-from python_motion_planning.planner import Planner
+from .lpa_star_planner import LNode
+
+from python_motion_planning.path_planner import PathPlanner
 from python_motion_planning.common.utils import LOG
-from python_motion_planning.common.structure import Node
+from python_motion_planning.common.structure import Node, Env
 from python_motion_planning.common.utils import Visualizer
 from python_motion_planning.common.geometry import Point3d
 
-class DStarLite(Planner):
+class DStarLitePlanner(PathPlanner):
     """
-    Class for D* Lite motion planning.
+    Class for D* Lite path planning.
 
     Parameters:
+        env (Env): environment object
         params (dict): parameters
         
     References:
         [1] D* Lite
     """
-    def __init__(self, params: dict) -> None:
-        super().__init__(params)
+    def __init__(self, env: Env, params: dict) -> None:
+        super().__init__(env, params)
         # allowed motions
         self.motions = [
             LNode(Point3d(-1, 0, 0), None, 1, None), LNode(Point3d(-1,  1, 0), None, math.sqrt(2), None),
@@ -35,10 +38,6 @@ class DStarLite(Planner):
             LNode(Point3d( 0,-1, 0), None, 1, None), LNode(Point3d(-1, -1, 0), None, math.sqrt(2), None)
         ]
  
-        # parameters
-        for k, v in self.params["strategy"]["planner"].items():
-            setattr(self, k, v)
-
         # correction
         self.km = 0
 
@@ -61,9 +60,17 @@ class DStarLite(Planner):
     def __str__(self) -> str:
         return "D* Lite"
 
-    def plan(self, start: Point3d, goal: Point3d):
+    def plan(self, start: Point3d, goal: Point3d) -> Tuple[List[Point3d], List[Dict]]:
         """
-        D* Lite dynamic motion planning function.
+        D* Lite motion plan function.
+
+        Parameters:
+            start (Point3d): The starting point of the planning path.
+            goal (Point3d): The goal point of the planning path.
+
+        Returns:
+            path (List[Point3d]): The planned path from start to goal.
+            visual_info (List[Dict]): Information for visualization
         """
         self.start = LNode(start, float('inf'), float('inf'), None)
         self.goal = LNode(goal, float('inf'), 0.0, None)
@@ -75,7 +82,7 @@ class DStarLite(Planner):
         self.computeShortestPath()
         self.p_cost, self.path = self.extractPath()
 
-        LOG.INFO(f"{str(self)} Planner Planning Successfully. Cost: {self.p_cost}")
+        LOG.INFO(f"{str(self)} PathPlanner Planning Successfully. Cost: {self.p_cost}")
         return self.path, [
             {"type": "value", "data": True, "name": "success"},
             {"type": "value", "data": self.p_cost, "name": "cost"},
@@ -142,11 +149,10 @@ class DStarLite(Planner):
 
                     self.computeShortestPath()    
         
-            LOG.INFO(f"{str(self)} Planner Planning Successfully. Cost: {self.p_cost}")
+            LOG.INFO(f"{str(self)} PathPlanner Planning Successfully. Cost: {self.p_cost}")
             # animation
             self.visualizer.clean()
-            self.visualizer.clean()
-            self.visualizer.plotGridMap(self.env)
+            self.visualizer.plotGridMap(self.env.grid_map)
             self.visualizer.plotGrids([
                 {"x": self.start.x, "y": self.start.y, "name": "start"},
                 {"x": self.goal.x, "y": self.goal.y, "name": "goal"},

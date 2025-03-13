@@ -17,8 +17,8 @@ class ParamsManager:
 
 		if "strategy" not in self.params.keys():
 			raise RuntimeError("parameters `strategy` should be configured.")
-		if "planner" not in self.params["strategy"].keys():
-			raise RuntimeError("parameters `planner` should be configured in `strategy`.")
+		if "path_planner" not in self.params["strategy"].keys():
+			raise RuntimeError("parameters `path_planner` should be configured in `strategy`.")
 		if "controller" not in self.params["strategy"].keys():
 			raise RuntimeError("parameters `controller` should be configured in `strategy`.")
 
@@ -34,7 +34,7 @@ class ParamsManager:
 			self.params["grid_map"]["grid_map"] = grid_map
 			self.params["grid_map"]["dimensions"] = [grid_map.shape[0], grid_map.shape[1]]
 
-		extra_config = ["planner", "controller"]
+		extra_config = ["path_planner", "controller"]
 		for obj in extra_config:
 			if "config" in self.params["strategy"][obj].keys():
 				extra_params = self.parse(os.path.abspath(os.path.join(

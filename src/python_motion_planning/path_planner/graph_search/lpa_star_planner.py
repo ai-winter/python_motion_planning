@@ -1,15 +1,17 @@
 """
-@file: lpa_star.py
-@breif: Lifelong Planning A* motion planning
-@author: Yang Haodong, Wu Maojia
+@file: lpa_star_planner.py
+@breif: Lifelong Planning A* path planning
+@author: Yang Haodong
 @update: 2024.2.11
 """
 import math
 import heapq
 
-from python_motion_planning.planner import Planner
+from typing import List, Tuple, Dict
+
+from python_motion_planning.path_planner import PathPlanner
 from python_motion_planning.common.utils import LOG
-from python_motion_planning.common.structure import Node
+from python_motion_planning.common.structure import Node, Env
 from python_motion_planning.common.utils import Visualizer
 from python_motion_planning.common.geometry import Point3d
 
@@ -46,18 +48,19 @@ class LNode(Node):
     def __str__(self) -> str:
         return f"----------\ncurrent:({self.x}, {self.y})\ng:{self.g}\nrhs:{self.rhs}\nk:{self.key}----------"
 
-class LPAStar(Planner):
+class LPAStarPlanner(PathPlanner):
     """
     Class for LPA* motion planning.
 
     Parameters:
+        env (Env): environment object
         params (dict): parameters
 
     References:
         [1] Lifelong Planning A*
     """
-    def __init__(self, params: dict) -> None:
-        super().__init__(params)
+    def __init__(self, env: Env, params: dict) -> None:
+        super().__init__(env, params)
         # allowed motions
         self.motions = [
             LNode(Point3d(-1, 0, 0), None, 1, None), LNode(Point3d(-1,  1, 0), None, math.sqrt(2), None),
@@ -65,10 +68,6 @@ class LPAStar(Planner):
             LNode(Point3d( 1, 0, 0), None, 1, None), LNode(Point3d( 1, -1, 0), None, math.sqrt(2), None),
             LNode(Point3d( 0,-1, 0), None, 1, None), LNode(Point3d(-1, -1, 0), None, math.sqrt(2), None)
         ]
-
-        # parameters
-        for k, v in self.params["strategy"]["planner"].items():
-            setattr(self, k, v)
 
         # OPEN set and expand zone
         self.U, self.EXPAND = [], []
@@ -89,9 +88,17 @@ class LPAStar(Planner):
     def __str__(self) -> str:
         return "Lifelong Planning A*"
 
-    def plan(self, start: Point3d, goal: Point3d):
+    def plan(self, start: Point3d, goal: Point3d) -> Tuple[List[Point3d], List[Dict]]:
         """
-        LPA* dynamic motion planning function.
+        LPA* motion plan function.
+
+        Parameters:
+            start (Point3d): The starting point of the planning path.
+            goal (Point3d): The goal point of the planning path.
+
+        Returns:
+            path (List[Point3d]): The planned path from start to goal.
+            visual_info (List[Dict]): Information for visualization
         """
         self.start = LNode(start, float('inf'), 0.0, None)
         self.goal = LNode(goal, float('inf'), float('inf'), None)
@@ -110,7 +117,7 @@ class LPAStar(Planner):
         self.computeShortestPath()
         self.p_cost, self.path = self.extractPath()
 
-        LOG.INFO(f"{str(self)} Planner Planning Successfully. Cost: {self.p_cost}")
+        LOG.INFO(f"{str(self)} PathPlanner Planning Successfully. Cost: {self.p_cost}")
         return self.path, [
             {"type": "value", "data": True, "name": "success"},
             {"type": "value", "data": self.p_cost, "name": "cost"},
@@ -154,7 +161,7 @@ class LPAStar(Planner):
 
             _, output = self.planOnce()        
         
-            LOG.INFO(f"{str(self)} Planner Planning Successfully. Cost: {self.p_cost}")
+            LOG.INFO(f"{str(self)} PathPlanner Planning Successfully. Cost: {self.p_cost}")
 
             # animation
             cost = 0

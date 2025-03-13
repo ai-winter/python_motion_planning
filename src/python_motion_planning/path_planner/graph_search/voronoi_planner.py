@@ -1,42 +1,45 @@
 """
-@file: voronoi.py
-@breif: Voronoi-based motion planning
+@file: voronoi_planner.py
+@breif: Voronoi-based path planning
 @author: Yang Haodong, Wu Maojia
 @update: 2024.2.11
 """
 import heapq, math
 import numpy as np
-from scipy.spatial import cKDTree, Voronoi
 
-from python_motion_planning.planner import Planner
+from scipy.spatial import cKDTree, Voronoi
+from typing import List, Tuple, Dict
+
+from python_motion_planning.path_planner import PathPlanner
 from python_motion_planning.common.utils import LOG
-from python_motion_planning.common.structure import Node
+from python_motion_planning.common.structure import Node, Env
 from python_motion_planning.common.geometry import Point3d
 
-class VoronoiPlanner(Planner):
+class VoronoiPlanner(PathPlanner):
     """
-    Class for Voronoi-based motion planning.
+    Class for Voronoi-based path planning.
 
     Parameters:
+        env (Env): environment object
         params (dict): parameters
     """
-    def __init__(self, params: dict) -> None:
-        super().__init__(params)
-        # parameters
-        for k, v in self.params["strategy"]["planner"].items():
-            setattr(self, k, v)
+    def __init__(self, env: Env, params: dict) -> None:
+        super().__init__(env, params)
 
     def __str__(self) -> str:
-        return "Voronoi-based Planner"
+        return "Voronoi-based PathPlanner"
 
-    def plan(self, start: Point3d, goal: Point3d):
+    def plan(self, start: Point3d, goal: Point3d) -> Tuple[List[Point3d], List[Dict]]:
         """
         Voronoi-based motion plan function.
 
+        Parameters:
+            start (Point3d): The starting point of the planning path.
+            goal (Point3d): The goal point of the planning path.
+
         Returns:
-            cost (float): path cost
-            path (list): planning path
-            expand (list): voronoi sampled nodes
+            path (List[Point3d]): The planned path from start to goal.
+            visual_info (List[Dict]): Information for visualization
         """
         self.start = Node(start, start, 0, 0)
         self.goal = Node(goal, goal, 0, 0)
@@ -70,7 +73,7 @@ class VoronoiPlanner(Planner):
         cost, path = self.getShortestPath(road_map)
 
         if path != []:
-            LOG.INFO(f"{str(self)} Planner Planning Successfully. Cost: {cost}")
+            LOG.INFO(f"{str(self)} PathPlanner Planning Successfully. Cost: {cost}")
             return path, [
                 {"type": "value", "data": True, "name": "success"},
                 {"type": "value", "data": cost, "name": "cost"},
@@ -84,7 +87,8 @@ class VoronoiPlanner(Planner):
                 {"type": "value", "data": False, "name": "success"},
                 {"type": "value", "data": 0, "name": "cost"},
                 {"type": "path", "data": [], "name": "normal"},
-                {"type": "grids", "name": "expand", "data": []}
+                {"type": "grids", "name": "expand",
+                "data": [n.current for n in expand if (int(n.x), int(n.y)) not in self.obstacles]}
             ]
     
     def getShortestPath(self, road_map: dict, dijkstra: bool = True) -> list:

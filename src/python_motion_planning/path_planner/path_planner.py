@@ -5,24 +5,25 @@
 @update: 2023.1.17
 """
 import math
-from abc import abstractmethod, ABC
 
 from python_motion_planning.common.geometry import Point3d
-from python_motion_planning.common.structure import Grid, Node
+from python_motion_planning.common.structure import Node, Env
 from python_motion_planning.common.geometry import CollisionChecker
 
-class Planner(ABC):
+class PathPlanner:
     """
-    Class for building planner.
+    Class for building path planner.
 
     Parameters:
         params (dict): parameters
     """
-    def __init__(self, params: dict) -> None:
+    def __init__(self, env: Env, params: dict) -> None:
         # total parameters
         self.params = params
+        for k, v in params["strategy"]["path_planner"].items():
+            setattr(self, k, v)
         # environment
-        self.env = Grid(params)
+        self.env = env
         # obstacles
         self.obstacles = self.env.obstacles
         # collision checker
@@ -49,9 +50,8 @@ class Planner(ABC):
             return float("inf")
         return self.dist(node1, node2)
 
-    @abstractmethod
     def plan(self, start: Point3d, goal: Point3d):
         '''
         Interface for planning.
         '''
-        pass
+        raise NotImplementedError

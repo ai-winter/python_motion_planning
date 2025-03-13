@@ -1,14 +1,17 @@
 """
-@file: informed_rrt.py
-@breif: Informed RRT* motion planning
+@file: informed_rrt_planner.py
+@breif: Informed RRT* path planning
 @author: Winter
 @update: 2023.1.18
 """
 import numpy as np
-from functools import partial
 
-from .rrt_star import RRTStar
-from python_motion_planning.common.structure import Node
+from functools import partial
+from typing import List, Tuple, Dict
+
+from .rrt_star_planner import RRTStarPlanner
+
+from python_motion_planning.common.structure import Node, Env
 from python_motion_planning.common.geometry import Point3d
 
 class ellipse:
@@ -31,29 +34,34 @@ class ellipse:
                       [                 0,                 0,        1]])
         return T
 
-class InformedRRT(RRTStar):
+class InformedRRTPlanner(RRTStarPlanner):
     """
-    Class for Informed RRT* motion planning.
+    Class for Informed RRT* path planning.
 
     Parameters:
+        env (Env): environment object
         params (dict): parameters
 
     References:
         [1] Optimal Sampling-based Path Planning Focused via Direct Sampling of an Admissible Ellipsoidal heuristic
     """
-    def __init__(self, params: dict) -> None:
-        super().__init__(params)
+    def __init__(self, env: Env, params: dict) -> None:
+        super().__init__(env, params)
     
     def __str__(self) -> str:
         return "Informed RRT*"
 
-    def plan(self, start: Point3d, goal: Point3d):
+    def plan(self, start: Point3d, goal: Point3d) -> Tuple[List[Point3d], List[Dict]]:
         """
         Informed-RRT* motion plan function.
 
+        Parameters:
+            start (Point3d): The starting point of the planning path.
+            goal (Point3d): The goal point of the planning path.
+
         Returns:
-            cost (float): path cost
-            path (list): planning path
+            path (List[Point3d]): The planned path from start to goal.
+            visual_info (List[Dict]): Information for visualization
         """
         self.start = Node(start, start, 0, 0)
         self.goal = Node(goal, goal, 0, 0)

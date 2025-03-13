@@ -1,13 +1,10 @@
-a_star:
+astar:
   heuristic_type: euclidean
 
 dijkstra:
   heuristic_type: euclidean
 
 gbfs:
-  heuristic_type: euclidean
-
-bi_a_star:
   heuristic_type: euclidean
 
 theta_star:
@@ -31,13 +28,13 @@ voronoi:
   # inflation range
   inflation_r: 1.0
 
-d_star:
+dstar:
   heuristic_type: euclidean
 
 lpa_star:
   heuristic_type: euclidean
 
-d_star_lite:
+dstar_lite:
   heuristic_type: euclidean
 
 rrt:

@@ -1,14 +1,16 @@
 """
-@file: d_star.py
-@breif: Dynamic A* motion planning
+@file: dstar_planner.py
+@breif: Dynamic A* path planning
 @author: Yang Haodong
 @update: 2024.2.11
 """
 import math
 
-from python_motion_planning.planner import Planner
+from typing import List, Tuple, Dict
+
+from python_motion_planning.path_planner import PathPlanner
 from python_motion_planning.common.utils import LOG
-from python_motion_planning.common.structure import Node
+from python_motion_planning.common.structure import Node, Env
 from python_motion_planning.common.utils import Visualizer
 from python_motion_planning.common.geometry import Point3d
 
@@ -44,18 +46,19 @@ class DNode(Node):
     def __str__(self) -> str:
         return f"----------\ncurrent:({self.x}, {self.y})\nparent:({self.px}, {self.py})\nt:{self.t}\nh:{self.h}\nk:{self.k}----------"
 
-class DStar(Planner):
+class DStarPlanner(PathPlanner):
     """
     Class for D* motion planning.
 
     Parameters:
+        env (Env): environment object
         params (dict): parameters
 
     References:
         [1]Optimal and Efficient Path Planning for Partially-Known Environments
     """
-    def __init__(self, params: dict) -> None:
-        super().__init__(params)
+    def __init__(self, env: Env, params: dict) -> None:
+        super().__init__(env, params)
         # allowed motions
         self.motions = [
             DNode(Point3d(-1,  0, 0), None, None, 1, 0), DNode(Point3d(-1,  1, 0), None, None, math.sqrt(2), 0),
@@ -81,21 +84,20 @@ class DStar(Planner):
         # visualizer
         self.visualizer = None
 
-        # parameters
-        for k, v in self.params["strategy"]["planner"].items():
-            setattr(self, k, v)
-
     def __str__(self) -> str:
         return "Dynamic A*(D*)"
 
-    def plan(self, start: Point3d, goal: Point3d):
+    def plan(self, start: Point3d, goal: Point3d) -> Tuple[List[Point3d], List[Dict]]:
         """
-        D* static motion planning function.
+        Dynamic A* motion plan function.
+
+        Parameters:
+            start (Point3d): The starting point of the planning path.
+            goal (Point3d): The goal point of the planning path.
 
         Returns:
-            cost (float): path cost
-            path (list): planning path
-            expand (list): all nodes that planner has searched
+            path (List[Point3d]): The planned path from start to goal.
+            visual_info (List[Dict]): Information for visualization
         """
         self.start = DNode(start, None, 'NEW', float('inf'), float("inf"))
         self.goal = DNode(goal, None, 'NEW', 0, float('inf'))
@@ -111,7 +113,7 @@ class DStar(Planner):
 
         self.p_cost, self.path = self.extractPath(self.map)
         
-        LOG.INFO(f"{str(self)} Planner Planning Successfully. Cost: {self.p_cost}")
+        LOG.INFO(f"{str(self)} PathPlanner Planning Successfully. Cost: {self.p_cost}")
         return self.path, [
             {"type": "value", "data": True, "name": "success"},
             {"type": "value", "data": self.p_cost, "name": "cost"},
@@ -156,7 +158,7 @@ class DStar(Planner):
                     self.p_cost += self.cost(node, node_parent)
                     node = node_parent
 
-                LOG.INFO(f"{str(self)} Planner Planning Successfully. Cost: {self.p_cost}")
+                LOG.INFO(f"{str(self)} PathPlanner Planning Successfully. Cost: {self.p_cost}")
 
                 # animation
                 self.visualizer.clean()

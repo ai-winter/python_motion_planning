@@ -98,9 +98,9 @@ mkdocs serve
 Then open the browser and go to [http://127.0.0.1:8000](http://127.0.0.1:8000). That is the generated documentation.
 
 # Version
-## Global Planner
+## Global PathPlanner
 
-Planner      | Version                                                                                                                                                                         | Animation
+PathPlanner      | Version                                                                                                                                                                         | Animation
 ------------ |---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------| --------- 
 **GBFS**              | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/graph_search/gbfs.py)            | ![gbfs_python.png](assets/gbfs_python.png) 
 **Dijkstra**                 | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/graph_search/dijkstra.py)        | ![dijkstra_python.png](assets/dijkstra_python.png)
@@ -123,9 +123,9 @@ Planner      | Version                                                          
 | **PSO**  | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/evolutionary_search/pso.py)      | ![pso_python.png](assets/pso_python.svg) ![pso_python_cost.png](assets/pso_python_cost.svg) 
 
 
-## Local Planner
+## Local PathPlanner
 
-| Planner     | Version                                                                                                                                                | Animation                                     
+| PathPlanner     | Version                                                                                                                                                | Animation                                     
 |-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------| -------------------------------------------------- 
 | **PID**     | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/local_planner/pid.py)  | ![pid_python.svg](assets/pid_python.svg) 
 | **APF**     | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/local_planner/apf.py)  | ![apf_python.svg](assets/apf_python.svg) 
@@ -141,7 +141,7 @@ Planner      | Version                                                          
 
 ## Curve Generation
 
-| Planner | Version   | Animation                                |
+| PathPlanner | Version   | Animation                                |
 | ------- | -------------------------------------------------------- | -------------------------------------------------------- 
 | **Polynomia** | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/curve_generation/polynomial_curve.py) | ![polynomial_curve_python.gif](assets/polynomial_curve_python.gif)
 | **Bezier** | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/curve_generation/bezier_curve.py) | ![bezier_curve_python.png](assets/bezier_curve_python.png)

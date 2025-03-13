@@ -195,9 +195,9 @@ nav:
     - voronoi:
       - VoronoiPlanner: planner\graph_search\voronoi\VoronoiPlanner.md
   - planner:
-    - Planner: planner\planner\Planner.md
+    - PathPlanner: planner\planner\PathPlanner.md
   - planner_factory:
-    - PlannerFactory: planner\planner_factory\PlannerFactory.md
+    - PathPlannerFactory: planner\planner_factory\PathPlannerFactory.md
   - sample_search:
     - informed_rrt:
       - ellipse: planner\sample_search\informed_rrt\ellipse.md

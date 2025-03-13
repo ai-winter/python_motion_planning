@@ -54,7 +54,7 @@ class Controller:
             kappa (float): the curvature on trajectory
         """
         if path is None:
-            assert RuntimeError("Planner path is invalid!")
+            assert RuntimeError("PathPlanner path is invalid!")
 
         # Find the first pose which is at a distance greater than the lookahead distance
         dist_to_robot = [self.dist(p, Point3d(self.robot.px, self.robot.py)) for p in path]

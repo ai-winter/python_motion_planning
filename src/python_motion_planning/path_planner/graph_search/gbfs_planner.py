@@ -1,33 +1,44 @@
 """
-@file: gbfs.py
-@breif: Greedy Best First Search motion planning
-@author: Yang Haodong, Wu Maojia
+@file: gbfs_planner.py
+@breif: Greedy Best First Search path planning
+@author: Yang Haodong
 @update: 2024.2.11
 """
 import heapq
 
-from .a_star import AStar
+from typing import List, Tuple, Dict
+
+from .astar_planner import AStarPlanner
 
 from python_motion_planning.common.utils import LOG
-from python_motion_planning.common.structure import Node
+from python_motion_planning.common.structure import Node, Env
 from python_motion_planning.common.geometry import Point3d
 
-class GBFS(AStar):
+class GBFSPlanner(AStarPlanner):
     """
     Class for GBFS motion planning.
 
     Parameters:
+        env (Env): environment object
         params (dict): parameters
     """
-    def __init__(self, params: dict) -> None:
-        super().__init__(params)
+    def __init__(self, env: Env, params: dict) -> None:
+        super().__init__(env, params)
     
     def __str__(self) -> str:
         return "Greedy Best First Search(GBFS)"
 
-    def plan(self, start: Point3d, goal: Point3d):
+    def plan(self, start: Point3d, goal: Point3d) -> Tuple[List[Point3d], List[Dict]]:
         """
-        Class for Greedy Best First Search.
+        Greedy Best First Search motion plan function.
+
+        Parameters:
+            start (Point3d): The starting point of the planning path.
+            goal (Point3d): The goal point of the planning path.
+
+        Returns:
+            path (List[Point3d]): The planned path from start to goal.
+            visual_info (List[Dict]): Information for visualization
         """
         self.start = Node(start, start, 0, 0)
         self.goal = Node(goal, goal, 0, 0)
@@ -48,7 +59,7 @@ class GBFS(AStar):
             if node == self.goal:
                 CLOSED[self.goal.current] = node
                 cost, path = self.extractPath(CLOSED)
-                LOG.INFO(f"{str(self)} Planner Planning Successfully. Cost: {cost}")
+                LOG.INFO(f"{str(self)} PathPlanner Planning Successfully. Cost: {cost}")
                 return path, [
                     {"type": "value", "data": True, "name": "success"},
                     {"type": "value", "data": cost, "name": "cost"},

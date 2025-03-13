@@ -4,7 +4,7 @@ build/
 devel/
 docs/
 tmp/
-python_motion_planning.egg-info/
+src/python_motion_planning.egg-info/
 # local env files
 .env.local
 .env.*.local
@@ -40,4 +40,4 @@ examples/models/*
 # auto generated files
 site/ 
 dist/
-logs/
+src/logs/

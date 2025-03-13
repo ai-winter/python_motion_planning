@@ -1,38 +1,46 @@
 """
-@file: rrt_connected.py
-@breif: RRT-Connected motion planning
+@file: rrt_connected_planner.py
+@breif: RRT-Connected path planning
 @author: Winter
 @update: 2023.1.17
 """
 import math
 
-from .rrt import RRT
-from python_motion_planning.common.structure import Node
+from typing import List, Tuple, Dict
+
+from .rrt_planner import RRTPlanner
+
+from python_motion_planning.common.structure import Node, Env
 from python_motion_planning.common.geometry import Point3d
 
-class RRTConnect(RRT):
+class RRTConnectPlanner(RRTPlanner):
     """
-    Class for RRT-Connect motion planning.
+    Class for RRT-Connect path planning.
 
     Parameters:
+        env (Env): environment object
         params (dict): parameters
 
     References:
         [1] RRT-Connect: An Efficient Approach to Single-Query Path Planning
     """
-    def __init__(self, params: dict) -> None:
-        super().__init__(params)
+    def __init__(self, env: Env, params: dict) -> None:
+        super().__init__(env, params)
     
     def __str__(self) -> str:
         return "RRT-Connect"
 
-    def plan(self, start: Point3d, goal: Point3d):
+    def plan(self, start: Point3d, goal: Point3d) -> Tuple[List[Point3d], List[Dict]]:
         """
         RRT-Connected motion plan function.
 
+        Parameters:
+            start (Point3d): The starting point of the planning path.
+            goal (Point3d): The goal point of the planning path.
+
         Returns:
-            cost (float): path cost
-            path (list): planning path
+            path (List[Point3d]): The planned path from start to goal.
+            visual_info (List[Dict]): Information for visualization
         """
         self.start = Node(start, start, 0, 0)
         self.goal = Node(goal, goal, 0, 0)

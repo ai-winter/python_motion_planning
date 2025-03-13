@@ -7,7 +7,7 @@
 import os
 
 from python_motion_planning.common.structure import Grid
-from python_motion_planning.planner import PlannerFactory
+from python_motion_planning.path_planner import PathPlannerFactory
 from python_motion_planning.utils.logger import ParamsManager
 from python_motion_planning.common.utils import Visualizer
 
@@ -24,8 +24,8 @@ if __name__ == '__main__':
     '''
     evolutionary search
     '''
-    planner_factory = PlannerFactory()
-    planner = planner_factory(params["strategy"]["planner"]["name"], params=params)
+    planner_factory = PathPlannerFactory()
+    planner = planner_factory(params["strategy"]["path_planner"]["name"], params=params)
 
     # plan
     cost, path, cost_curve = planner.plan()

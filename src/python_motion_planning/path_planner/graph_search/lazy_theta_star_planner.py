@@ -1,47 +1,51 @@
-'''
-@file: s_theta_star.py
-@breif: S-Theta* motion planning
-@author: Wu Maojia
-@update: 2024.3.6
-'''
+"""
+@file: lazy_theta_star_planner.py
+@breif: Lazy Theta* path planning
+@author: Yang Haodong, Wu Maojia
+@update: 2024.2.11
+"""
 import heapq
-from math import acos
 
-from .theta_star import ThetaStar
+from typing import List, Tuple, Dict
+
+from .theta_star_planner import ThetaStarPlanner
 
 from python_motion_planning.common.utils import LOG
-from python_motion_planning.common.structure import Node
+from python_motion_planning.common.structure import Node, Env
 from python_motion_planning.common.geometry import Point3d
 
-class SThetaStar(ThetaStar):
+class LazyThetaStarPlanner(ThetaStarPlanner):
     """
-    Class for S-Theta* motion planning.
+    Class for Lazy Theta* path planning.
 
     Parameters:
+        env (Env): environment object
         params (dict): parameters
 
     References:
-        [1] S-Theta*: low steering path-planning algorithm
+        [1] Lazy Theta*: Any-Angle Path Planning and Path Length Analysis in 3D
     """
-
-    def __init__(self, params: dict) -> None:
-        super().__init__(params)
+    def __init__(self, env: Env, params: dict) -> None:
+        super().__init__(env, params)
 
     def __str__(self) -> str:
-        return "S-Theta*"
+        return "Lazy Theta*"
 
-    def plan(self, start: Point3d, goal: Point3d):
+    def plan(self, start: Point3d, goal: Point3d) -> Tuple[List[Point3d], List[Dict]]:
         """
-        S-Theta* motion plan function.
+        Lazy Theta* motion plan function.
+
+        Parameters:
+            start (Point3d): The starting point of the planning path.
+            goal (Point3d): The goal point of the planning path.
 
         Returns:
-            cost (float): path cost
-            path (list): planning path
-            expand (list): all nodes that planner has searched
+            path (List[Point3d]): The planned path from start to goal.
+            visual_info (List[Dict]): Information for visualization
         """
         self.start = Node(start, start, 0, 0)
         self.goal = Node(goal, goal, 0, 0)
-        
+
         # OPEN set with priority and CLOSED set
         OPEN = []
         heapq.heappush(OPEN, self.start)
@@ -49,6 +53,20 @@ class SThetaStar(ThetaStar):
 
         while OPEN:
             node = heapq.heappop(OPEN)
+
+            # set vertex: path 1
+            try:
+                node_p = CLOSED.get(node.parent)
+                if node_p and self.collision_checker(node_p.current, node.current):
+                    node.g = float("inf")
+                    for node_n in self.getNeighbor(node):
+                        if node_n.current in CLOSED:
+                            node_n = CLOSED[node_n.current]
+                            if node.g > node_n.g + self.dist(node_n, node):
+                                node.g = node_n.g + self.dist(node_n, node)
+                                node.parent = node_n.current
+            except:
+                pass
 
             # exists in CLOSED set
             if node.current in CLOSED:
@@ -58,7 +76,7 @@ class SThetaStar(ThetaStar):
             if node == self.goal:
                 CLOSED[self.goal.current] = node
                 cost, path = self.extractPath(CLOSED)
-                LOG.INFO(f"{str(self)} Planner Planning Successfully. Cost: {cost}")
+                LOG.INFO(f"{str(self)} PathPlanner Planning Successfully. Cost: {cost}")
                 return path, [
                     {"type": "value", "data": True, "name": "success"},
                     {"type": "value", "data": cost, "name": "cost"},
@@ -66,33 +84,30 @@ class SThetaStar(ThetaStar):
                     {"type": "grids", "data": [n.current for n in CLOSED.values()], "name": "expand"}
                 ]
 
-            for node_n in self.getNeighbor(node):
+            for node_n in self.getNeighbor(node):                
                 # exists in CLOSED set
                 if node_n.current in CLOSED:
                     continue
-
+                
                 # path1
                 node_n.parent = node.current
                 node_n.h = self.h(node_n, self.goal)
-
-                alpha = 0.0
                 node_p = CLOSED.get(node.parent)
 
                 if node_p:
-                    alpha = self.getAlpha(node_p, node_n)
-                    node_n.g += alpha
-                    self.updateVertex(node_p, node_n, alpha)
+                    # path2
+                    self.updateVertex(node_p, node_n)
 
                 # goal found
                 if node_n == self.goal:
                     heapq.heappush(OPEN, node_n)
                     break
-
+                
                 # update OPEN set
                 heapq.heappush(OPEN, node_n)
-
+            
             CLOSED[node.current] = node
-        
+
         LOG.INFO("Planning Failed.")
         return path, [
             {"type": "value", "data": False, "name": "success"},
@@ -100,40 +115,16 @@ class SThetaStar(ThetaStar):
             {"type": "path", "data": [], "name": "normal"},
             {"type": "grids", "data": [], "name": "expand"}
         ]
-
-    def updateVertex(self, node_p: Node, node_c: Node, alpha: float) -> None:
+    
+    def updateVertex(self, node_p: Node, node_c: Node) -> None:
         """
         Update extend node information with current node's parent node.
 
         Parameters:
             node_p (Node): parent node
             node_c (Node): current node
-            alpha (float): alpha angle
         """
-        if not self.collision_checker(node_c.current, node_p.current):
-            # path 2
-            new_g = node_p.g + self.dist(node_c, node_p) + alpha
-            if new_g <= node_c.g:
-                node_c.g = new_g
-                node_c.parent = node_p.current
-
-    def getAlpha(self, node_p: Node, node_c: Node):
-        """
-        α(t) represents the deviation in the trajectory to reach the goal node g
-        through the node t in relation to the straight-line distance between the parent of its
-        predecessor (t ∈ succ(p) and parent(p) = q) and the goal node.
-
-        Parameters:
-            node_p (Node): parent node
-            node_c (Node): current node
-
-        Returns:
-            alpha (float): alpha angle
-        """
-        d_qt = self.dist(node_p, node_c)
-        d_qg = self.dist(node_p, self.goal)
-        d_tg = self.dist(node_c, self.goal)
-        value = (d_qt * d_qt + d_qg * d_qg - d_tg * d_tg) / (2.0 * d_qt * d_qg)
-        value = max(-1.0, min(1.0, value))
-        cost = acos(value)
-        return cost
+        # path 2
+        if node_p.g + self.dist(node_c, node_p) <= node_c.g:
+            node_c.g = node_p.g + self.dist(node_c, node_p)
+            node_c.parent = node_p.current  

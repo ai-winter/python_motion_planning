@@ -1,42 +1,46 @@
 """
-@file: rrt.py
-@breif: RRT motion planning
+@file: rrt_planner.py
+@breif: RRT path planning
 @author: Winter
 @update: 2023.1.17
 """
 import math
 import numpy as np
 
-from python_motion_planning.planner import Planner
-from python_motion_planning.common.structure import Node
+from typing import List, Tuple, Dict
+
+from python_motion_planning.path_planner import PathPlanner
+from python_motion_planning.common.structure import Node, Env
 from python_motion_planning.common.geometry import Point3d
 
-class RRT(Planner):
+class RRTPlanner(PathPlanner):
     """
-    Class for RRT motion planning.
+    Class for RRT path planning.
 
     Parameters:
+        env (Env): environment object
         params (dict): parameters
 
     References:
         [1] Rapidly-Exploring Random Trees: A New Tool for Path Planning
     """
-    def __init__(self, params: dict) -> None:
-        super().__init__(params)
-        # parameters
-        for k, v in self.params["strategy"]["planner"].items():
-            setattr(self, k, v)
+    def __init__(self, env: Env, params: dict) -> None:
+        super().__init__(env, params)
 
     def __str__(self) -> str:
         return "Rapidly-exploring Random Tree(RRT)"
 
-    def plan(self, start: Point3d, goal: Point3d):
+    def plan(self, start: Point3d, goal: Point3d) -> Tuple[List[Point3d], List[Dict]]:
         """
-        RRT motion plan function.
+        Rapidly-exploring Random Tree motion plan function.
+
+        Parameters:
+            start (Point3d): The starting point of the planning path.
+            goal (Point3d): The goal point of the planning path.
 
         Returns:
-            cost (float): path cost
-            path (list): planning path
+            path (List[Point3d]): The planned path from start to goal.
+            visual_info (List[Dict]): Information for visualization
         """
         self.start = Node(start, start, 0, 0)
         self.goal = Node(goal, goal, 0, 0)

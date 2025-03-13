@@ -7,20 +7,19 @@ agents:
     type: differential
 
 strategy:
-  planner:
-    name: "a_star"
-    ## a_star
+  path_planner:
+    name: "astar"
+    ## astar
     ## dijkstra
     ## gbfs
-    ## bi_a_star
     ## theta_star
     ## lazy_theta_star
     ## s_theta_star
     ## jps
     ## voronoi
-    ## d_star
+    ## dstar
     ## lpa_star
-    ## d_star_lite
+    ## dstar_lite
     ## rrt
     ## rrt_connect
     ## rrt_star
