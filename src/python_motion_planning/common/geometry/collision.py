@@ -4,17 +4,14 @@
 @author: Winter
 @update: 2024.4.14
 """
+import numpy as np
+
+from python_motion_planning.common.types import TYPES
 from python_motion_planning.common.geometry import Point3d
 
 class CollisionChecker:
-    """
-    Class for collision checking.
-
-    Parameters:
-        obstacles (list): list of obstacles
-    """
-    def __init__(self, obstacles: list) -> None:
-        self.obstacles = obstacles
+    def __init__(self, grid_map: np.ndarray) -> None:
+        self.grid_map = grid_map
 
     def __call__(self, node1: Point3d, node2: Point3d, method: str="bresenham") -> bool:
         if method == "bresenham":
@@ -24,14 +21,8 @@ class CollisionChecker:
         else:
             raise NotImplementedError
 
-    def update(self, obstacles: list) -> None:
-        """
-        Update obstacles information.
-
-        Parameters:
-            obstacles (list): list of obstacles
-        """
-        self.obstacles = obstacles
+    def update(self, grid_map: np.ndarray) -> None:
+        self.grid_map = grid_map
 
     def onestep(self, node1: Point3d, node2: Point3d) -> bool:
         """
@@ -47,7 +38,13 @@ class CollisionChecker:
         x1, y1 = round(node1.x()), round(node1.y())
         x2, y2 = round(node2.x()), round(node2.y())
 
-        if (x1, y1) in self.obstacles or (x2, y2) in self.obstacles:
+        y_range, x_range = self.grid_map.shape
+        if x1 < 0 or x1 >= x_range or x2 < 0 or x2 >= x_range:
+            return True
+        if y1 < 0 or y1 >= y_range or y2 < 0 or y2 >= y_range:
+            return True
+
+        if self.grid_map[y1, x1] != TYPES.FREE_GRID or self.grid_map[y2, x2] != TYPES.FREE_GRID:
             return True
 
         if x1 != x2 and y1 != y2:
@@ -57,7 +54,7 @@ class CollisionChecker:
             else:
                 s1 = (min(x1, x2), max(y1, y2))
                 s2 = (max(x1, x2), min(y1, y2))
-            if s1 in self.obstacles or s2 in self.obstacles:
+            if self.grid_map[s1[1], s1[0]] != TYPES.FREE_GRID or self.grid_map[s2[1], s2[0]] != TYPES.FREE_GRID:
                 return True
         return False
 
@@ -76,7 +73,13 @@ class CollisionChecker:
         x1, y1 = round(node1.x()), round(node1.y())
         x2, y2 = round(node2.x()), round(node2.y())
 
-        if (x1, y1) in self.obstacles or (x2, y2) in self.obstacles:
+        y_range, x_range = self.grid_map.shape
+        if x1 < 0 or x1 >= x_range or x2 < 0 or x2 >= x_range:
+            return True
+        if y1 < 0 or y1 >= y_range or y2 < 0 or y2 >= y_range:
+            return True
+            
+        if self.grid_map[y1, x1] != TYPES.FREE_GRID or self.grid_map[y2, x2] != TYPES.FREE_GRID:
             return True
 
         d_x = abs(x2 - x1)
@@ -99,7 +102,7 @@ class CollisionChecker:
                     x = x + s_x
                     y = y + s_y
                     e = e + d_x - d_y
-                if (x, y) in self.obstacles:
+                if self.grid_map[round(y), round(x)] != TYPES.FREE_GRID:
                     return True
                     
         # swap x and y
@@ -116,7 +119,7 @@ class CollisionChecker:
                     x = x + s_x
                     y = y + s_y
                     e = e + d_y - d_x
-                if (x, y) in self.obstacles:
+                if self.grid_map[round(y), round(x)] != TYPES.FREE_GRID:
                     return True
         
         return False

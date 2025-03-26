@@ -9,6 +9,8 @@ import numpy as np
 from abc import ABC
 from scipy.spatial import KDTree
 
+from python_motion_planning.common.types import TYPES
+
 class Env(ABC):
 	"""
 	Class for building 2-d workspace of robots.
@@ -33,7 +35,7 @@ class Grid(Env):
 			self.grid_map = params["grid_map"]["grid_map"]
 			self.x_range = params["grid_map"]["dimensions"][0]
 			self.y_range = params["grid_map"]["dimensions"][1]
-			obs_indices = np.vstack(np.where(self.grid_map == 1)).T.tolist()
+			obs_indices = np.vstack(np.where(self.grid_map == TYPES.OBSTACLE_GRID)).T.tolist()
 			self.obstacles = [(obs[1], obs[0]) for obs in obs_indices]
 		else:
 			self.x_range = params["grid_map"]["dimensions"][0]
@@ -41,7 +43,7 @@ class Grid(Env):
 			self.grid_map = np.zeros((self.y_range, self.x_range))
 			for (ox, oy) in params["grid_map"]["obstacles"]:
 				self.obstacles.append((ox, oy))
-				self.grid_map[oy, ox] = 1
+				self.grid_map[oy, ox] = TYPES.OBSTACLE_GRID
 
 		# resolution
 		self.resolution = params["grid_map"]["resolution"]

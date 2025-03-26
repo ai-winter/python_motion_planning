@@ -27,7 +27,7 @@ class PathPlanner:
         # obstacles
         self.obstacles = self.env.obstacles
         # collision checker
-        self.collision_checker = CollisionChecker(list(self.obstacles))
+        self.collision_checker = CollisionChecker(self.env.grid_map)
 
     def dist(self, node1: Node, node2: Node) -> float:
         return math.hypot(node2.x - node1.x, node2.y - node1.y)

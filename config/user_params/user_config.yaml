@@ -8,7 +8,7 @@ agents:
 
 strategy:
   path_planner:
-    name: "astar"
+    name: "jps"
     ## astar
     ## dijkstra
     ## gbfs
