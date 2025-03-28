@@ -8,7 +8,7 @@ import numpy as np
 import math
 from typing import Iterable, Union, Tuple
 
-from pointnd import PointND
+from python_motion_planning.common.geometry.point import PointND
 
 
 class Point2D(PointND):
