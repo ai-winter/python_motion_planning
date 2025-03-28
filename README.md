@@ -81,7 +81,7 @@ planner = search_factory("a_star", start=(5, 5), goal=(45, 25), env=pmp.Grid(51,
 planner.run()       # run both planning and animation
 ```
 
-More examples can be found in the folder `test` in the repository.
+More examples can be found in the folder `examples` in the repository.
 
 ## Documentation
 
@@ -90,7 +90,6 @@ For more details, you can refer to [online documentation](https://ai-winter.gith
 The documentation is auto-generated using mkdocs. To do this, enter the root directory and run
 
 ```shell
-pip install -r requirements.txt
 python generate_mkdocs.py
 mkdocs serve
 ```
@@ -98,9 +97,9 @@ mkdocs serve
 Then open the browser and go to [http://127.0.0.1:8000](http://127.0.0.1:8000). That is the generated documentation.
 
 # Version
-## Global PathPlanner
+## Global Planner
 
-PathPlanner      | Version                                                                                                                                                                         | Animation
+Planner      | Version                                                                                                                                                                         | Animation
 ------------ |---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------| --------- 
 **GBFS**              | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/graph_search/gbfs.py)            | ![gbfs_python.png](assets/gbfs_python.png) 
 **Dijkstra**                 | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/graph_search/dijkstra.py)        | ![dijkstra_python.png](assets/dijkstra_python.png)
@@ -123,9 +122,9 @@ PathPlanner      | Version                                                      
 | **PSO**  | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/global_planner/evolutionary_search/pso.py)      | ![pso_python.png](assets/pso_python.svg) ![pso_python_cost.png](assets/pso_python_cost.svg) 
 
 
-## Local PathPlanner
+## Local Planner
 
-| PathPlanner     | Version                                                                                                                                                | Animation                                     
+| Planner     | Version                                                                                                                                                | Animation                                     
 |-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------| -------------------------------------------------- 
 | **PID**     | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/local_planner/pid.py)  | ![pid_python.svg](assets/pid_python.svg) 
 | **APF**     | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/local_planner/apf.py)  | ![apf_python.svg](assets/apf_python.svg) 
@@ -141,7 +140,7 @@ PathPlanner      | Version                                                      
 
 ## Curve Generation
 
-| PathPlanner | Version   | Animation                                |
+| Planner | Version   | Animation                                |
 | ------- | -------------------------------------------------------- | -------------------------------------------------------- 
 | **Polynomia** | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/curve_generation/polynomial_curve.py) | ![polynomial_curve_python.gif](assets/polynomial_curve_python.gif)
 | **Bezier** | [![Status](https://img.shields.io/badge/done-v1.0-brightgreen)](https://github.com/ai-winter/python_motion_planning/blob/master/curve_generation/bezier_curve.py) | ![bezier_curve_python.png](assets/bezier_curve_python.png)

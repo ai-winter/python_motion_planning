@@ -95,119 +95,116 @@ copyright: Copyright @ 2023-2024, Yang Haodong, Wu Maojia.
 repo_url: https://github.com/ai-winter/python_motion_planning/
 nav:
 - Home: index.md
-- common:
-  - geometry:
-    - collision:
-      - CollisionChecker: common\geometry\collision\CollisionChecker.md
-    - curve_generation:
-      - bezier_curve:
-        - Bezier: common\geometry\curve_generation\bezier_curve\Bezier.md
-        - Bernstein: common\geometry\curve_generation\bezier_curve\Bernstein.md
-      - bspline_curve:
-        - BSpline: common\geometry\curve_generation\bspline_curve\BSpline.md
-      - cubic_spline:
-        - CubicSpline: common\geometry\curve_generation\cubic_spline\CubicSpline.md
-      - curve:
-        - Curve: common\geometry\curve_generation\curve\Curve.md
-      - curve_factory:
-        - CurveFactory: common\geometry\curve_generation\curve_factory\CurveFactory.md
-      - dubins_curve:
-        - Dubins: common\geometry\curve_generation\dubins_curve\Dubins.md
-      - polynomial_curve:
-        - QuinticPolynomial: common\geometry\curve_generation\polynomial_curve\QuinticPolynomial.md
-        - Polynomial: common\geometry\curve_generation\polynomial_curve\Polynomial.md
-      - reeds_shepp:
-        - ReedsShepp: common\geometry\curve_generation\reeds_shepp\ReedsShepp.md
-    - line_segment2d:
-      - LineSegment2d: common\geometry\line_segment2d\LineSegment2d.md
-    - point:
-      - Point2d: common\geometry\point\Point2d.md
-      - Point3d: common\geometry\point\Point3d.md
-    - vector2d:
-      - Vec2d: common\geometry\vector2d\Vec2d.md
-  - math:
-    - math_helper:
-      - MathHelper: common\math\math_helper\MathHelper.md
-  - structure:
-    - agent:
-      - Agent: common\structure\agent\Agent.md
-      - DiffRobot: common\structure\agent\DiffRobot.md
-    - env:
-      - Env: common\structure\env\Env.md
-      - Grid: common\structure\env\Grid.md
-    - node:
-      - Node: common\structure\node\Node.md
-  - utils:
-    - logger:
-      - Logger: common\utils\logger\Logger.md
-    - params_manager:
-      - ParamsManager: common\utils\params_manager\ParamsManager.md
-    - visualization:
-      - Visualizer: common\utils\visualization\Visualizer.md
-- controller:
-  - apf:
-    - APF: controller\apf\APF.md
-  - control_factory:
-    - ControlFactory: controller\control_factory\ControlFactory.md
-  - controller:
-    - Controller: controller\controller\Controller.md
-  - dwa:
-    - DWA: controller\dwa\DWA.md
-  - lqr:
-    - LQR: controller\lqr\LQR.md
-  - mpc:
-    - MPC: controller\mpc\MPC.md
-  - pid:
-    - PID: controller\pid\PID.md
-  - rpp:
-    - RPP: controller\rpp\RPP.md
-- planner:
+- curve_generation:
+  - bezier_curve:
+    - Bezier: curve_generation\bezier_curve\Bezier.md
+  - bspline_curve:
+    - BSpline: curve_generation\bspline_curve\BSpline.md
+  - cubic_spline:
+    - CubicSpline: curve_generation\cubic_spline\CubicSpline.md
+  - curve:
+    - Curve: curve_generation\curve\Curve.md
+  - dubins_curve:
+    - Dubins: curve_generation\dubins_curve\Dubins.md
+  - fem_pos_smooth:
+    - FemPosSmoother: curve_generation\fem_pos_smooth\FemPosSmoother.md
+  - polynomial_curve:
+    - Polynomial: curve_generation\polynomial_curve\Polynomial.md
+  - reeds_shepp:
+    - ReedsShepp: curve_generation\reeds_shepp\ReedsShepp.md
+- global_planner:
   - evolutionary_search:
     - aco:
-      - ACO: planner\evolutionary_search\aco\ACO.md
+      - ACO: global_planner\evolutionary_search\aco\ACO.md
+    - evolutionary_search:
+      - EvolutionarySearcher: global_planner\evolutionary_search\evolutionary_search\EvolutionarySearcher.md
     - pso:
-      - PSO: planner\evolutionary_search\pso\PSO.md
+      - PSO: global_planner\evolutionary_search\pso\PSO.md
   - graph_search:
     - a_star:
-      - AStar: planner\graph_search\a_star\AStar.md
-    - bi_a_star:
-      - BiAStar: planner\graph_search\bi_a_star\BiAStar.md
+      - AStar: global_planner\graph_search\a_star\AStar.md
     - d_star:
-      - DNode: planner\graph_search\d_star\DNode.md
-      - DStar: planner\graph_search\d_star\DStar.md
+      - DNode: global_planner\graph_search\d_star\DNode.md
+      - DStar: global_planner\graph_search\d_star\DStar.md
     - d_star_lite:
-      - DStarLite: planner\graph_search\d_star_lite\DStarLite.md
+      - DStarLite: global_planner\graph_search\d_star_lite\DStarLite.md
     - dijkstra:
-      - Dijkstra: planner\graph_search\dijkstra\Dijkstra.md
+      - Dijkstra: global_planner\graph_search\dijkstra\Dijkstra.md
     - gbfs:
-      - GBFS: planner\graph_search\gbfs\GBFS.md
+      - GBFS: global_planner\graph_search\gbfs\GBFS.md
+    - graph_search:
+      - GraphSearcher: global_planner\graph_search\graph_search\GraphSearcher.md
     - jps:
-      - JPS: planner\graph_search\jps\JPS.md
+      - JPS: global_planner\graph_search\jps\JPS.md
     - lazy_theta_star:
-      - LazyThetaStar: planner\graph_search\lazy_theta_star\LazyThetaStar.md
+      - LazyThetaStar: global_planner\graph_search\lazy_theta_star\LazyThetaStar.md
     - lpa_star:
-      - LNode: planner\graph_search\lpa_star\LNode.md
-      - LPAStar: planner\graph_search\lpa_star\LPAStar.md
+      - LNode: global_planner\graph_search\lpa_star\LNode.md
+      - LPAStar: global_planner\graph_search\lpa_star\LPAStar.md
     - s_theta_star:
-      - SThetaStar: planner\graph_search\s_theta_star\SThetaStar.md
+      - SThetaStar: global_planner\graph_search\s_theta_star\SThetaStar.md
     - theta_star:
-      - ThetaStar: planner\graph_search\theta_star\ThetaStar.md
+      - ThetaStar: global_planner\graph_search\theta_star\ThetaStar.md
     - voronoi:
-      - VoronoiPlanner: planner\graph_search\voronoi\VoronoiPlanner.md
-  - planner:
-    - PathPlanner: planner\planner\PathPlanner.md
-  - planner_factory:
-    - PathPlannerFactory: planner\planner_factory\PathPlannerFactory.md
+      - VoronoiPlanner: global_planner\graph_search\voronoi\VoronoiPlanner.md
   - sample_search:
     - informed_rrt:
-      - ellipse: planner\sample_search\informed_rrt\ellipse.md
-      - InformedRRT: planner\sample_search\informed_rrt\InformedRRT.md
+      - Ellipse: global_planner\sample_search\informed_rrt\Ellipse.md
+      - InformedRRT: global_planner\sample_search\informed_rrt\InformedRRT.md
     - rrt:
-      - RRT: planner\sample_search\rrt\RRT.md
+      - RRT: global_planner\sample_search\rrt\RRT.md
     - rrt_connect:
-      - RRTConnect: planner\sample_search\rrt_connect\RRTConnect.md
+      - RRTConnect: global_planner\sample_search\rrt_connect\RRTConnect.md
     - rrt_star:
-      - RRTStar: planner\sample_search\rrt_star\RRTStar.md
+      - RRTStar: global_planner\sample_search\rrt_star\RRTStar.md
+    - sample_search:
+      - SampleSearcher: global_planner\sample_search\sample_search\SampleSearcher.md
+- local_planner:
+  - apf:
+    - APF: local_planner\apf\APF.md
+  - dwa:
+    - DWA: local_planner\dwa\DWA.md
+  - local_planner:
+    - LocalPlanner: local_planner\local_planner\LocalPlanner.md
+  - lqr:
+    - LQR: local_planner\lqr\LQR.md
+  - mpc:
+    - MPC: local_planner\mpc\MPC.md
+  - pid:
+    - PID: local_planner\pid\PID.md
+  - rpp:
+    - RPP: local_planner\rpp\RPP.md
+- utils:
+  - agent:
+    - agent:
+      - Agent: utils\agent\agent\Agent.md
+      - Robot: utils\agent\agent\Robot.md
+  - environment:
+    - env:
+      - Env: utils\environment\env\Env.md
+      - Grid: utils\environment\env\Grid.md
+      - Map: utils\environment\env\Map.md
+    - node:
+      - Node: utils\environment\node\Node.md
+    - point2d:
+      - Point2D: utils\environment\point2d\Point2D.md
+    - pose2d:
+      - Pose2D: utils\environment\pose2d\Pose2D.md
+  - helper:
+    - math_helper:
+      - MathHelper: utils\helper\math_helper\MathHelper.md
+  - planner:
+    - control_factory:
+      - ControlFactory: utils\planner\control_factory\ControlFactory.md
+    - curve_factory:
+      - CurveFactory: utils\planner\curve_factory\CurveFactory.md
+    - planner:
+      - Planner: utils\planner\planner\Planner.md
+    - search_factory:
+      - SearchFactory: utils\planner\search_factory\SearchFactory.md
+  - plot:
+    - plot:
+      - Plot: utils\plot\plot\Plot.md
 plugins:
 - search
 - autorefs
