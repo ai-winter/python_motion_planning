@@ -8,7 +8,7 @@ version = "2.0"
 description = "Motion planning algorithms for Python"
 maintainers = [
     {name = "Yang Haodong", email = "913982779@qq.com"},
-    {name = "Wu Maojia", email = "2223942063@qq.com"}
+    {name = "Wu Maojia", email = "omige@mail.nwpu.edu.cn"}
 ]
 readme = "README.md"
 license = {file = "LICENSE"}
@@ -19,8 +19,7 @@ dependencies = [
     "matplotlib",
     "cvxopt",
     "osqp",
-    "tqdm",
-    "tensorboard==2.12.0"
+    "tqdm"
 ]
 classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
