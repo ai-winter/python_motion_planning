@@ -16,7 +16,7 @@ class World(ABC):
 
     Parameters:
         bounds: boundaries of world (length of boundaries means the number of dimensions)
-        dtype: data type of coordinates (should be float)
+        dtype: data type of coordinates (must be float)
 
     Examples:
         >>> world = World((30, 40))

@@ -15,82 +15,176 @@ from python_motion_planning.common.geometry.point import *
 from python_motion_planning.common.env.map import Map
 
 
+class GridTypeMap:
+    """
+    Class for Grid Type Map. It is like a np.ndarray, except that its shape and dtype are fixed.
+
+    Parameters:
+        type_map: The np.ndarray type map.
+
+    Examples:
+        >>> type_map = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]], dtype=np.int8)
+        >>> grid_type_map = GridTypeMap(type_map)
+        >>> grid_type_map
+        GridTypeMap(array(
+        [[0 0 0]
+         [0 1 0]
+         [0 0 0]]
+        ), shape=(3, 3), dtype=int8)
+
+        >>> grid_type_map.array
+        array([[0, 0, 0],
+               [0, 1, 0],
+               [0, 0, 0]], dtype=int8)
+
+        >>> grid_type_map.shape
+        (3, 3)
+
+        >>> grid_type_map.dtype
+        dtype('int8')
+
+        >>> new_array = np.array([[1, 1, 1], [0, 0, 0], [0, 0, 0]], dtype=np.int8)
+
+        >>> grid_type_map.update(new_array)
+
+        >>> grid_type_map
+        GridTypeMap(array(
+        [[1 1 1]
+         [0 0 0]
+         [0 0 0]]
+        ), shape=(3, 3), dtype=int8)
+    """
+    def __init__(self, type_map: np.ndarray):
+        self._array = np.array(type_map)
+        self._shape = self._array.shape
+        self._dtype = self._array.dtype
+        
+        self._dtype_options = [np.int8, np.int16, np.int32, np.int64]
+        if self._dtype not in self._dtype_options:
+            raise ValueError("Dtype must be one of {} instead of {}".format(self._dtype_options, self._dtype))
+
+    def __str__(self) -> str:
+        return "GridTypeMap(array(\n{}\n), shape={}, dtype={})".format(self._array, self._shape, self._dtype)
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+    def __getitem__(self, idx):
+        return self._array[idx]
+
+    def __setitem__(self, idx, value):
+        self._array[idx] = value
+
+    @property
+    def array(self) -> np.ndarray:
+        return self._array.copy()
+
+    @property
+    def shape(self) -> Tuple:
+        return self._shape
+
+    @property
+    def dtype(self) -> np.dtype:
+        return self._dtype
+
+    def update(self, new_array):
+        new_array = np.asarray(new_array)
+        if new_array.shape != self._shape:
+            raise ValueError(f"Shape must be {self._shape}")
+        if new_array.dtype != self.dtype:
+            raise ValueError(f"New values dtype must be {self.dtype}")
+        np.copyto(self._array, new_array)
+
+
 class Grid(Map):
     """
     Class for Grid Map.
+    The shape of each dimension of the grid map is determined by the base world and resolution.
+    For each dimension, the conversion equation is: shape_grid = shape_world * resolution + 1
+    For example, if the base world is (30, 40) and the resolution is 0.5, the grid map will be (30 * 0.5 + 1, 40 * 0.5 + 1) = (61, 81).
 
     Parameters:
         world: Base world.
-        dtype: data type of coordinates (should be int)
+        type_map: initial type map of the grid map (its shape must be the same as the converted grid map shape, and its dtype must be int)
+        resolution: resolution of the grid map
+        dtype: data type of coordinates (must be int)
 
     Examples:
-        >>> map = Grid((30, 40), resolution=0.5)
-        >>> map
+        >>> type_map = np.zeros((61, 81), dtype=np.int8)
+        >>> grid_map = Grid(world=(30, 40), type_map=type_map, resolution=0.5)
+        >>> grid_map
         Grid(World((30, 40)), resolution=0.5)
 
-        >>> map.world
+        >>> grid_map.world
         World((30, 40))
 
-        >>> map.bounds    # bounds of the base world
+        >>> grid_map.bounds    # bounds of the base world
         (30, 40)
 
-        >>> map.ndim
+        >>> grid_map.ndim
         2
 
-        >>> map.resolution
+        >>> grid_map.resolution
         0.5
 
-        >>> map.shape   # shape of the grid map
+        >>> grid_map.shape   # shape of the grid map
         (61, 81)
 
-        >>> map.dtype
+        >>> grid_map.dtype
         <class 'numpy.int32'>
 
-        >>> map.type_map
-        array([[0, 0, 0, ..., 0, 0, 0],
-               [0, 0, 0, ..., 0, 0, 0],
-               [0, 0, 0, ..., 0, 0, 0],
-               ...,
-               [0, 0, 0, ..., 0, 0, 0],
-               [0, 0, 0, ..., 0, 0, 0],
-               [0, 0, 0, ..., 0, 0, 0]], shape=(61, 81), dtype=int8)
+        >>> grid_map.type_map
+        GridTypeMap(array(
+        [[0 0 0 ... 0 0 0]
+         [0 0 0 ... 0 0 0]
+         [0 0 0 ... 0 0 0]
+         ...
+         [0 0 0 ... 0 0 0]
+         [0 0 0 ... 0 0 0]
+         [0 0 0 ... 0 0 0]]
+        ), shape=(61, 81), dtype=int8)
 
-        >>> map.mapToWorld(Point2D(1, 2))
+        >>> grid_map.mapToWorld(Point2D(1, 2))
         Point2D([0.5, 1.0], dtype=float64)
 
-        >>> map.worldToMap(Point2D(0.5, 1.0))
+        >>> grid_map.worldToMap(Point2D(0.5, 1.0))
         Point2D([1, 2], dtype=int32)
 
-        >>> map.getNeighbor(Node(Point2D(1, 2)))
+        >>> grid_map.getNeighbor(Node(Point2D(1, 2)))
         [Node(PointND([0, 1], dtype=int32), Point2D([1, 2], dtype=int32), 1.4142135623730951, 0), Node(PointND([0, 2], dtype=int32), Point2D([1, 2], dtype=int32), 1.0, 0), Node(PointND([0, 3], dtype=int32), Point2D([1, 2], dtype=int32), 1.4142135623730951, 0), Node(PointND([1, 1], dtype=int32), Point2D([1, 2], dtype=int32), 1.0, 0), Node(PointND([1, 3], dtype=int32), Point2D([1, 2], dtype=int32), 1.0, 0), Node(PointND([2, 1], dtype=int32), Point2D([1, 2], dtype=int32), 1.4142135623730951, 0), Node(PointND([2, 2], dtype=int32), Point2D([1, 2], dtype=int32), 1.0, 0), Node(PointND([2, 3], dtype=int32), Point2D([1, 2], dtype=int32), 1.4142135623730951, 0)]
         
-        >>> map.getNeighbor(Node(Point2D(1, 2)), diagonal=False)
+        >>> grid_map.getNeighbor(Node(Point2D(1, 2)), diagonal=False)
         [Node(PointND([2, 2], dtype=int32), Point2D([1, 2], dtype=int32), 1.0, 0), Node(PointND([0, 2], dtype=int32), Point2D([1, 2], dtype=int32), 1.0, 0), Node(PointND([1, 3], dtype=int32), Point2D([1, 2], dtype=int32), 1.0, 0), Node(PointND([1, 1], dtype=int32), Point2D([1, 2], dtype=int32), 1.0, 0)]
 
-        >>> map.getNeighbor(Node(Point2D(0, 0)))    # limited within the bounds
+        >>> grid_map.getNeighbor(Node(Point2D(0, 0)))    # limited within the bounds
         [Node(PointND([0, 1], dtype=int32), Point2D([0, 0], dtype=int32), 1.0, 0), Node(PointND([1, 0], dtype=int32), Point2D([0, 0], dtype=int32), 1.0, 0), Node(PointND([1, 1], dtype=int32), Point2D([0, 0], dtype=int32), 1.4142135623730951, 0)]
 
-        >>> map.getNeighbor(Node(Point2D(map.shape[0] - 1, map.shape[1] - 1)), diagonal=False)  # limited within the boundss
+        >>> grid_map.getNeighbor(Node(Point2D(grid_map.shape[0] - 1, grid_map.shape[1] - 1)), diagonal=False)  # limited within the boundss
         [Node(PointND([59, 80], dtype=int32), Point2D([60, 80], dtype=int32), 1.0, 0), Node(PointND([60, 79], dtype=int32), Point2D([60, 80], dtype=int32), 1.0, 0)]
 
-        >>> map.lineOfSight(Point2D(1, 2), Point2D(3, 6))
+        >>> grid_map.lineOfSight(Point2D(1, 2), Point2D(3, 6))
         array([[1, 2],
                [1, 3],
                [2, 4],
                [2, 5],
                [3, 6]], dtype=int32)
 
-        >>> map.lineOfSight(Point2D(1, 2), Point2D(1, 2))
+        >>> grid_map.lineOfSight(Point2D(1, 2), Point2D(1, 2))
         array([[1, 2]], dtype=int32)
 
-        >>> map.inCollision(Point2D(1, 2), Point2D(3, 6))
+        >>> grid_map.inCollision(Point2D(1, 2), Point2D(3, 6))
         False
 
-        >>> map.type_map[1, 3] = TYPES.OBSTACLE
-        >>> map.inCollision(Point2D(1, 2), Point2D(3, 6))
+        >>> grid_map.type_map[1, 3] = TYPES.OBSTACLE
+        >>> grid_map.inCollision(Point2D(1, 2), Point2D(3, 6))
         True
     """
-    def __init__(self, world: Union[World, Iterable], resolution: float = 1.0, dtype: np.dtype = np.int32) -> None:
+    def __init__(self, 
+                world: Union[World, Iterable], 
+                type_map: Union[GridTypeMap, np.ndarray] = None, 
+                resolution: float = 1.0, 
+                dtype: np.dtype = np.int32
+                ) -> None:
         super().__init__(world, dtype)
         
         self._dtype_options = [np.int8, np.int16, np.int32, np.int64]
@@ -99,7 +193,21 @@ class Grid(Map):
 
         self._resolution = resolution
         self._shape = tuple([int(self.world.bounds[i] / self.resolution) + 1 for i in range(self.ndim)])
-        self.type_map = np.zeros(self._shape, dtype=np.int8)
+
+        if type_map is None:
+            self.type_map = GridTypeMap(np.zeros(self._shape, dtype=np.int8))
+        else:
+            if type_map.shape != self._shape:
+                raise ValueError("Shape must be {} instead of {}".format(self._shape, type_map.shape))
+            if type_map.dtype not in self._dtype_options:
+                raise ValueError("Dtype must be one of {} instead of {}".format(self._dtype_options, type_map.dtype))
+
+            if isinstance(type_map, GridTypeMap):
+                self.type_map = type_map
+            elif isinstance(type_map, np.ndarray):
+                self.type_map = GridTypeMap(type_map)        
+            else:
+                raise ValueError("Type map must be GridTypeMap or numpy.ndarray instead of {}".format(type(type_map)))
     
     def __str__(self) -> str:
         return "Grid({}, resolution={})".format(self.world, self.resolution)
