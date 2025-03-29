@@ -4,9 +4,12 @@
 @author: Wu Maojia
 @update: 2025.3.29
 """
+from typing import Iterable, Union
 from abc import ABC, abstractmethod
 
-from python_motion_planning.common.env import Env, Node
+import numpy as np
+
+from python_motion_planning.common.env import World, Node
 from python_motion_planning.common.geometry.point import *
 
 
@@ -15,30 +18,80 @@ class Map(ABC):
     Class for Path Planning Map.
 
     Parameters:
-        env: Base environment.
+        world: Base world.
+        dtype: data type of coordinates
     """
-    def __init__(self, env: Env) -> None:
+    def __init__(self, world: Union[World, Iterable], dtype: np.dtype) -> None:
         super().__init__()
-        self.setEnv(env)
+        if isinstance(world, World):
+            self.world = world
+        elif isinstance(world, Iterable):
+            self.world = World(world)
+        else:
+            raise ValueError("Invalid world input.")
 
-    def setEnv(self, env: Env) -> None:
+        self._dtype = dtype
+
+    @property
+    def world(self) -> World:
+        return self._world
+    
+    @world.setter
+    def world(self, world: World) -> None:
+        self._world = world
+
+    @property
+    def bounds(self) -> tuple:
+        return self.world.bounds
+
+    @property
+    def ndim(self) -> int:
+        return self.world.ndim
+
+    @property
+    def dtype(self) -> np.dtype:
+        return self._dtype
+
+    @abstractmethod
+    def mapToWorld(self, point: PointND) -> PointND:
         """
-        Set base environment of Map.
+        Convert map coordinates to world coordinates.
         
         Parameters:
-            env: Base environment of Map.
-        """
-        self._env = env
-
-    def getEnv(self) -> Env:
-        """
-        Get base environment of Map.
+            point: Point in map coordinates.
         
         Returns:
-            env: Base environment of Map.
+            point: Point in world coordinates.
         """
-        return self._env
-    
+        pass
+
+    @abstractmethod
+    def worldToMap(self, point: PointND) -> PointND:
+        """
+        Convert world coordinates to map coordinates.
+        
+        Parameters:
+            point: Point in world coordinates.
+        
+        Returns:
+            point: Point in map coordinates.
+        """
+        pass
+
+    @abstractmethod
+    def getDistance(self, p1: PointND, p2: PointND) -> float:
+        """
+        Get the distance between two points.
+
+        Parameters:
+            p1: First point.
+            p2: Second point.
+        
+        Returns:
+            dist: Distance between two points.
+        """
+        pass
+        
     @abstractmethod
     def getNeighbor(self, node: Node) -> list:
         """
@@ -66,16 +119,3 @@ class Map(ABC):
         """
         pass
         
-    @abstractmethod
-    def getDistance(self, p1: PointND, p2: PointND) -> float:
-        """
-        Get the distance between two points.
-
-        Parameters:
-            p1: First point.
-            p2: Second point.
-        
-        Returns:
-            dist: Distance between two points.
-        """
-        pass

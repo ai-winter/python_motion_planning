@@ -4,9 +4,9 @@
 @author: Yang Haodong, Wu Maojia
 @update: 2025.3.28
 """
-from enum import Enum
+from enum import IntEnum
 
-class TYPES(Enum):
+class TYPES(IntEnum):
     # environment macro
     FREE = 0
     OBSTACLE = 1

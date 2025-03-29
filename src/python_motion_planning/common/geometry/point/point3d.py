@@ -4,9 +4,10 @@
 @author: Wu Maojia
 @update: 2025.3.28
 """
-import numpy as np
 import math
 from typing import Iterable, Union, Tuple
+
+import numpy as np
 
 from python_motion_planning.common.geometry.point import PointND
 

@@ -44,6 +44,9 @@ class Node(object):
 
         >>> node1.h
         2
+
+        >>> node1.ndim
+        2
     """
     def __init__(self, current: PointND, parent: PointND = None, g: float = 0, h: float = 0) -> None:
         self._current = current
@@ -51,7 +54,7 @@ class Node(object):
         self._g = g
         self._h = h
 
-        if self.current.ndim != self.parent.ndim:
+        if self.parent is not None and self.current.ndim != self.parent.ndim:
             raise ValueError("The dimension of current and parent must be the same.")
     
     def __add__(self, node: "Node") -> "Node":
@@ -91,9 +94,17 @@ class Node(object):
     def g(self) -> float:
         return self._g
 
+    @g.setter
+    def g(self, value: float) -> None:
+        self._g = value
+
     @property
     def h(self) -> float:
         return self._h
+
+    @h.setter
+    def h(self, value: float) -> None:
+        self._h = value
 
     @property
     def ndim(self) -> int:

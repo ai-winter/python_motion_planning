@@ -4,9 +4,10 @@
 @author: Wu Maojia
 @update: 2025.3.28
 """
-import numpy as np
 from typing import Iterable, Union
 import copy
+
+import numpy as np
 
 
 class PointND(object):
@@ -55,6 +56,12 @@ class PointND(object):
 
         >>> p1.astype(np.int32)
         PointND([1, 2], dtype=int32)
+
+        >>> np.array(p1)
+        array([1., 2.])
+
+        >>> np.array(p1, dtype=np.int32)
+        array([1, 2], dtype=int32)
 
         >>> p1.dist(p2)
         2.8284271247461903
@@ -113,6 +120,12 @@ class PointND(object):
 
     def __iter__(self):
         return iter(self._vec.tolist())
+
+    def __array__(self, dtype: np.dtype = None):
+        if dtype is None:
+            return self._vec
+        else:
+            return self._vec.astype(dtype)
 
     def __getitem__(self, idx):
         return self._vec[idx].item()
@@ -208,7 +221,7 @@ class PointND(object):
         Returns:
             New PointND instance with the specified dtype
         """
-        point = self.__class__(self._vec.astype(dtype), dtype)
+        point = self.__class__(self._vec.astype(dtype), dtype=dtype)
         return point
 
 
