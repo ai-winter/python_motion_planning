@@ -32,7 +32,7 @@ class Point2D(PointND):
         2.0
         
         >>> p1 + p2
-        Point2D([4.0, 6.0], dtype=float64)
+        Point2D([4.0, 6.0])
         
         >>> p1.cross(p2)
         -2.0
@@ -85,7 +85,7 @@ class Point2D(PointND):
         return float(np.cross(self._vec, point._vec))
 
     def __str__(self) -> str:
-        return "Point2D([{}, {}], dtype={})".format(self.x, self.y, self.dtype)
+        return "Point2D([{}, {}])".format(self.x, self.y)
 
 
 if __name__ == "__main__":

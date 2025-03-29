@@ -3,3 +3,4 @@
 # from .local_planner import *
 # from .curve_generation import *
 from .common import *
+from .path_planner import *

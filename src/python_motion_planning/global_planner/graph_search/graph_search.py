@@ -1,8 +1,8 @@
 """
 @file: graph_search.py
 @breif: Base class for planner based on graph searching
-@author: Winter
-@update: 2023.1.13
+@author: Yang Haodong, Wu Maojia
+@update: 2025.3.29
 """
 import math
 from python_motion_planning.utils import Env, Node, Planner

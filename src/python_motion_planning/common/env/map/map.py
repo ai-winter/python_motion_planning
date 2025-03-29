@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 
-from python_motion_planning.common.env import World, Node
+from python_motion_planning.common.env import Node
 from python_motion_planning.common.geometry.point import *
 
 
@@ -18,35 +18,28 @@ class Map(ABC):
     Class for Path Planning Map.
 
     Parameters:
-        world: Base world.
+        bounds: The size of map in the world (shape: (n, 2) (n>=2)). bounds[i, 0] means the lower bound of the world in the i-th dimension. bounds[i, 1] means the upper bound of the world in the i-th dimension.  
         dtype: data type of coordinates
     """
-    def __init__(self, world: Union[World, Iterable], dtype: np.dtype) -> None:
+    def __init__(self, bounds: Iterable, dtype: np.dtype) -> None:
         super().__init__()
-        if isinstance(world, World):
-            self.world = world
-        elif isinstance(world, Iterable):
-            self.world = World(world)
-        else:
-            raise ValueError("Invalid world input.")
-
+        self._bounds = np.array(bounds, dtype=np.float64)
         self._dtype = dtype
 
-    @property
-    def world(self) -> World:
-        return self._world
-    
-    @world.setter
-    def world(self, world: World) -> None:
-        self._world = world
+        if len(self._bounds.shape) != 2 or self._bounds.shape[0] <= 1 or self._bounds.shape[1] != 2:
+            raise ValueError(f"The shape of bounds must be (n, 2) (n>=2) instead of {self._bounds.shape}")
+
+        for dim in range(self._bounds.shape[0]):
+            if self._bounds[dim, 0] >= self._bounds[dim, 1]:
+                raise ValueError(f"The lower bound of the world in the {dim}-th dimension must be smaller than the upper bound of the world in the {dim}-th dimension.")
 
     @property
-    def bounds(self) -> tuple:
-        return self.world.bounds
+    def bounds(self) -> np.ndarray:
+        return self._bounds
 
     @property
     def ndim(self) -> int:
-        return self.world.ndim
+        return self._bounds.shape[0]
 
     @property
     def dtype(self) -> np.dtype:

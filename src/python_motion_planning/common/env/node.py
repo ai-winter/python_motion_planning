@@ -22,10 +22,10 @@ class Node(object):
         >>> node3 = Node(Point2D(1, 1), Point2D(2, 3), 1, 2)
 
         >>> node1
-        Node(Point2D([1.0, 0.0], dtype=float64), Point2D([2.0, 3.0], dtype=float64), 1, 2)
+        Node(Point2D([1.0, 0.0]), Point2D([2.0, 3.0]), 1, 2)
         
         >>> node1 + node2
-        Node(Point2D([2.0, 0.0], dtype=float64), Point2D([2.0, 3.0], dtype=float64), 2, 2)
+        Node(Point2D([2.0, 0.0]), Point2D([2.0, 3.0]), 2, 2)
 
         >>> node1 == node2
         True
@@ -34,10 +34,10 @@ class Node(object):
         True
 
         >>> node1.current
-        Point2D([1.0, 0.0], dtype=float64)
+        Point2D([1.0, 0.0])
 
         >>> node1.parent
-        Point2D([2.0, 3.0], dtype=float64)
+        Point2D([2.0, 3.0])
 
         >>> node1.g
         1

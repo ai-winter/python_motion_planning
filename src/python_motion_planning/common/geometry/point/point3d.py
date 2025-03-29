@@ -36,10 +36,10 @@ class Point3D(PointND):
         3.0
         
         >>> p1 + p2
-        Point3D([5.0, 7.0, 9.0], dtype=float64)
+        Point3D([5.0, 7.0, 9.0])
         
         >>> p1.cross(p2)
-        Point3D([-3.0, 6.0, -3.0], dtype=float64)
+        Point3D([-3.0, 6.0, -3.0])
 
         >>> p1.dot(p2)
         32.0
@@ -101,7 +101,7 @@ class Point3D(PointND):
         return Point3D(np.cross(self._vec, point._vec), dtype=self.dtype)
 
     def __str__(self) -> str:
-        return "Point3D([{}, {}, {}], dtype={})".format(self.x, self.y, self.z, self.dtype)
+        return "Point3D([{}, {}, {}])".format(self.x, self.y, self.z)
 
 
 if __name__ == "__main__":

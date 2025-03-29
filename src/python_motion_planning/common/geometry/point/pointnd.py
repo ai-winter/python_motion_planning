@@ -22,16 +22,16 @@ class PointND(object):
         >>> p2 = PointND([3, 4], dtype=np.float64)
 
         >>> p1
-        PointND([1.0, 2.0], dtype=float64)
+        PointND([1.0, 2.0])
 
         >>> p1[0]
         1.0
 
         >>> p1 + p2
-        PointND([4.0, 6.0], dtype=float64)
+        PointND([4.0, 6.0])
 
         >>> p1 - p2
-        PointND([-2.0, -2.0], dtype=float64)
+        PointND([-2.0, -2.0])
 
         >>> p1 == p2
         False
@@ -40,7 +40,7 @@ class PointND(object):
         True
 
         >>> p1*3
-        PointND([3.0, 6.0], dtype=float64)
+        PointND([3.0, 6.0])
 
         >>> p1.dot(p2)
         11.0
@@ -55,7 +55,7 @@ class PointND(object):
         2
 
         >>> p1.astype(np.int32)
-        PointND([1, 2], dtype=int32)
+        PointND([1, 2])
 
         >>> np.array(p1)
         array([1., 2.])
@@ -103,8 +103,7 @@ class PointND(object):
     def __eq__(self, point: 'PointND') -> bool:
         if not isinstance(point, PointND):
             return False
-        return (self._vec.dtype == point._vec.dtype and 
-                np.array_equal(self._vec, point._vec))
+        return np.array_equal(self._vec, point._vec)
 
     def __ne__(self, point: 'PointND') -> bool:
         return not self.__eq__(point)
@@ -113,7 +112,7 @@ class PointND(object):
         return hash(tuple(self._vec))
 
     def __str__(self) -> str:
-        return "PointND({}, dtype={})".format(self._vec.tolist(), self._vec.dtype)
+        return "PointND({})".format(self._vec.tolist())
 
     def __repr__(self) -> str:
         return self.__str__()
