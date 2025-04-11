@@ -108,19 +108,7 @@ planner.plot.animation(path, str(planner), cost, expand)    # animation
 
 More examples can be found in the folder `examples` in the repository.
 
-## Documentation
-
 For more details, you can refer to [online documentation](https://ai-winter.github.io/python_motion_planning/).
-
-The documentation is auto-generated using mkdocs. To do this, enter the root directory and run
-
-```shell
-pip install -r requirements.txt
-python generate_mkdocs.py
-mkdocs serve
-```
-
-Then open the browser and go to [http://127.0.0.1:8000](http://127.0.0.1:8000). That is the generated documentation.
 
 # Version
 ## Global Planner
