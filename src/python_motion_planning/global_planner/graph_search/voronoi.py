@@ -9,7 +9,7 @@ import numpy as np
 from scipy.spatial import cKDTree, Voronoi
 
 from .graph_search import GraphSearcher
-from python_motion_planning.utils import Env, Node
+from python_motion_planning.utils import Env, Node, Grid
 
 class VoronoiPlanner(GraphSearcher):
     """
@@ -18,7 +18,7 @@ class VoronoiPlanner(GraphSearcher):
     Parameters:
         start (tuple): start point coordinate
         goal (tuple): goal point coordinate
-        env (Env): environment
+        env (Grid): environment
         heuristic_type (str): heuristic function type, default is euclidean
         n_knn (int): number of edges from one sampled point
         max_edge_len (float): maximum edge length
@@ -31,7 +31,7 @@ class VoronoiPlanner(GraphSearcher):
         >>> planner.plot.animation(path, str(planner), cost, expand)  # animation
         >>> planner.run()       # run both planning and animation
     """
-    def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean", \
+    def __init__(self, start: tuple, goal: tuple, env: Grid, heuristic_type: str = "euclidean", \
                  n_knn: int = 10, max_edge_len: float = 10.0, inflation_r: float = 1.0) -> None:
         super().__init__(start, goal, env, heuristic_type)
         # number of edges from one sampled point

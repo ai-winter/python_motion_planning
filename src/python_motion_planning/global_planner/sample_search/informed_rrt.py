@@ -9,7 +9,7 @@ from functools import partial
 import matplotlib.pyplot as plt
 
 from .rrt_star import RRTStar
-from python_motion_planning.utils import Env, Node
+from python_motion_planning.utils import Env, Node, Map
 
 
 class Ellipse:
@@ -40,7 +40,7 @@ class InformedRRT(RRTStar):
     Parameters:
         start (tuple): start point coordinate
         goal (tuple): goal point coordinate
-        env (Env): environment
+        env (Map): environment
         max_dist (float): Maximum expansion distance one step
         sample_num (int): Maximum number of sample points
         r (float): optimization radius
@@ -56,7 +56,7 @@ class InformedRRT(RRTStar):
     References:
         [1] Optimal Sampling-based Path Planning Focused via Direct Sampling of an Admissible Ellipsoidal heuristic
     """
-    def __init__(self, start: tuple, goal: tuple, env: Env, max_dist: float = 0.5,
+    def __init__(self, start: tuple, goal: tuple, env: Map, max_dist: float = 0.5,
                  sample_num: int = 1500, r: float = 12.0, goal_sample_rate: float = 0.05) -> None:
         super().__init__(start, goal, env, max_dist, sample_num, goal_sample_rate)
         # optimization radius

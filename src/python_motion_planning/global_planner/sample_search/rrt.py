@@ -8,7 +8,7 @@ import math
 import numpy as np
 
 from .sample_search import SampleSearcher
-from python_motion_planning.utils import Env, Node
+from python_motion_planning.utils import Env, Node, Map
 
 
 class RRT(SampleSearcher):
@@ -18,7 +18,7 @@ class RRT(SampleSearcher):
     Parameters:
         start (tuple): start point coordinate
         goal (tuple): goal point coordinate
-        env (Env): environment
+        env (Map): environment
         max_dist (float): Maximum expansion distance one step
         sample_num (int): Maximum number of sample points
         goal_sample_rate (float): heuristic sample
@@ -33,7 +33,7 @@ class RRT(SampleSearcher):
     References:
         [1] Rapidly-Exploring Random Trees: A New Tool for Path Planning
     """
-    def __init__(self, start: tuple, goal: tuple, env: Env, max_dist: float = 0.5,
+    def __init__(self, start: tuple, goal: tuple, env: Map, max_dist: float = 0.5,
         sample_num: int = 10000, goal_sample_rate: float = 0.05) -> None:
         super().__init__(start, goal, env)
         # Maximum expansion distance one step

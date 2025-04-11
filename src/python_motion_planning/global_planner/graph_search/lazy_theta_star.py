@@ -7,7 +7,7 @@
 import heapq
 
 from .theta_star import ThetaStar
-from python_motion_planning.utils import Env, Node
+from python_motion_planning.utils import Env, Node, Grid
 
 class LazyThetaStar(ThetaStar):
     """
@@ -16,7 +16,7 @@ class LazyThetaStar(ThetaStar):
     Parameters:
         start (tuple): start point coordinate
         goal (tuple): goal point coordinate
-        env (Env): environment
+        env (Grid): environment
         heuristic_type (str): heuristic function type
 
     Examples:
@@ -29,7 +29,7 @@ class LazyThetaStar(ThetaStar):
     References:
         [1] Lazy Theta*: Any-Angle Path Planning and Path Length Analysis in 3D
     """
-    def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
+    def __init__(self, start: tuple, goal: tuple, env: Grid, heuristic_type: str = "euclidean") -> None:
         super().__init__(start, goal, env, heuristic_type)
 
     def __str__(self) -> str:

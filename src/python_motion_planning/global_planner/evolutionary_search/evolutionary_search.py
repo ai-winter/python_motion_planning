@@ -6,7 +6,7 @@
 """
 import math
 
-from python_motion_planning.utils import Env, Node, Planner
+from python_motion_planning.utils import Env, Node, Planner, Grid
 
 class EvolutionarySearcher(Planner):
     """
@@ -15,10 +15,10 @@ class EvolutionarySearcher(Planner):
     Parameters:
         start (tuple): start point coordinate
         goal (tuple): goal point coordinate
-        env (Env): environment
+        env (Grid): environment
         heuristic_type (str): heuristic function type
     """
-    def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str="euclidean") -> None:
+    def __init__(self, start: tuple, goal: tuple, env: Grid, heuristic_type: str="euclidean") -> None:
         super().__init__(start, goal, env)
         # heuristic type
         self.heuristic_type = heuristic_type

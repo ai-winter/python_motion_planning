@@ -8,7 +8,7 @@ import random
 from bisect import bisect_left
 
 from .evolutionary_search import EvolutionarySearcher
-from python_motion_planning.utils import Env, Node
+from python_motion_planning.utils import Env, Node, Grid
 
 
 class ACO(EvolutionarySearcher):
@@ -18,7 +18,7 @@ class ACO(EvolutionarySearcher):
     Parameters:
         start (tuple): start point coordinate
         goal (tuple): goal point coordinate
-        env (Env): environment
+        env (Grid): environment
         heuristic_type (str): heuristic function type, default is euclidean
         n_ants (int): number of ants
         alpha (float): pheromone and heuristic factor weight coefficient
@@ -37,7 +37,7 @@ class ACO(EvolutionarySearcher):
     References:
         [1] Ant Colony Optimization: A New Meta-Heuristic
     """
-    def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean", 
+    def __init__(self, start: tuple, goal: tuple, env: Grid, heuristic_type: str = "euclidean", 
         n_ants: int = 50, alpha: float = 1.0, beta: float = 5.0, rho: float = 0.1, Q: float = 1.0,
         max_iter: int = 100) -> None:
         super().__init__(start, goal, env, heuristic_type)

@@ -7,7 +7,7 @@
 import heapq
 
 from .a_star import AStar
-from python_motion_planning.utils import Env, Node
+from python_motion_planning.utils import Env, Node, Grid
 
 
 class ThetaStar(AStar):
@@ -19,7 +19,7 @@ class ThetaStar(AStar):
             start point coordinate
         goal (tuple):
             goal point coordinate
-        env (Env):
+        env (Grid):
             environment
         heuristic_type (str):
             heuristic function type
@@ -35,7 +35,7 @@ class ThetaStar(AStar):
         [1] Theta*: Any-Angle Path Planning on Grids
         [2] Any-angle path planning on non-uniform costmaps
     """
-    def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
+    def __init__(self, start: tuple, goal: tuple, env: Grid, heuristic_type: str = "euclidean") -> None:
         super().__init__(start, goal, env, heuristic_type)
 
     def __str__(self) -> str:

@@ -5,7 +5,7 @@
 @update: 2024.6.23
 """
 from .graph_search import GraphSearcher
-from python_motion_planning.utils import Env, Node
+from python_motion_planning.utils import Env, Node, Grid
 
 
 class DNode(Node):
@@ -41,7 +41,7 @@ class DStar(GraphSearcher):
     Parameters:
         start (tuple): start point coordinate
         goal (tuple): goal point coordinate
-        env (Env): environment
+        env (Grid): environment
 
     Examples:
         >>> import python_motion_planning as pmp
@@ -53,7 +53,7 @@ class DStar(GraphSearcher):
     References:
         [1]Optimal and Efficient Path Planning for Partially-Known Environments
     """
-    def __init__(self, start: tuple, goal: tuple, env: Env) -> None:
+    def __init__(self, start: tuple, goal: tuple, env: Grid) -> None:
         super().__init__(start, goal, env, None)
         self.start = DNode(start, None, 'NEW', float('inf'), float("inf"))
         self.goal = DNode(goal, None, 'NEW', 0, float('inf'))
