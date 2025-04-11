@@ -7,11 +7,27 @@
 import heapq
 
 from .a_star import AStar
-from python_motion_planning.utils import Env
+from python_motion_planning.utils import Env, Grid
 
 
 class Dijkstra(AStar):
-    def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
+    """
+    Class for Dijkstra motion planning.
+
+    Parameters:
+        start (tuple): start point coordinate
+        goal (tuple): goal point coordinate
+        env (Grid): environment
+        heuristic_type (str): heuristic function type
+
+    Examples:
+        >>> import python_motion_planning as pmp
+        >>> planner = pmp.Dijkstra((5, 5), (45, 25), pmp.Grid(51, 31))
+        >>> cost, path, expand = planner.plan()     # planning results only
+        >>> planner.plot.animation(path, str(planner), cost, expand)  # animation
+        >>> planner.run()       # run both planning and animation
+    """
+    def __init__(self, start: tuple, goal: tuple, env: Grid, heuristic_type: str = "euclidean") -> None:
         super().__init__(start, goal, env, heuristic_type)
     
     def __str__(self) -> str:
@@ -19,20 +35,12 @@ class Dijkstra(AStar):
 
     def plan(self) -> tuple:
         """
-        Class for Dijkstra motion planning.
+        Dijkstra motion plan function.
 
-        Parameters:
-            start (tuple): start point coordinate
-            goal (tuple): goal point coordinate
-            env (Env): environment
-            heuristic_type (str): heuristic function type
-
-        Examples:
-            >>> import python_motion_planning as pmp
-            >>> planner = pmp.Dijkstra((5, 5), (45, 25), pmp.Grid(51, 31))
-            >>> cost, path, expand = planner.plan()     # planning results only
-            >>> planner.plot.animation(path, str(planner), cost, expand)  # animation
-            >>> planner.run()       # run both planning and animation
+        Returns:
+            cost (float): path cost
+            path (list): planning path
+            expand (list): all nodes that planner has searched
         """
         # OPEN list (priority queue) and CLOSED list (hash table)
         OPEN = []

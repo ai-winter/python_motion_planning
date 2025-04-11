@@ -58,27 +58,52 @@ pip install python-motion-planning
 ## Run
 Below are some simple examples.
 
-1. Run planning and animation separately
+1. Run A* with discrete environment (Grid)
 ```python
 import python_motion_planning as pmp
-planner = pmp.AStar(start=(5, 5), goal=(45, 25), env=pmp.Grid(51, 31))
-cost, path, expand = planner.plan()
-planner.plot.animation(path, str(planner), cost, expand)  # animation
+
+# Create environment with custom obstacles
+env = pmp.Grid(51, 31)
+obstacles = env.obstacles
+for i in range(10, 21):
+    obstacles.add((i, 15))
+for i in range(15):
+    obstacles.add((20, i))
+for i in range(15, 30):
+    obstacles.add((30, i))
+for i in range(16):
+    obstacles.add((40, i))
+env.update(obstacles)
+
+planner = pmp.AStar(start=(5, 5), goal=(45, 25), env=env)   # create planner
+cost, path, expand = planner.plan()                         # plan
+planner.plot.animation(path, str(planner), cost, expand)    # animation
 ```
 
-2. Run planning and animation in one step
+2. Run RRT with continuous environment (Map)
 ```python
 import python_motion_planning as pmp
-planner = pmp.AStar(start=(5, 5), goal=(45, 25), env=pmp.Grid(51, 31))
-planner.run()       # run both planning and animation
-```
 
-3. Create planner in factory mode
-```python
-import python_motion_planning as pmp
-search_factory = pmp.SearchFactory()
-planner = search_factory("a_star", start=(5, 5), goal=(45, 25), env=pmp.Grid(51, 31))
-planner.run()       # run both planning and animation
+# Create environment with custom obstacles
+env = pmp.Map(51, 31)
+obs_rect = [
+    [14, 12, 8, 2],
+    [18, 22, 8, 3],
+    [26, 7, 2, 12],
+    [32, 14, 10, 2]
+]
+obs_circ = [
+    [7, 12, 3],
+    [46, 20, 2],
+    [15, 5, 2],
+    [37, 7, 3],
+    [37, 23, 3]
+]
+env.update(obs_rect=obs_rect, obs_circ=obs_circ)
+
+planner = pmp.RRT(start=(18, 8), goal=(37, 18), env=env)    # create planner
+cost, path, expand = planner.plan()                         # plan
+planner.plot.animation(path, str(planner), cost, expand)    # animation
 ```
 
 More examples can be found in the folder `examples` in the repository.

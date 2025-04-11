@@ -7,7 +7,7 @@
 import heapq
 
 from .graph_search import GraphSearcher
-from python_motion_planning.utils import Env, Node
+from python_motion_planning.utils import Env, Node, Grid
 
 class LNode(Node):
     """
@@ -43,7 +43,7 @@ class LPAStar(GraphSearcher):
     Parameters:
         start (tuple): start point coordinate
         goal (tuple): goal point coordinate
-        env (Env): environment
+        env (Grid): environment
         heuristic_type (str): heuristic function type
 
     Examples:
@@ -56,7 +56,7 @@ class LPAStar(GraphSearcher):
     References:
         [1] Lifelong Planning A*
     """
-    def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
+    def __init__(self, start: tuple, goal: tuple, env: Grid, heuristic_type: str = "euclidean") -> None:
         super().__init__(start, goal, env, heuristic_type)
         # start and goal
         self.start = LNode(start, float('inf'), 0.0, None)

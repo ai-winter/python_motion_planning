@@ -7,7 +7,7 @@
 import heapq
 
 from .a_star import AStar
-from python_motion_planning.utils import Env, Node
+from python_motion_planning.utils import Env, Node, Grid
 
 class JPS(AStar):
     """
@@ -16,7 +16,7 @@ class JPS(AStar):
     Parameters:
         start (tuple): start point coordinate
         goal (tuple): goal point coordinate
-        env (Env): environment
+        env (Grid): environment
         heuristic_type (str): heuristic function type
 
     Examples:
@@ -29,7 +29,7 @@ class JPS(AStar):
     References:
         [1] Online Graph Pruning for Pathfinding On Grid Maps
     """
-    def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean") -> None:
+    def __init__(self, start: tuple, goal: tuple, env: Grid, heuristic_type: str = "euclidean") -> None:
         super().__init__(start, goal, env, heuristic_type)
     
     def __str__(self) -> str:

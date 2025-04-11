@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "python-motion-planning"
-version = "1.1"
+version = "1.1.1"
 description = "Motion planning algorithms for Python"
 maintainers = [
     {name = "Yang Haodong", email = "913982779@qq.com"},
@@ -19,8 +19,7 @@ dependencies = [
     "matplotlib",
     "cvxopt",
     "osqp",
-    "tqdm",
-    "tensorboard==2.12.0"
+    "tqdm"
 ]
 classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",

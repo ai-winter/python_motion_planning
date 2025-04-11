@@ -41,6 +41,10 @@ class Env(ABC):
 class Grid(Env):
     """
     Class for discrete 2-d grid map.
+
+    Parameters:
+        x_range (int): x-axis range of enviroment
+        y_range (int): y-axis range of environmet
     """
     def __init__(self, x_range: int, y_range: int) -> None:
         super().__init__(x_range, y_range)
@@ -69,18 +73,7 @@ class Grid(Env):
             obstacles.add((0, i))
             obstacles.add((x - 1, i))
 
-        # user-defined obstacles        
-        for i in range(10, 21):
-            obstacles.add((i, 15))
-        for i in range(15):
-            obstacles.add((20, i))
-        for i in range(15, 30):
-            obstacles.add((30, i))
-        for i in range(16):
-            obstacles.add((40, i))
-
-        self.obstacles = obstacles
-        self.obstacles_tree = cKDTree(np.array(list(obstacles)))
+        self.update(obstacles)
 
     def update(self, obstacles):
         self.obstacles = obstacles 
@@ -90,6 +83,10 @@ class Grid(Env):
 class Map(Env):
     """
     Class for continuous 2-d map.
+
+    Parameters:
+        x_range (int): x-axis range of enviroment
+        y_range (int): y-axis range of environmet
     """
     def __init__(self, x_range: int, y_range: int) -> None:
         super().__init__(x_range, y_range)
@@ -111,24 +108,10 @@ class Map(Env):
             [1, 0, x, 1],
             [x, 1, 1, y]
         ]
+        self.obs_rect = []
+        self.obs_circ = []
 
-        # user-defined obstacles
-        self.obs_rect = [
-            [14, 12, 8, 2],
-            [18, 22, 8, 3],
-            [26, 7, 2, 12],
-            [32, 14, 10, 2]
-        ]
-
-        self.obs_circ = [
-            [7, 12, 3],
-            [46, 20, 2],
-            [15, 5, 2],
-            [37, 7, 3],
-            [37, 23, 3]
-        ]
-
-    def update(self, boundary, obs_circ, obs_rect):
+    def update(self, boundary=None, obs_circ=None, obs_rect=None):
         self.boundary = boundary if boundary else self.boundary
         self.obs_circ = obs_circ if obs_circ else self.obs_circ
         self.obs_rect = obs_rect if obs_rect else self.obs_rect

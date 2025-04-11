@@ -8,7 +8,7 @@ import numpy as np
 from itertools import combinations
 import math
 
-from python_motion_planning.utils import Env, Node, Planner
+from python_motion_planning.utils import Env, Node, Planner, Map
 
 class SampleSearcher(Planner):
     """
@@ -17,9 +17,9 @@ class SampleSearcher(Planner):
     Parameters:
         start (tuple): start point coordinate
         goal (tuple): goal point coordinate
-        env (Env): environment
+        env (Map): environment
     """
-    def __init__(self, start: tuple, goal: tuple, env: Env, delta: float=0.5) -> None:
+    def __init__(self, start: tuple, goal: tuple, env: Map, delta: float=0.5) -> None:
         super().__init__(start, goal, env)
         # inflation bias
         self.delta = delta

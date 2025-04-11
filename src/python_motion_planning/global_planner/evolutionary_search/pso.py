@@ -8,7 +8,7 @@ import random, math
 from copy import deepcopy
 
 from .evolutionary_search import EvolutionarySearcher
-from python_motion_planning.utils import Env, MathHelper
+from python_motion_planning.utils import Env, MathHelper, Grid
 from python_motion_planning.curve_generation import BSpline
 
 GEN_MODE_CIRCLE = 0
@@ -22,7 +22,7 @@ class PSO(EvolutionarySearcher):
     Parameters:
         start (tuple): start point coordinate
         goal (tuple): goal point coordinate
-        env (Env): environment
+        env (Grid): environment
         heuristic_type (str): heuristic function type
         n_particles (int): number of particles
         w_inertial (float): inertial weight
@@ -41,7 +41,7 @@ class PSO(EvolutionarySearcher):
         >>> planner.plot.animation(path, str(planner), cost, cost_curve=cost_curve)  # animation
         >>> planner.run()       # run both planning and animation
     """
-    def __init__(self, start: tuple, goal: tuple, env: Env, heuristic_type: str = "euclidean", 
+    def __init__(self, start: tuple, goal: tuple, env: Grid, heuristic_type: str = "euclidean", 
         n_particles: int = 300, point_num: int = 5, w_inertial: float = 1.0,
         w_cognitive: float = 1.0, w_social: float = 1.0, max_speed: int = 6,
         max_iter: int = 200, init_mode: int = GEN_MODE_RANDOM) -> None:

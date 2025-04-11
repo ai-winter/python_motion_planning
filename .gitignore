@@ -3,7 +3,6 @@ __pycache__/
 build/
 devel/
 docs/
-tmp/
 python_motion_planning.egg-info/
 # local env files
 .env.local
@@ -40,3 +39,7 @@ examples/models/*
 site/ 
 dist/
 logs/
+
+# temporary files
+tmp/
+tmp.*
