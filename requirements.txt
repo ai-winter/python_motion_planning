@@ -9,3 +9,4 @@ mkdocs      # >=1.5.3
 mkdocstrings    # >=0.27.0
 mkdocstrings-python==1.12.2
 mkdocs-material # >=9.5.45
+mike
