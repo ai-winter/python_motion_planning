@@ -75,14 +75,14 @@ class Grid(Env):
                         Node((0, -1, 1), None, sqrt(2), None), # Down Forward
                         Node((0, -1, -1), None, sqrt(2), None), # Down Backward
                         # XYZ-Plane
-                        Node((1, 1, 1), None, -1, None),   # Right Up Forward
-                        Node((-1, 1, 1), None, -1, None),  # Left Up Forward
-                        Node((1, 1, -1), None, -1, None),  # Right Up Backward
-                        Node((-1, 1, -1), None, -1, None), # Left Up Backward
-                        Node((1, -1, 1), None, -1, None), # Right Down Forward
-                        Node((-1, -1, 1), None, -1, None), # Left Down Forward
-                        Node((1, -1, -1), None, -1, None), # Right Down Backward
-                        Node((-1, -1, -1), None, -1, None)  # Left Down Backward
+                        Node((1, 1, 1), None, sqrt(3), None),   # Right Up Forward
+                        Node((-1, 1, 1), None, sqrt(3), None),  # Left Up Forward
+                        Node((1, 1, -1), None, sqrt(3), None),  # Right Up Backward
+                        Node((-1, 1, -1), None, sqrt(3), None), # Left Up Backward
+                        Node((1, -1, 1), None, sqrt(3), None), # Right Down Forward
+                        Node((-1, -1, 1), None, sqrt(3), None), # Left Down Forward
+                        Node((1, -1, -1), None, sqrt(3), None), # Right Down Backward
+                        Node((-1, -1, -1), None, sqrt(3), None)  # Left Down Backward
                         ]
         # obstacles
         self.obstacles = None
