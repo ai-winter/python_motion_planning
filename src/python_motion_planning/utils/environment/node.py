@@ -35,7 +35,7 @@ class Node(object):
         self.parent = parent
         self.g = g
         self.h = h
-    
+
     def __add__(self, node):
         assert isinstance(node, Node)
         return Node((self.x + node.x, self.y + node.y), self.parent, self.g + node.g, self.h)
@@ -44,7 +44,7 @@ class Node(object):
         if not isinstance(node, Node):
             return False
         return self.current == node.current
-    
+
     def __ne__(self, node) -> bool:
         return not self.__eq__(node)
 
@@ -61,14 +61,18 @@ class Node(object):
 
     def __repr__(self) -> str:
         return self.__str__()
-    
+
     @property
     def x(self) -> float:
         return self.current[0]
-    
+
     @property
     def y(self) -> float:
         return self.current[1]
+
+    @property
+    def z(self) -> float:
+        return self.current[2]
 
     @property
     def px(self) -> float:
