@@ -24,10 +24,11 @@ class Env(ABC):
         >>> from python_motion_planning.utils import Env
         >>> env = Env(30, 40)
     """
-    def __init__(self, x_range: int, y_range: int, eps: float = 1e-6) -> None:
+    def __init__(self, x_range: int, y_range: int, z_range: int, eps: float = 1e-6) -> None:
         # size of environment
-        self.x_range = x_range  
+        self.x_range = x_range
         self.y_range = y_range
+        self.z_range = z_range
         self.eps = eps
 
     @property
@@ -44,20 +45,50 @@ class Grid(Env):
 
     Parameters:
         x_range (int): x-axis range of enviroment
-        y_range (int): y-axis range of environmet
+        y_range (int): y-axis range of enviroment
+        z_range (int): z-axis range of enviroment
     """
-    def __init__(self, x_range: int, y_range: int) -> None:
-        super().__init__(x_range, y_range)
+    def __init__(self, x_range: int, y_range: int, z_range: int) -> None:
+        super().__init__(x_range, y_range, z_range)
         # allowed motions
-        self.motions = [Node((-1, 0), None, 1, None), Node((-1, 1),  None, sqrt(2), None),
-                        Node((0, 1),  None, 1, None), Node((1, 1),   None, sqrt(2), None),
-                        Node((1, 0),  None, 1, None), Node((1, -1),  None, sqrt(2), None),
-                        Node((0, -1), None, 1, None), Node((-1, -1), None, sqrt(2), None)]
+        self.motions = [
+                        # Singular direction
+                        Node((1, 0, 0), None, 1, None),  # Right
+                        Node((-1, 0, 0), None, 1, None), # Left
+                        Node((0, 1, 0), None, 1, None),  # Up
+                        Node((0, -1, 0), None, 1, None), # Down
+                        Node((0, 0, 1), None, 1, None),  # Forward
+                        Node((0, 0, -1), None, 1, None), # Backward
+                        # XY-Plane
+                        Node((1, 1, 0), None, sqrt(2), None), # Right Up
+                        Node((-1, 1, 0), None, sqrt(2), None), # Left Up
+                        Node((1, -1, 0), None, sqrt(2), None), # Right Down
+                        Node((-1, 1, 0), None, sqrt(2), None), # Left Down
+                        # XZ-Plane
+                        Node((1, 0, 1), None, sqrt(2), None), # Right Forward ##
+                        Node((1, 0, -1), None, sqrt(2), None), # Right Backward
+                        Node((-1, 0, 1), None, sqrt(2), None), # Left Forward
+                        Node((-1, 0, -1), None, sqrt(2), None), # Left Backward
+                        # YZ-Plane
+                        Node((0, 1, 1), None, sqrt(2), None), # Up Forward
+                        Node((0, 1, -1), None, sqrt(2), None), # Up Backward
+                        Node((0, -1, 1), None, sqrt(2), None), # Down Forward
+                        Node((0, -1, -1), None, sqrt(2), None), # Down Backward
+                        # XYZ-Plane
+                        Node((1, 1, 1), None, -1, None),   # Right Up Forward
+                        Node((-1, 1, 1), None, -1, None),  # Left Up Forward
+                        Node((1, 1, -1), None, -1, None),  # Right Up Backward
+                        Node((-1, 1, -1), None, -1, None), # Left Up Backward
+                        Node((1, -1, 1), None, -1, None), # Right Down Forward
+                        Node((-1, -1, 1), None, -1, None), # Left Down Forward
+                        Node((1, -1, -1), None, -1, None), # Right Down Backward
+                        Node((-1, -1, -1), None, -1, None)  # Left Down Backward
+                        ]
         # obstacles
         self.obstacles = None
         self.obstacles_tree = None
         self.init()
-    
+
     def init(self) -> None:
         """
         Initialize grid map.
@@ -76,7 +107,7 @@ class Grid(Env):
         self.update(obstacles)
 
     def update(self, obstacles):
-        self.obstacles = obstacles 
+        self.obstacles = obstacles
         self.obstacles_tree = cKDTree(np.array(list(obstacles)))
 
 
@@ -88,8 +119,8 @@ class Map(Env):
         x_range (int): x-axis range of enviroment
         y_range (int): y-axis range of environmet
     """
-    def __init__(self, x_range: int, y_range: int) -> None:
-        super().__init__(x_range, y_range)
+    def __init__(self, x_range: int, y_range: int, z_range: int) -> None:
+        super().__init__(x_range, y_range, z_range)
         self.boundary = None
         self.obs_circ = None
         self.obs_rect = None
