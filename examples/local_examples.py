@@ -13,7 +13,7 @@ if __name__ == '__main__':
     local planner constructor
     '''
     control_factory = ControlFactory()
-    
+
     # build environment
     start = (5, 5, 0)
     goal = (45, 25, 0)
