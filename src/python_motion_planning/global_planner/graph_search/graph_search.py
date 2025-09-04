@@ -69,19 +69,57 @@ class GraphSearcher(Planner):
         Returns:
             collision (bool): True if collision exists else False
         """
+
+        # This checks whether up, down, left, right, forwards and backwards is an invalid move
         if node1.current in self.obstacles or node2.current in self.obstacles:
             return True
 
-        x1, y1 = node1.x, node1.y
-        x2, y2 = node2.x, node2.y
+        x1, y1, z1 = node1.x, node1.y, node1.z
+        x2, y2, z2 = node2.x, node2.y, node2.z
 
-        if x1 != x2 and y1 != y2:
-            if x2 - x1 == y1 - y2:
-                s1 = (min(x1, x2), min(y1, y2))
-                s2 = (max(x1, x2), max(y1, y2))
-            else:
-                s1 = (min(x1, x2), max(y1, y2))
-                s2 = (max(x1, x2), min(y1, y2))
+        # XY-plane
+        if x1 != x2 and y1 != y2 and z1 == z2:
+            if x2 - x1 == y1 - y2: # If true, this is a negative diagonal (The commented logic applies for each plane)
+                # Get either left and top cell between diagonal or bottom and right
+                s1 = (min(x1, x2), min(y1, y2), z1)
+                s2 = (max(x1, x2), max(y1, y2), z1)
+            else: # Positive diagonal
+                # Get either top and right cell between diagonal or bottom and left
+                s1 = (min(x1, x2), max(y1, y2), z1)
+                s2 = (max(x1, x2), min(y1, y2), z1)
             if s1 in self.obstacles or s2 in self.obstacles:
                 return True
+
+        # XZ-plane
+        if x1 != x2 and y1 == y2 and z1 != z2:
+            if x2 - x1 == z1 - z2:
+                s1 = (min(x1, x2), y1, min(z1, z2))
+                s2 = (max(x1, x2), y1, max(z1, z2))
+            else:
+                s1 = (min(x1, x2), y1, max(z1, z2))
+                s2 = (max(x1, x2), y1, min(z1, z2))
+            if s1 in self.obstacles or s2 in self.obstacles:
+                return True
+
+        # YZ-plane
+        if x1 == x2 and y1 != y2 and z1 != z2:
+            if y2 - y1 == z1 - z2:
+                s1 = (x1, min(y1, y2), min(z1, z2))
+                s2 = (x1, max(y1, y2), max(z1, z2))
+            else:
+                s1 = (x1, min(y1, y2), max(z1, z2))
+                s2 = (x1, max(y1, y2), min(z1, z2))
+            if s1 in self.obstacles or s2 in self.obstacles:
+                return True
+
+        # XYZ-plane
+        if x1 != x2 and y1 != y2 and z1 != z2:
+            # Check the three neighbors between node1 and node2
+            s1 = (x2, y1, z1)
+            s2 = (x1, y2, z1)
+            s3 = (x1, y1, z2)
+
+            if s1 in self.obstacles or s2 in self.obstacles or s3 in self.obstacles:
+                return True
+
         return False

@@ -5,12 +5,14 @@
 @update: 2025.4.11
 """
 import sys, os
+sys.path.insert(0, '/Users/julianmella/Desktop/University/Semesters/11. Semester/IN5060/python_motion_planning/src')
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from python_motion_planning import *
 
 if __name__ == '__main__':
     # Create environment with custom obstacles
-    grid_env = Grid(51, 31)
+    grid_env = Grid(5, 5, 5)
+    """
     obstacles = grid_env.obstacles
     for i in range(10, 21):
         obstacles.add((i, 15))
@@ -22,7 +24,7 @@ if __name__ == '__main__':
         obstacles.add((40, i))
     grid_env.update(obstacles)
 
-    map_env = Map(51, 31)
+    map_env = Map(51, 31, 1)
     obs_rect = [
         [14, 12, 8, 2],
         [18, 22, 8, 3],
@@ -38,9 +40,9 @@ if __name__ == '__main__':
     ]
     map_env.update(obs_rect=obs_rect, obs_circ=obs_circ)
 
-
+    """
     # -------------global planners-------------
-    plt = AStar(start=(5, 5), goal=(45, 25), env=grid_env)
+    plt = AStar(start=(1, 1, 1), goal=(3, 3, 3), env=grid_env)
     # plt = DStar(start=(5, 5), goal=(45, 25), env=grid_env)
     # plt = DStarLite(start=(5, 5), goal=(45, 25), env=grid_env)
     # plt = Dijkstra(start=(5, 5), goal=(45, 25), env=grid_env)
