@@ -65,7 +65,7 @@ class Grid(Env):
                         Node((1, -1, 0), None, sqrt(2), None), # Right Down
                         Node((-1, 1, 0), None, sqrt(2), None), # Left Down
                         # XZ-Plane
-                        Node((1, 0, 1), None, sqrt(2), None), # Right Forward ##
+                        Node((1, 0, 1), None, sqrt(2), None), # Right Forward
                         Node((1, 0, -1), None, sqrt(2), None), # Right Backward
                         Node((-1, 0, 1), None, sqrt(2), None), # Left Forward
                         Node((-1, 0, -1), None, sqrt(2), None), # Left Backward
@@ -93,16 +93,25 @@ class Grid(Env):
         """
         Initialize grid map.
         """
-        x, y = self.x_range, self.y_range
+        x, y, z = self.x_range, self.y_range, self.z_range
         obstacles = set()
 
         # boundary of environment
+
+        # walls
+        for i in range(z):
+            for j in range(x):
+                obstacles.add((j, 0, i))
+                obstacles.add((j, y - 1, i))
+            for j in range(y):
+                obstacles.add((0, j, i))
+                obstacles.add((x - 1, j, i))
+
+        # floor and roof
         for i in range(x):
-            obstacles.add((i, 0))
-            obstacles.add((i, y - 1))
-        for i in range(y):
-            obstacles.add((0, i))
-            obstacles.add((x - 1, i))
+            for j in range(y):
+                obstacles.add((i, j, 0))
+                obstacles.add((i, j, z - 1))
 
         self.update(obstacles)
 

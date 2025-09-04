@@ -11,19 +11,26 @@ from python_motion_planning import *
 
 if __name__ == '__main__':
     # Create environment with custom obstacles
-    grid_env = Grid(5, 5, 5)
-    """
-    obstacles = grid_env.obstacles
-    for i in range(10, 21):
-        obstacles.add((i, 15))
-    for i in range(15):
-        obstacles.add((20, i))
-    for i in range(15, 30):
-        obstacles.add((30, i))
-    for i in range(16):
-        obstacles.add((40, i))
-    grid_env.update(obstacles)
+    x = 10
+    y = 10
+    z = 10
+    grid_env = Grid(x, y, z)
 
+    obstacles = grid_env.obstacles
+    for i in range(x):
+        for j in range(y):
+            obstacles.add((i, j, 7))
+            obstacles.add((i, j, 5))
+            obstacles.add((i, j, 3))
+
+    obstacles.remove((8,8,3))
+    obstacles.remove((1,1,5))
+    obstacles.remove((5,5,7))
+
+    grid_env.update(obstacles=obstacles)
+    print(grid_env.obstacles)
+
+    """
     map_env = Map(51, 31, 1)
     obs_rect = [
         [14, 12, 8, 2],
@@ -42,10 +49,10 @@ if __name__ == '__main__':
 
     """
     # -------------global planners-------------
-    plt = AStar(start=(1, 1, 1), goal=(3, 3, 3), env=grid_env)
+    plt = AStar(start=(5, 5, 1), goal=(5, 5, 8), env=grid_env)
     # plt = DStar(start=(5, 5), goal=(45, 25), env=grid_env)
     # plt = DStarLite(start=(5, 5), goal=(45, 25), env=grid_env)
-    # plt = Dijkstra(start=(5, 5), goal=(45, 25), env=grid_env)
+    # plt = Dijkstra(start=(1, 1, 1), goal=(7, 7, 7), env=grid_env)
     # plt = GBFS(start=(5, 5), goal=(45, 25), env=grid_env)
     # plt = JPS(start=(5, 5), goal=(45, 25), env=grid_env)
     # plt = ThetaStar(start=(5, 5), goal=(45, 25), env=grid_env)
