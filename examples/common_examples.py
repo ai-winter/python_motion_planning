@@ -16,19 +16,18 @@ if __name__ == '__main__':
     z = 10
     grid_env = Grid(x, y, z)
 
-    obstacles = grid_env.obstacles
+    inner_obstacles = set()
     for i in range(x):
         for j in range(y):
-            obstacles.add((i, j, 7))
-            obstacles.add((i, j, 5))
-            obstacles.add((i, j, 3))
+            inner_obstacles.add((i, j, 7))
+            inner_obstacles.add((i, j, 5))
+            inner_obstacles.add((i, j, 3))
 
-    obstacles.remove((8,8,3))
-    obstacles.remove((1,1,5))
-    obstacles.remove((5,5,7))
+    inner_obstacles.remove((8,8,3))
+    inner_obstacles.remove((1,1,5))
+    inner_obstacles.remove((5,5,7))
 
-    grid_env.update(obstacles=obstacles)
-    print(grid_env.obstacles)
+    grid_env.inner_obstacles = inner_obstacles
 
     """
     map_env = Map(51, 31, 1)
@@ -49,7 +48,7 @@ if __name__ == '__main__':
 
     """
     # -------------global planners-------------
-    plt = AStar(start=(5, 5, 1), goal=(5, 5, 8), env=grid_env)
+    plt = AStar(start=(5, 5, 1), goal=(8, 8, 8), env=grid_env)
     # plt = DStar(start=(5, 5), goal=(45, 25), env=grid_env)
     # plt = DStarLite(start=(5, 5), goal=(45, 25), env=grid_env)
     # plt = Dijkstra(start=(1, 1, 1), goal=(7, 7, 7), env=grid_env)
