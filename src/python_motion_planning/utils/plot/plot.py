@@ -16,7 +16,7 @@ class Plot:
         self.goal = Node(goal, goal, 0, 0)
         self.env = env
         self.fig = plt.figure("planning")
-        self.ax = self.fig.add_subplot()
+        self.ax = self.fig.add_subplot(projection='3d')
 
     def animation(self, path: list, name: str, cost: float = None, expand: list = None, history_pose: list = None,
                   predict_path: list = None, lookahead_pts: list = None, cost_curve: list = None,
@@ -26,18 +26,24 @@ class Plot:
         if expand is not None:
             self.plotExpand(expand)
         if history_pose is not None:
+            print("history pose")
             self.plotHistoryPose(history_pose, predict_path, lookahead_pts)
         if path is not None:
+            print("path")
             self.plotPath(path)
 
         if cost_curve:
+            print("cost_curve")
             plt.figure("cost curve")
             self.plotCostCurve(cost_curve, name)
 
         if ellipse is not None:
+            print("cost_curve")
             self.plotEllipse(ellipse)
 
         plt.show()
+
+
 
     def plotEnv(self, name: str) -> None:
         '''
@@ -47,13 +53,71 @@ class Plot:
         ----------
         name: Algorithm name or some other information
         '''
-        plt.plot(self.start.x, self.start.y, marker="s", color="#ff0000")
-        plt.plot(self.goal.x, self.goal.y, marker="s", color="#1155cc")
 
-        if isinstance(self.env, Grid):
-            obs_x = [x[0] for x in self.env.obstacles]
-            obs_y = [x[1] for x in self.env.obstacles]
-            plt.plot(obs_x, obs_y, "sk")
+        # Voxels
+        if 1 == 0:
+            filled = np.zeros((self.env.x_range, self.env.y_range, self.env.z_range), dtype=bool)
+            filled[self.start.x, self.start.y, self.start.z] = True
+            filled[self.goal.x, self.goal.y, self.goal.z] = True
+
+            colors = np.empty(filled.shape + (4,))
+            colors[self.start.x, self.start.y, self.start.z] = [0.8, 0.2, 0.2, 1]
+            colors[self.goal.x, self.goal.y, self.goal.z] = [0.2, 0.8, 0.2, 1]
+
+            self.ax.set_xlim(0, self.env.x_range)
+            self.ax.set_ylim(0, self.env.x_range)
+            self.ax.set_zlim(0, self.env.x_range)
+            self.ax.set_box_aspect([1, 1, 1])
+
+            if isinstance(self.env, Grid):
+                for x, y, z in self.env.inner_obstacles:
+                    filled[x, y, z] = True
+                    colors[x, y, z] = [0.2, 0.2, 0.2, 0.1]
+
+            self.ax.voxels(filled, facecolors=colors, edgecolors='black', linewidth=0.5)
+
+        # Scatter plot!
+        if 1 == 1:
+            # Boolean grid
+            filled = np.zeros((self.env.x_range, self.env.y_range, self.env.z_range), dtype=bool)
+            filled[self.start.x, self.start.y, self.start.z] = True
+            filled[self.goal.x, self.goal.y, self.goal.z] = True
+
+            # Colors array (same shape as filled)
+            colors = np.zeros(filled.shape + (4,))
+            colors[self.start.x, self.start.y, self.start.z] = [0.8, 0.2, 0.2, 1]
+            colors[self.goal.x, self.goal.y, self.goal.z] = [0.2, 0.8, 0.2, 1]
+
+            if isinstance(self.env, Grid):
+                for x, y, z in self.env.inner_obstacles:
+                    filled[x, y, z] = True
+                    colors[x, y, z] = [0, 0, 0, 1]
+
+            # Get coordinates of all filled cells
+            filled_coords = np.argwhere(filled)  # shape (N, 3)
+            filled_colors = colors[filled_coords[:,0], filled_coords[:,1], filled_coords[:,2]]
+
+            # Scatter plot
+            self.ax.scatter(
+                filled_coords[:,0],
+                filled_coords[:,1],
+                filled_coords[:,2],
+                c=filled_colors,
+                marker='s',  # square marker to mimic voxel
+                s=100        # adjust size
+            )
+
+            # Fix axes
+            self.ax.set_xlim(0, self.env.x_range)
+            self.ax.set_ylim(0, self.env.y_range)
+            self.ax.set_zlim(0, self.env.z_range)
+            self.ax.set_xlabel('X')
+            self.ax.set_ylabel('Y')
+            self.ax.set_zlabel('Z')
+            self.ax.set_box_aspect([1,1,1])
+            plt.title(name)
+
+        return
 
         if isinstance(self.env, Map):
             ax = self.fig.add_subplot()
@@ -85,9 +149,6 @@ class Plot:
                     )
                 )
 
-        plt.title(name)
-        plt.axis("equal")
-
     def plotExpand(self, expand: list) -> None:
         '''
         Plot expanded grids using in graph searching.
@@ -105,19 +166,31 @@ class Plot:
         if isinstance(self.env, Grid):
             for x in expand:
                 count += 1
-                plt.plot(x.x, x.y, color="#dddddd", marker='s')
+                self.ax.scatter(x.x, x.y, x.z, c="blue")
                 plt.gcf().canvas.mpl_connect('key_release_event',
-                                            lambda event: [exit(0) if event.key == 'escape' else None])
+                                        lambda event: [exit(0) if event.key == 'escape' else None])
                 if count < len(expand) / 3:         length = 20
                 elif count < len(expand) * 2 / 3:   length = 30
                 else:                               length = 40
                 if count % length == 0:             plt.pause(0.001)
-        
+
+            '''
+            count += 1
+            plt.plot(x.x, x.y, color="#dddddd", marker='s')
+            plt.gcf().canvas.mpl_connect('key_release_event',
+                                        lambda event: [exit(0) if event.key == 'escape' else None])
+            if count < len(expand) / 3:         length = 20
+            elif count < len(expand) * 2 / 3:   length = 30
+            else:                               length = 40
+            if count % length == 0:             plt.pause(0.001)
+            '''
+
         if isinstance(self.env, Map):
             for x in expand:
                 count += 1
                 if x.parent:
-                    plt.plot([x.parent[0], x.x], [x.parent[1], x.y], 
+                    plt.scatter()
+                    plt.plot([x.parent[0], x.x], [x.parent[1], x.y],
                         color="#dddddd", linestyle="-")
                     plt.gcf().canvas.mpl_connect('key_release_event',
                                                  lambda event:
@@ -135,11 +208,18 @@ class Plot:
         ----------
         path: Path found in global planning
         '''
+        print(path)
         path_x = [path[i][0] for i in range(len(path))]
         path_y = [path[i][1] for i in range(len(path))]
-        plt.plot(path_x, path_y, path_style, linewidth='2', color=path_color)
-        plt.plot(self.start.x, self.start.y, marker="s", color="#ff0000")
-        plt.plot(self.goal.x, self.goal.y, marker="s", color="#1155cc")
+        path_z = [path[i][2] for i in range(len(path))]
+
+        self.ax.scatter(path_x, path_y, path_z, c="red")
+        self.ax.scatter(self.start.x, self.start.y, self.start.z, c="green")
+        self.ax.scatter(self.goal.x, self.goal.y, self.goal.z, c="green")
+
+        #plt.plot(path_x, path_y, path_style, linewidth='2', color=path_color)
+        #plt.plot(self.start.x, self.start.y, marker="s", color="#ff0000")
+        #plt.plot(self.goal.x, self.goal.y, marker="s", color="#1155cc")
 
     def plotAgent(self, pose: tuple, radius: float=1) -> None:
         '''
