@@ -2,7 +2,7 @@
 @file: visualization.py
 @breif: visualization
 @author: Yang Haodong, Wu Maojia
-@update: 2025.3.29
+@update: 2025.9.6
 """
 from typing import Union
 from collections import namedtuple
@@ -43,7 +43,7 @@ type:
 '''
 
 class Visualizer:
-    def __init__(self, fig_name: str):
+    def __init__(self, fig_name: str = ""):
         self.fig = plt.figure(fig_name)
         self.ax = self.fig.add_subplot()
 
@@ -70,8 +70,7 @@ class Visualizer:
             equal: Whether to set axis equal.
         '''
         if grid_map.ndim == 2:
-            print(grid_map.type_map.array)
-            plt.imshow(grid_map.type_map.array, cmap=self.cmap, norm=self.norm, origin='lower', interpolation='nearest')
+            plt.imshow(np.transpose(grid_map.type_map.array), cmap=self.cmap, norm=self.norm, origin='lower', interpolation='nearest')
             if equal: 
                 plt.axis("equal")
 
@@ -111,31 +110,28 @@ class Visualizer:
     def setTitle(self, title: str) -> None:
         plt.title(title)
 
-    # def plotPath(self, path: list, axis_equal: bool=True, name: str="normal", props: dict={}) -> None:
-    #     '''
-    #     Plot path-like information.
-    #     '''
-    #     path_style = props["style"] if "style" in props.keys() else "-"
-    #     path_color = props["color"] if "color" in props.keys() else "#13ae00"
-    #     path_label = props["label"] if "label" in props.keys() else None
-    #     linewidth = props["width"] if "width" in props.keys() else 2
-    #     marker = props["marker"] if "marker" in props.keys() else None
+    def plotPath(self, path: list, style: str = "-", color: str = "#13ae00", label: str = None, linewidth: float = 2, marker: str = None) -> None:
+        '''
+        Plot path-like information.
+        The meaning of parameters are similar to matplotlib.pyplot.plot (https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html).
 
-    #     if name == "normal":
-    #         path_x = [path[i][0] for i in range(len(path))]
-    #         path_y = [path[i][1] for i in range(len(path))]
-    #         plt.plot(path_x, path_y, path_style, lw=linewidth, color=path_color, label=path_label, marker=marker)
-    #     elif name == "line":
-    #         for line in path:
-    #             plt.plot(line[0], line[1], path_style, lw=linewidth, color=path_color, label=path_label, marker=marker)
-    #     else:
-    #         raise NotImplementedError
+        Parameters:
+            path: point list of path
+            style: style of path
+            color: color of path
+            label: label of path
+            linewidth: linewidth of path
+            marker: marker of path
+        '''
+        if name == "normal":
+            path_x = [path[i][0] for i in range(len(path))]
+            path_y = [path[i][1] for i in range(len(path))]
+            plt.plot(path_x, path_y, style, lw=linewidth, color=color, label=label, marker=marker)
+        else:
+            raise NotImplementedError
         
-    #     if axis_equal:
-    #         plt.axis("equal")
-        
-    #     if path_label:
-    #         plt.legend()
+        if label:
+            plt.legend()
 
     # def plotMarkers(self, markers: list, axis_equal: bool=True, name: str="normal", props: dict={}) -> None:
     #     '''

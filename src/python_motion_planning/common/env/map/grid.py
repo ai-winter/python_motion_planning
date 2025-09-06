@@ -2,7 +2,7 @@
 @file: grid.py
 @breif: Grid Map for Path Planning
 @author: Wu Maojia
-@update: 2025.3.29
+@update: 2025.9.5
 """
 from itertools import product
 from typing import Iterable, Union, Tuple, Callable
@@ -11,8 +11,8 @@ import time
 import numpy as np
 
 from python_motion_planning.common.env import Node, TYPES
-from python_motion_planning.common.geometry.point import *
 from python_motion_planning.common.env.map import Map
+from python_motion_planning.common.utils.geometry import dist
 
 
 class GridTypeMap:
@@ -55,7 +55,7 @@ class GridTypeMap:
         ), shape=(3, 3), dtype=int8)
     """
     def __init__(self, type_map: np.ndarray):
-        self._array = np.array(type_map)
+        self._array = np.asarray(type_map)
         self._shape = self._array.shape
         self._dtype = self._array.dtype
         
@@ -77,7 +77,7 @@ class GridTypeMap:
 
     @property
     def array(self) -> np.ndarray:
-        return self._array.copy()
+        return self._array.view()
 
     @property
     def shape(self) -> Tuple:
@@ -144,40 +144,36 @@ class Grid(Map):
          [0 0 0 ... 0 0 0]]
         ), shape=(61, 81), dtype=int8)
 
-        >>> grid_map.mapToWorld(Point2D(1, 2))
-        Point2D([0.5, 1.0])
+        >>> grid_map.mapToWorld((1, 2))
+        (0.5, 1.0)
 
-        >>> grid_map.worldToMap(Point2D(0.5, 1.0))
-        Point2D([1, 2])
+        >>> grid_map.worldToMap((0.5, 1.0))
+        (1, 2)
 
-        >>> grid_map.getNeighbor(Node(Point2D(1, 2)))
-        [Node(PointND([0, 1]), Point2D([1, 2]), 1.4142135623730951, 0), Node(PointND([0, 2]), Point2D([1, 2]), 1.0, 0), Node(PointND([0, 3]), Point2D([1, 2]), 1.4142135623730951, 0), Node(PointND([1, 1]), Point2D([1, 2]), 1.0, 0), Node(PointND([1, 3]), Point2D([1, 2]), 1.0, 0), Node(PointND([2, 1]), Point2D([1, 2]), 1.4142135623730951, 0), Node(PointND([2, 2]), Point2D([1, 2]), 1.0, 0), Node(PointND([2, 3]), Point2D([1, 2]), 1.4142135623730951, 0)]
-        
-        >>> grid_map.getNeighbor(Node(Point2D(1, 2)), diagonal=False)
-        [Node(PointND([2, 2]), Point2D([1, 2]), 1.0, 0), Node(PointND([0, 2]), Point2D([1, 2]), 1.0, 0), Node(PointND([1, 3]), Point2D([1, 2]), 1.0, 0), Node(PointND([1, 1]), Point2D([1, 2]), 1.0, 0)]
+        >>> grid_map.getNeighbors(Node((1, 2)))
+        [Node((0, 1), (1, 2), 0, 0), Node((0, 2), (1, 2), 0, 0), Node((0, 3), (1, 2), 0, 0), Node((1, 1), (1, 2), 0, 0), Node((1, 3), (1, 2), 0, 0), Node((2, 1), (1, 2), 0, 0), Node((2, 2), (1, 2), 0, 0), Node((2, 3), (1, 2), 0, 0)]
+
+        >>> grid_map.getNeighbors(Node((1, 2)), diagonal=False)
+        [Node((2, 2), (1, 2), 0, 0), Node((0, 2), (1, 2), 0, 0), Node((1, 3), (1, 2), 0, 0), Node((1, 1), (1, 2), 0, 0)]
 
         >>> grid_map.type_map[1, 0] = TYPES.OBSTACLE     # place an obstacle
-        >>> grid_map.getNeighbor(Node(Point2D(0, 0)))    # limited within the bounds
-        [Node(PointND([0, 1]), Point2D([0, 0]), 1.0, 0), Node(PointND([1, 1]), Point2D([0, 0]), 1.4142135623730951, 0)]
+        >>> grid_map.getNeighbors(Node((0, 0)))    # limited within the bounds
+        [Node((0, 1), (0, 0), 0, 0), Node((1, 1), (0, 0), 0, 0)]
 
-        >>> grid_map.getNeighbor(Node(Point2D(grid_map.shape[0] - 1, grid_map.shape[1] - 1)), diagonal=False)  # limited within the boundss
-        [Node(PointND([59, 80]), Point2D([60, 80]), 1.0, 0), Node(PointND([60, 79]), Point2D([60, 80]), 1.0, 0)]
+        >>> grid_map.getNeighbors(Node((grid_map.shape[0] - 1, grid_map.shape[1] - 1)), diagonal=False)  # limited within the boundss
+        [Node((59, 80), (60, 80), 0, 0), Node((60, 79), (60, 80), 0, 0)]
 
-        >>> grid_map.lineOfSight(Point2D(1, 2), Point2D(3, 6))
-        array([[1, 2],
-               [1, 3],
-               [2, 4],
-               [2, 5],
-               [3, 6]], dtype=int32)
+        >>> grid_map.lineOfSight((1, 2), (3, 6))
+        [(1, 2), (1, 3), (2, 4), (2, 5), (3, 6)]
 
-        >>> grid_map.lineOfSight(Point2D(1, 2), Point2D(1, 2))
-        array([[1, 2]], dtype=int32)
+        >>> grid_map.lineOfSight((1, 2), (1, 2))
+        [(1, 2)]
 
-        >>> grid_map.inCollision(Point2D(1, 2), Point2D(3, 6))
+        >>> grid_map.inCollision((1, 2), (3, 6))
         False
 
         >>> grid_map.type_map[1, 3] = TYPES.OBSTACLE
-        >>> grid_map.inCollision(Point2D(1, 2), Point2D(3, 6))
+        >>> grid_map.inCollision((1, 2), (3, 6))
         True
     """
     def __init__(self, 
@@ -209,6 +205,8 @@ class Grid(Map):
                 self.type_map = GridTypeMap(type_map)        
             else:
                 raise ValueError("Type map must be GridTypeMap or numpy.ndarray instead of {}".format(type(type_map)))
+
+        self._precompute_offsets()
     
     def __str__(self) -> str:
         return "Grid(bounds={}, resolution={})".format(self.bounds, self.resolution)
@@ -224,7 +222,7 @@ class Grid(Map):
     def shape(self) -> tuple:
         return self._shape
     
-    def mapToWorld(self, point: PointND) -> PointND:
+    def mapToWorld(self, point: tuple) -> tuple:
         """
         Convert map coordinates to world coordinates.
         
@@ -234,12 +232,12 @@ class Grid(Map):
         Returns:
             point: Point in world coordinates.
         """
-        if point.ndim != self.ndim:
+        if len(point) != self.ndim:
             raise ValueError("Point dimension does not match map dimension.")
         
-        return point.astype(np.float64) * self.resolution
+        return tuple(x * self.resolution for x in point)
 
-    def worldToMap(self, point: PointND) -> PointND:
+    def worldToMap(self, point: tuple) -> tuple:
         """
         Convert world coordinates to map coordinates.
         
@@ -249,27 +247,12 @@ class Grid(Map):
         Returns:
             point: Point in map coordinates.
         """
-        if point.ndim != self.ndim:
+        if len(point) != self.ndim:
             raise ValueError("Point dimension does not match map dimension.")
         
-        return (point * (1.0 / self.resolution)).astype(self.dtype)
+        return tuple(round(x * (1.0 / self.resolution)) for x in point)
 
-    def withinBounds(self, point: PointND) -> bool:
-        """
-        Check if a point is within the bounds of the grid map.
-        
-        Parameters:
-            point: Point to check.
-        
-        Returns:
-            bool: True if the point is within the bounds of the map, False otherwise.
-        """
-        if point.ndim != self.ndim:
-            raise ValueError("Point dimension does not match map dimension.")
-
-        return all(0 <= point[i] < self.shape[i] for i in range(self.ndim))
-
-    def getDistance(self, p1: PointND, p2: PointND) -> float:
+    def getDistance(self, p1: tuple, p2: tuple) -> float:
         """
         Get the distance between two points.
 
@@ -280,13 +263,33 @@ class Grid(Map):
         Returns:
             dist: Distance between two points.
         """
-        return p1.dist(p2, type='Euclidean')
+        return dist(p1, p2, type='Euclidean')
 
-    def getNeighbor(self, 
+    def withinBounds(self, point: tuple) -> bool:
+        """
+        Check if a point is within the bounds of the grid map.
+        
+        Parameters:
+            point: Point to check.
+        
+        Returns:
+            bool: True if the point is within the bounds of the map, False otherwise.
+        """
+        # if point.ndim != self.ndim:
+        #     raise ValueError("Point dimension does not match map dimension.")
+
+        # return all(0 <= point[i] < self.shape[i] for i in range(self.ndim))
+        ndim = self.ndim
+        shape = self.shape
+        
+        for i in range(ndim):
+            if not (0 <= point[i] < shape[i]):
+                return False
+        return True
+
+    def getNeighbors(self, 
                     node: Node, 
-                    diagonal: bool = True, 
-                    cost_func: Callable[[PointND, PointND], float] = None,
-                    heuristic_func: Callable[[PointND], float] = None 
+                    diagonal: bool = True
                     ) -> list:
         """
         Get neighbor nodes of a given node.
@@ -294,8 +297,6 @@ class Grid(Map):
         Parameters:
             node: Node to get neighbor nodes.
             diagonal: Whether to include diagonal neighbors.
-            cost_func: Cost function to calculate the cost between two points (default: getDistance(p1, p2)).
-            heuristic_func: Heuristic function to calculate the heuristic value of a node (default: return 0).
         
         Returns:
             nodes: List of neighbor nodes.
@@ -303,41 +304,36 @@ class Grid(Map):
         if node.ndim != self.ndim:
             raise ValueError("Node dimension does not match map dimension.")
 
-        current_point = node.current.astype(self.dtype)
-        current_pos = np.array(current_point)
-        neighbors = []
+        # current_point = node.current.astype(self.dtype)
+        # current_pos = current_point.numpy()
+        # neighbors = []
         
-        if diagonal:
-            # Generate all possible offsets (-1, 0, +1) in each dimension
-            offsets = np.array(np.meshgrid(*[[-1, 0, 1]]*self.ndim), dtype=self.dtype).T.reshape(-1, self.ndim)
-            # Remove the zero offset (current node itself)
-            offsets = offsets[np.any(offsets != 0, axis=1)]
-        else:
-            # Generate only orthogonal offsets (one dimension changes by ±1)
-            offsets = np.zeros((2*self.ndim, self.ndim), dtype=self.dtype)
-            for dim in range(self.ndim):
-                offsets[2*dim, dim] = 1
-                offsets[2*dim+1, dim] = -1
+        offsets = self._diagonal_offsets if diagonal else self._orthogonal_offsets
         
         # Generate all neighbor positions
-        neighbor_positions = current_pos + offsets
+        # neighbor_positions = current_pos + offsets
+        neighbors = [node + offset for offset in offsets]
+        filtered_neighbors = []
 
-        if cost_func is None:
-            cost_func = self.getDistance
-
-        if heuristic_func is None:
-            heuristic_func = lambda p: 0
+        # print(neighbors)
 
         # Filter out positions outside map bounds
-        for pos in neighbor_positions:
-            point = PointND(pos, dtype=self.dtype)
-            if self.withinBounds(point) and self.type_map[tuple(point)] != TYPES.OBSTACLE:
-                neighbor_node = Node(point, parent=current_point, g=node.g + cost_func(current_point, point), h=heuristic_func(point))
-                neighbors.append(neighbor_node)
+        # for pos in neighbor_positions:
+        #     point = (pos, dtype=self.dtype)
+        #     if self.withinBounds(point):
+        #         if self.type_map[tuple(point)] != TYPES.OBSTACLE:
+        #             neighbor_node = Node(point, parent=current_point)
+        #             neighbors.append(neighbor_node)
+        for neighbor in neighbors:
+            # print(neighbor)
+            if self.withinBounds(neighbor.current) and self.type_map[tuple(neighbor.current)] != TYPES.OBSTACLE:
+                filtered_neighbors.append(neighbor)
+
+        # print(filtered_neighbors)
         
-        return neighbors
+        return filtered_neighbors
         
-    def lineOfSight(self, p1: PointND, p2: PointND) -> list:
+    def lineOfSight(self, p1: tuple, p2: tuple) -> list:
         """
         N-dimensional line of sight (Bresenham's line algorithm)
         
@@ -351,8 +347,8 @@ class Grid(Map):
         if not self.withinBounds(p1) or not self.withinBounds(p2):
             return []
 
-        p1 = np.array(p1, dtype=self.dtype)
-        p2 = np.array(p2, dtype=self.dtype)
+        p1 = np.array(p1)
+        p2 = np.array(p2)
 
         dim = len(p1)
         delta = p2 - p1
@@ -368,11 +364,11 @@ class Grid(Map):
         
         # Calculate the number of steps and initialize the current point
         steps = abs_delta[primary_axis]
-        current = p1.copy()
+        current = p1
         
         # Allocate the result array
-        result = np.zeros((steps + 1, dim), dtype=self.dtype)
-        result[0] = current
+        result = []
+        result.append(tuple(current))
         
         for i in range(1, steps + 1):
             current[primary_axis] += primary_step
@@ -387,11 +383,11 @@ class Grid(Map):
                     current[d] += 1 if delta[d] > 0 else -1
                     error[d] -= delta2[primary_axis]
             
-            result[i] = current
+            result.append(tuple(current))
 
         return result
 
-    def inCollision(self, p1: PointND, p2: PointND) -> bool:
+    def inCollision(self, p1: tuple, p2: tuple) -> bool:
         """
         Check if the line of sight between two points is in collision.
         
@@ -405,13 +401,13 @@ class Grid(Map):
         if not self.withinBounds(p1) or not self.withinBounds(p2):
             return True
 
-        p1 = np.array(p1, dtype=np.int32)
-        p2 = np.array(p2, dtype=np.int32)
-        
         # Corner Case: Start and end points are the same
-        if np.all(p1 == p2):
-            return self.type_map[tuple(p1)] == TYPES.OBSTACLE
+        if p1 == p2:
+            return self.type_map[p1] == TYPES.OBSTACLE
         
+        p1 = np.array(p1)
+        p2 = np.array(p2)
+
         # Calculate delta and absolute delta
         delta = p2 - p1
         abs_delta = np.abs(delta)
@@ -426,7 +422,7 @@ class Grid(Map):
         
         # calculate the number of steps and initialize the current point
         steps = abs_delta[primary_axis]
-        current = p1.copy()
+        current = p1
         
         # Check the start point
         if self.type_map[tuple(current)] == TYPES.OBSTACLE:
@@ -450,4 +446,29 @@ class Grid(Map):
                 return True
         
         return False
-            
+
+    def fillBoundaryWithObstacles(self) -> None:
+        """
+        Fill the boundary of the map with obstacles.
+        """
+        self.type_map[0, :] = TYPES.OBSTACLE
+        self.type_map[-1, :] = TYPES.OBSTACLE
+        self.type_map[:, 0] = TYPES.OBSTACLE
+        self.type_map[:, -1] = TYPES.OBSTACLE
+
+
+    def _precompute_offsets(self):
+        # Generate all possible offsets (-1, 0, +1) in each dimension
+        self._diagonal_offsets = np.array(np.meshgrid(*[[-1, 0, 1]]*self.ndim), dtype=self.dtype).T.reshape(-1, self.ndim)
+        # Remove the zero offset (current node itself)
+        self._diagonal_offsets = self._diagonal_offsets[np.any(self._diagonal_offsets != 0, axis=1)]
+        # self._diagonal_offsets = [Node((offset.tolist(), dtype=self.dtype)) for offset in self._diagonal_offsets]
+        self._diagonal_offsets = [Node(tuple(offset.tolist())) for offset in self._diagonal_offsets]
+
+        # Generate only orthogonal offsets (one dimension changes by ±1)
+        self._orthogonal_offsets = np.zeros((2*self.ndim, self.ndim), dtype=self.dtype)
+        for dim in range(self.ndim):
+            self._orthogonal_offsets[2*dim, dim] = 1
+            self._orthogonal_offsets[2*dim+1, dim] = -1
+        # self._orthogonal_offsets = [Node((offset.tolist(), dtype=self.dtype)) for offset in self._orthogonal_offsets]
+        self._orthogonal_offsets = [Node(tuple(offset.tolist())) for offset in self._orthogonal_offsets]

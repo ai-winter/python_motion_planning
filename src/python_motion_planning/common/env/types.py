@@ -4,9 +4,10 @@
 @author: Yang Haodong, Wu Maojia
 @update: 2025.3.29
 """
-from enum import IntEnum
+# from enum import IntEnum
 
-class TYPES(IntEnum):
+# class TYPES(IntEnum):
+class TYPES:
     """
     Macro definition of types of plots in maps. They must be integers in sequence of (0, 1, 2, ...).
     """

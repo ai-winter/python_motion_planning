@@ -2,9 +2,10 @@
 @file: node.py
 @breif: map node data stucture
 @author: Wu Maojia, Yang Haodong 
-@update: 2025.3.29
+@update: 2025.9.5
 """
-from python_motion_planning.common.geometry.point import *
+import numpy as np
+
 
 class Node(object):
     """
@@ -17,15 +18,15 @@ class Node(object):
         h: heuristic cost
 
     Examples:
-        >>> node1 = Node(Point2D(1, 0), Point2D(2, 3), 1, 2)
-        >>> node2 = Node(Point2D(1, 0), Point2D(2, 3), 1, 2)
-        >>> node3 = Node(Point2D(1, 1), Point2D(2, 3), 1, 2)
+        >>> node1 = Node((1, 0), (2, 3), 1, 2)
+        >>> node2 = Node((1, 0), (2, 3), 1, 2)
+        >>> node3 = Node((1, 1), (2, 3), 1, 2)
 
         >>> node1
-        Node(Point2D([1.0, 0.0]), Point2D([2.0, 3.0]), 1, 2)
+        Node((1, 0), (2, 3), 1, 2)
         
         >>> node1 + node2
-        Node(Point2D([2.0, 0.0]), Point2D([2.0, 3.0]), 2, 2)
+        Node((2, 0), (1, 0), 2, 2)
 
         >>> node1 == node2
         True
@@ -34,10 +35,10 @@ class Node(object):
         True
 
         >>> node1.current
-        Point2D([1.0, 0.0])
+        (1, 0)
 
         >>> node1.parent
-        Point2D([2.0, 3.0])
+        (2, 3)
 
         >>> node1.g
         1
@@ -48,17 +49,17 @@ class Node(object):
         >>> node1.ndim
         2
     """
-    def __init__(self, current: PointND, parent: PointND = None, g: float = 0, h: float = 0) -> None:
+    def __init__(self, current: tuple, parent: tuple = None, g: float = 0, h: float = 0) -> None:
         self._current = current
         self._parent = parent
         self._g = g
         self._h = h
 
-        if self.parent is not None and self.current.ndim != self.parent.ndim:
-            raise ValueError("The dimension of current and parent must be the same.")
+        if self.parent is not None and len(self.current) != len(self.parent):
+            raise ValueError("The dimension of current " + str(self.current) + " and parent " + str(self.parent) + " must be the same.")
     
     def __add__(self, node: "Node") -> "Node":
-        return Node(self._current + node._current, self._parent, self._g + node._g, self._h)
+        return Node(tuple(x+y for x, y in zip(self._current, node._current)), self._current, self._g + node._g, self._h)
 
     def __eq__(self, node: "Node") -> bool:
         if not isinstance(node, Node):
@@ -69,7 +70,6 @@ class Node(object):
         return not self.__eq__(node)
 
     def __lt__(self, node: "Node") -> bool:
-        assert isinstance(node, Node)
         return self._g + self._h < node._g + node._h or \
                 (self._g + self._h == node._g + node._h and self._h < node._h)
 
@@ -82,12 +82,15 @@ class Node(object):
     def __repr__(self) -> str:
         return self.__str__()
 
+    def __len__(self) -> int:
+        return len(self.current)
+
     @property
-    def current(self) -> PointND:
+    def current(self) -> tuple:
         return self._current
 
     @property
-    def parent(self) -> PointND:
+    def parent(self) -> tuple:
         return self._parent
 
     @property
@@ -108,4 +111,4 @@ class Node(object):
 
     @property
     def ndim(self) -> int:
-        return self.current.ndim
+        return len(self.current)

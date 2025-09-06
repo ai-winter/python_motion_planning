@@ -10,7 +10,6 @@ from abc import ABC, abstractmethod
 import numpy as np
 
 from python_motion_planning.common.env import Node
-from python_motion_planning.common.geometry.point import *
 
 
 class Map(ABC):
@@ -23,7 +22,7 @@ class Map(ABC):
     """
     def __init__(self, bounds: Iterable, dtype: np.dtype) -> None:
         super().__init__()
-        self._bounds = np.array(bounds, dtype=np.float64)
+        self._bounds = np.asarray(bounds, dtype=np.float64)
         self._dtype = dtype
 
         if len(self._bounds.shape) != 2 or self._bounds.shape[0] <= 1 or self._bounds.shape[1] != 2:
@@ -46,7 +45,7 @@ class Map(ABC):
         return self._dtype
 
     @abstractmethod
-    def mapToWorld(self, point: PointND) -> PointND:
+    def mapToWorld(self, point: tuple) -> tuple:
         """
         Convert map coordinates to world coordinates.
         
@@ -59,7 +58,7 @@ class Map(ABC):
         pass
 
     @abstractmethod
-    def worldToMap(self, point: PointND) -> PointND:
+    def worldToMap(self, point: tuple) -> tuple:
         """
         Convert world coordinates to map coordinates.
         
@@ -72,7 +71,7 @@ class Map(ABC):
         pass
 
     @abstractmethod
-    def getDistance(self, p1: PointND, p2: PointND) -> float:
+    def getDistance(self, p1: tuple, p2: tuple) -> float:
         """
         Get the distance between two points.
 
@@ -86,7 +85,7 @@ class Map(ABC):
         pass
         
     @abstractmethod
-    def getNeighbor(self, node: Node) -> list:
+    def getNeighbors(self, node: Node) -> list:
         """
         Get neighbor nodes of a given node.
         
@@ -99,7 +98,7 @@ class Map(ABC):
         pass
 
     @abstractmethod
-    def inCollision(self, p1: PointND, p2: PointND) -> bool:
+    def inCollision(self, p1: tuple, p2: tuple) -> bool:
         """
         Check if the line of sight between two points is in collision.
         

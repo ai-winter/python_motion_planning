@@ -2,12 +2,12 @@
 @file: a_star.py
 @breif: A* planner
 @author: Wu Maojia
-@update: 2025.3.29
+@update: 2025.9.5
 """
 from typing import Union
 import heapq
  
-from python_motion_planning.common import Map, Grid, Point2D, PointND, Node, TYPES
+from python_motion_planning.common import Map, Grid, Node, TYPES
 from python_motion_planning.path_planner import PathPlanner
 
 class AStar(PathPlanner):
@@ -16,29 +16,34 @@ class AStar(PathPlanner):
 
     Parameters:
         map_: The map which the planner is based on.
+        start: The start point of the planner.
+        goal: The goal point of the planner.
 
     Examples:
         >>> map_ = Grid(bounds=[[0, 15], [0, 15]])
-        >>> planner = AStar(map_=map_)
-        >>> planner.plan(start=Point2D(5, 5), goal=Point2D(10, 10))
-        ([Point2D([5, 5]), PointND([6, 6]), PointND([7, 7]), PointND([8, 8]), PointND([9, 9]), PointND([10, 10])], {'success': True, 'start': Point2D([5, 5]), 'goal': Point2D([10, 10]), 'length': 7.0710678118654755, 'cost': 7.0710678118654755, 'expand': [Node(Point2D([5, 5]), None, 0, 7.0710678118654755), Node(PointND([6, 6]), Point2D([5, 5]), 1.4142135623730951, 5.656854249492381), Node(PointND([7, 7]), PointND([6, 6]), 2.8284271247461903, 4.242640687119285), Node(PointND([8, 8]), PointND([7, 7]), 4.242640687119286, 2.8284271247461903), Node(PointND([9, 9]), PointND([8, 8]), 5.656854249492381, 1.4142135623730951), Node(PointND([10, 10]), PointND([9, 9]), 7.0710678118654755, 0.0)]})
-        
-        >>> planner.map_.type_map[3:10, 6] = TYPES.OBSTACLE
-        >>> planner.plan(start=Point2D(5, 5), goal=Point2D(10, 10))
-        ([Point2D([5, 5]), PointND([6, 5]), PointND([7, 5]), PointND([8, 5]), PointND([9, 5]), PointND([10, 6]), PointND([10, 7]), PointND([10, 8]), PointND([10, 9]), PointND([10, 10])], {'success': True, 'start': Point2D([5, 5]), 'goal': Point2D([10, 10]), 'length': 9.414213562373096, 'cost': 9.414213562373096, 'expand': [Node(Point2D([5, 5]), None, 0, 7.0710678118654755), Node(PointND([6, 5]), Point2D([5, 5]), 1.0, 6.4031242374328485), Node(PointND([7, 5]), PointND([6, 5]), 2.0, 5.830951894845301), Node(PointND([8, 5]), PointND([7, 5]), 3.0, 5.385164807134504), Node(PointND([6, 4]), Point2D([5, 5]), 1.4142135623730951, 7.211102550927978), Node(PointND([5, 4]), Point2D([5, 5]), 1.0, 7.810249675906654), Node(PointND([4, 5]), Point2D([5, 5]), 1.0, 7.810249675906654), Node(PointND([9, 5]), PointND([8, 5]), 4.0, 5.0990195135927845), Node(PointND([7, 4]), PointND([6, 5]), 2.414213562373095, 6.708203932499369), Node(PointND([10, 6]), PointND([9, 5]), 5.414213562373095, 4.0), Node(PointND([10, 7]), PointND([10, 6]), 6.414213562373095, 3.0), Node(PointND([10, 8]), PointND([10, 7]), 7.414213562373095, 2.0), Node(PointND([10, 9]), PointND([10, 8]), 8.414213562373096, 1.0), Node(PointND([10, 10]), PointND([10, 9]), 9.414213562373096, 0.0)]})
+        >>> planner = AStar(map_=map_, start=(5, 5), goal=(10, 10))
+        >>> planner.plan()
+        ([(5, 5), (6, 6), (7, 7), (8, 8), (9, 9), (10, 10)], {'success': True, 'start': (5, 5), 'goal': (10, 10), 'length': 7.0710678118654755, 'cost': 7.0710678118654755, 'expand': [Node((5, 5), None, 0, 7.0710678118654755), Node((6, 6), (5, 5), 1.4142135623730951, 5.656854249492381), Node((7, 7), (6, 6), 2.8284271247461903, 4.242640687119285), Node((8, 8), (7, 7), 4.242640687119286, 2.8284271247461903), Node((9, 9), (8, 8), 5.656854249492381, 1.4142135623730951), Node((10, 10), (9, 9), 7.0710678118654755, 0.0)]})
 
-        >>> planner.plan(start=Point2D(6, 6), goal=Point2D(10, 10))
+        >>> planner.map_.type_map[3:10, 6] = TYPES.OBSTACLE
+        >>> planner.plan()
+        ([(5, 5), (6, 5), (7, 5), (8, 5), (9, 5), (10, 6), (10, 7), (10, 8), (10, 9), (10, 10)], {'success': True, 'start': (5, 5), 'goal': (10, 10), 'length': 9.414213562373096, 'cost': 9.414213562373096, 'expand': [Node((5, 5), None, 0, 7.0710678118654755), Node((6, 5), (5, 5), 1.0, 6.4031242374328485), Node((7, 5), (6, 5), 2.0, 5.830951894845301), Node((8, 5), (7, 5), 3.0, 5.385164807134504), Node((6, 4), (5, 5), 1.4142135623730951, 7.211102550927978), Node((5, 4), (5, 5), 1.0, 7.810249675906654), Node((4, 5), (5, 5), 1.0, 7.810249675906654), Node((9, 5), (8, 5), 4.0, 5.0990195135927845), Node((7, 4), (6, 5), 2.414213562373095, 6.708203932499369), Node((10, 6), (9, 5), 5.414213562373095, 4.0), Node((10, 7), (10, 6), 6.414213562373095, 3.0), Node((10, 8), (10, 7), 7.414213562373095, 2.0), Node((10, 9), (10, 8), 8.414213562373096, 1.0), Node((10, 10), (10, 9), 9.414213562373096, 0.0)]})
+
+        >>> AStar(map_=map_, start=(6, 6), goal=(10, 10)).plan()
         ([], {'success': False, 'start': None, 'goal': None, 'length': 0, 'cost': 0, 'expand': []})
+
+    References:
+        [1] A Formal Basis for the heuristic Determination of Minimum Cost Paths
     """
-    def __init__(self, map_: Map) -> None:
-        super().__init__(map_)
-        self.start = None
-        self.goal = None
+    def __init__(self, map_: Map, start: tuple, goal: tuple) -> None:
+        super().__init__(map_, start, goal)
+        self.start = start
+        self.goal = goal
 
     def __str__(self) -> str:
         return "A*"
 
-    def getCost(self, p1: PointND, p2: PointND) -> float:
+    def getCost(self, p1: tuple, p2: tuple) -> float:
         """
         Get the cost between two points. (default: distance defined in the map)
 
@@ -51,7 +56,7 @@ class AStar(PathPlanner):
         """
         return self.map_.getDistance(p1, p2)
 
-    def getHeuristic(self, point: PointND) -> float:
+    def getHeuristic(self, point: tuple) -> float:
         """
         Get the heuristic value of the point. (default: cost between current point and goal point)
 
@@ -64,27 +69,17 @@ class AStar(PathPlanner):
         """
         return self.getCost(point, self.goal)
 
-    def plan(self, start: PointND, goal: PointND) -> Union[list, dict]:
+    def plan(self) -> Union[list, dict]:
         """
         Interface for planning.
-
-        Parameters:
-            start: Start point
-            goal: Goal point
 
         Returns:
             path: A list containing the path waypoints
             path_info: A dictionary containing the path information (success, length, cost, expand)
         """
-        start = start.astype(self.map_.dtype)
-        goal = goal.astype(self.map_.dtype)
-
-        self.start = start
-        self.goal = goal
-
         # OPEN list (priority queue) and CLOSED list (hash table)
         OPEN = []
-        start_node = Node(start, None, 0, self.getHeuristic(start))
+        start_node = Node(self.start, None, 0, self.getHeuristic(self.start))
         heapq.heappush(OPEN, start_node)
         CLOSED = dict()
 
@@ -112,10 +107,13 @@ class AStar(PathPlanner):
                     "expand": list(CLOSED.values())
                 }
 
-            for node_n in self.map_.getNeighbor(node, cost_func=self.getCost, heuristic_func=self.getHeuristic): 
+            for node_n in self.map_.getNeighbors(node): 
                 # exists in CLOSED list
                 if node_n.current in CLOSED:
                     continue
+
+                node_n.g = node.g + self.getCost(node.current, node_n.current)
+                node_n.h = self.getHeuristic(node_n.current)
 
                 # goal found
                 if node_n.current == self.goal:
