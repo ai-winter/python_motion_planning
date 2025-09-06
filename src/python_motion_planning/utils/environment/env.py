@@ -11,6 +11,34 @@ import numpy as np
 
 from .node import Node
 
+class Env3D(ABC):
+    """
+    Class for building 2-d workspace of robots.
+
+    Parameters:
+        x_range (int): x-axis range of enviroment
+        y_range (int): y-axis range of environmet
+        eps (float): tolerance for float comparison
+
+    Examples:
+        >>> from python_motion_planning.utils import Env
+        >>> env = Env(30, 40)
+    """
+    def __init__(self, x_range: int, y_range: int, z_range: int, eps: float = 1e-6) -> None:
+        # size of environment
+        self.x_range = x_range  
+        self.y_range = y_range
+        self.z_range = z_range
+        self.eps = eps
+
+    @property
+    def grid_map(self) -> set:
+        return {(i, j, k) for i in range(self.x_range) for j in range(self.y_range) for k in range(self.z_range)}
+    
+    @abstractmethod
+    def init(self) -> None:
+        pass
+
 class Env(ABC):
     """
     Class for building 2-d workspace of robots.
