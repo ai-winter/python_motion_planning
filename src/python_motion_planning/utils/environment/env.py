@@ -6,6 +6,7 @@
 """
 from math import sqrt
 from abc import ABC, abstractmethod
+from turtle import distance
 from scipy.spatial import cKDTree
 import numpy as np
 
@@ -13,11 +14,12 @@ from .node import Node
 
 class Env3D(ABC):
     """
-    Class for building 2-d workspace of robots.
+    Class for building 3-d workspace of robots.
 
     Parameters:
         x_range (int): x-axis range of enviroment
         y_range (int): y-axis range of environmet
+        z_range (int): z-axis range of environmet
         eps (float): tolerance for float comparison
 
     Examples:
@@ -39,33 +41,6 @@ class Env3D(ABC):
     def init(self) -> None:
         pass
 
-class Env(ABC):
-    """
-    Class for building 2-d workspace of robots.
-
-    Parameters:
-        x_range (int): x-axis range of enviroment
-        y_range (int): y-axis range of environmet
-        eps (float): tolerance for float comparison
-
-    Examples:
-        >>> from python_motion_planning.utils import Env
-        >>> env = Env(30, 40)
-    """
-    def __init__(self, x_range: int, y_range: int, eps: float = 1e-6) -> None:
-        # size of environment
-        self.x_range = x_range  
-        self.y_range = y_range
-        self.eps = eps
-
-    @property
-    def grid_map(self) -> set:
-        return {(i, j) for i in range(self.x_range) for j in range(self.y_range)}
-
-    @abstractmethod
-    def init(self) -> None:
-        pass
-
 class Grid3D(Env3D):
     """
     Class for discrete 2-d grid map.
@@ -77,10 +52,23 @@ class Grid3D(Env3D):
     def __init__(self, x_range: int, y_range: int, z_range: int) -> None:
         super().__init__(x_range, y_range, z_range)
         # allowed motions
-        self.motions = [Node((-1, 0), None, 1, None), Node((-1, 1),  None, sqrt(2), None),
-                        Node((0, 1),  None, 1, None), Node((1, 1),   None, sqrt(2), None),
-                        Node((1, 0),  None, 1, None), Node((1, -1),  None, sqrt(2), None),
-                        Node((0, -1), None, 1, None), Node((-1, -1), None, sqrt(2), None)]
+        self.motions = []
+
+        for x in [-1, 0, 1]:
+            for y in [-1, 0, 1]:
+                for z in [-1, 0, 1]:
+                    if (x, y, z) == (0, 0, 0):
+                        continue
+                    distance = abs(x) + abs(y) + abs(z)
+                    cost = 0
+                    if distance == 1:
+                        cost = 1
+                    elif distance == 2:
+                        cost = sqrt(2) 
+                    else: 
+                        cost = sqrt(3)
+                    self.motions.append(Node((x,y,z), None, cost, None))
+
         # obstacles
         self.obstacles = None
         self.obstacles_tree = None
@@ -90,13 +78,14 @@ class Grid3D(Env3D):
         """
         Initialize grid map.
         """
-        x, y = self.x_range, self.y_range
+        x, y, z = self.x_range, self.y_range, self.z_range
         obstacles = set()
 
         # boundary of environment
         for i in range(x):
-            obstacles.add((i, 0))
-            obstacles.add((i, y - 1))
+            obstacles.add((i, 0, 0))
+            obstacles.add((i, y - 1, 0))
+            obstacles.add((i, 0, z-1))
         for i in range(y):
             obstacles.add((0, i))
             obstacles.add((x - 1, i))
