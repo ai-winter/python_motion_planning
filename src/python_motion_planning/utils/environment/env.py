@@ -82,13 +82,20 @@ class Grid3D(Env3D):
         obstacles = set()
 
         # boundary of environment
-        for i in range(x):
-            obstacles.add((i, 0, 0))
-            obstacles.add((i, y - 1, 0))
-            obstacles.add((i, 0, z-1))
-        for i in range(y):
-            obstacles.add((0, i))
-            obstacles.add((x - 1, i))
+        for ix in range(x):
+            for iy in range(y):
+                obstacles.add((ix, iy, 0))
+                obstacles.add((ix, iy, z - 1))
+
+        for ix in range(x):
+            for iz in range(z):
+                obstacles.add((ix, 0, iz))
+                obstacles.add((ix, y - 1, iz))
+
+        for iy in range(y):
+            for iz in range(z):
+                obstacles.add((0, iy, iz))
+                obstacles.add((x - 1, iy, iz))
 
         self.update(obstacles)
 
@@ -96,47 +103,32 @@ class Grid3D(Env3D):
         self.obstacles = obstacles 
         self.obstacles_tree = cKDTree(np.array(list(obstacles)))
 
-class Grid(Env):
+class Env(ABC):
     """
-    Class for discrete 2-d grid map.
+    Class for building 2-d workspace of robots.
 
     Parameters:
         x_range (int): x-axis range of enviroment
         y_range (int): y-axis range of environmet
+        eps (float): tolerance for float comparison
+
+    Examples:
+        >>> from python_motion_planning.utils import Env
+        >>> env = Env(30, 40)
     """
-    def __init__(self, x_range: int, y_range: int) -> None:
-        super().__init__(x_range, y_range)
-        # allowed motions
-        self.motions = [Node((-1, 0), None, 1, None), Node((-1, 1),  None, sqrt(2), None),
-                        Node((0, 1),  None, 1, None), Node((1, 1),   None, sqrt(2), None),
-                        Node((1, 0),  None, 1, None), Node((1, -1),  None, sqrt(2), None),
-                        Node((0, -1), None, 1, None), Node((-1, -1), None, sqrt(2), None)]
-        # obstacles
-        self.obstacles = None
-        self.obstacles_tree = None
-        self.init()
-    
+    def __init__(self, x_range: int, y_range: int, eps: float = 1e-6) -> None:
+        # size of environment
+        self.x_range = x_range  
+        self.y_range = y_range
+        self.eps = eps
+
+    @property
+    def grid_map(self) -> set:
+        return {(i, j) for i in range(self.x_range) for j in range(self.y_range)}
+
+    @abstractmethod
     def init(self) -> None:
-        """
-        Initialize grid map.
-        """
-        x, y = self.x_range, self.y_range
-        obstacles = set()
-
-        # boundary of environment
-        for i in range(x):
-            obstacles.add((i, 0))
-            obstacles.add((i, y - 1))
-        for i in range(y):
-            obstacles.add((0, i))
-            obstacles.add((x - 1, i))
-
-        self.update(obstacles)
-
-    def update(self, obstacles):
-        self.obstacles = obstacles 
-        self.obstacles_tree = cKDTree(np.array(list(obstacles)))
-
+        pass
 
 class Map(Env):
     """
