@@ -5,7 +5,7 @@
 @update: 2025.4.11
 """
 import sys, os
-sys.path.insert(0, '/Users/julianmella/Desktop/University/Semesters/11. Semester/IN5060/python_motion_planning/src')
+sys.path.insert(0, '/Users/anund/in5060/python_motion_planning/src')
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from python_motion_planning import *
 
@@ -48,10 +48,10 @@ if __name__ == '__main__':
 
     """
     # -------------global planners-------------
-    plt = AStar(start=(5, 5, 1), goal=(8, 8, 8), env=grid_env)
+    # plt = AStar(start=(5, 5, 1), goal=(8, 8, 8), env=grid_env)
     # plt = DStar(start=(5, 5), goal=(45, 25), env=grid_env)
     # plt = DStarLite(start=(5, 5), goal=(45, 25), env=grid_env)
-    # plt = Dijkstra(start=(1, 1, 1), goal=(7, 7, 7), env=grid_env)
+    plt = Dijkstra(start=(5, 5, 1), goal=(8, 8, 8), env=grid_env)
     # plt = GBFS(start=(5, 5), goal=(45, 25), env=grid_env)
     # plt = JPS(start=(5, 5), goal=(45, 25), env=grid_env)
     # plt = ThetaStar(start=(5, 5), goal=(45, 25), env=grid_env)
