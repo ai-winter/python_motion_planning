@@ -116,9 +116,10 @@ class AStar(GraphSearcher):
             path.append(node.current)
         return cost, path
 
-    def run(self):
+    def run(self) -> tuple:
         """
         Running both planning and animation.
         """
         cost, path, expand = self.plan()
         self.plot.animation(path, str(self), cost, expand)
+        return cost, path, expand
