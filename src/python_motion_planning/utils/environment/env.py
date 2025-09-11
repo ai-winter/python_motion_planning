@@ -16,8 +16,9 @@ class Env(ABC):
     Class for building 2-d workspace of robots.
 
     Parameters:
-        x_range (int): x-axis range of enviroment
-        y_range (int): y-axis range of environmet
+        x_range (int): x-axis range of environment
+        y_range (int): y-axis range of environment
+        z_range (int): z-axis range of environment
         eps (float): tolerance for float comparison
 
     Examples:
@@ -87,6 +88,7 @@ class Grid(Env):
         # obstacles
         self.obstacles = None
         self.obstacles_tree = None
+        self.inner_obstacles = None
         self.init()
 
     def init(self) -> None:

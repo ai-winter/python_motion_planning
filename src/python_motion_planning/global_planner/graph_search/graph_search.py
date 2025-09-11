@@ -71,8 +71,13 @@ class GraphSearcher(Planner):
         """
 
         # This checks whether up, down, left, right, forwards and backwards is an invalid move
-        if node1.current in self.obstacles or node2.current in self.obstacles:
+        if (node1.current in self.obstacles or node2.current in self.obstacles or
+            (self.env.inner_obstacles and
+            (node1.current in self.env.inner_obstacles or node2.current in self.env.inner_obstacles))):
             return True
+
+
+
 
         x1, y1, z1 = node1.x, node1.y, node1.z
         x2, y2, z2 = node2.x, node2.y, node2.z

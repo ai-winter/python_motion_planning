@@ -26,19 +26,18 @@ if __name__ == '__main__':
     z = 10
     grid_env = Grid(x, y, z)
 
-    obstacles = grid_env.obstacles
+    inner_obstacles = set()
     for i in range(x):
         for j in range(y):
-            obstacles.add((i, j, 7))
-            obstacles.add((i, j, 5))
-            obstacles.add((i, j, 3))
+            inner_obstacles.add((i, j, 7))
+            inner_obstacles.add((i, j, 5))
+            inner_obstacles.add((i, j, 3))
 
-    obstacles.remove((8,8,3))
-    obstacles.remove((1,1,5))
-    obstacles.remove((5,5,7))
+    inner_obstacles.remove((8,8,3))
+    inner_obstacles.remove((1,1,5))
+    inner_obstacles.remove((5,5,7))
 
-    grid_env.update(obstacles=obstacles)
-    #print(grid_env.obstacles)
+    grid_env.inner_obstacles = inner_obstacles
 
     """
     map_env = Map(51, 31, 1)
