@@ -7,18 +7,18 @@
 from typing import Union
 from abc import ABC, abstractmethod
  
-from python_motion_planning.common import Map
+from python_motion_planning.common import BaseMap
 
-class PathPlanner(ABC):
+class BasePathPlanner(ABC):
     """
     Class for building path planner.
 
     Parameters:
         map_: The map which the planner is based on.
-        start: Start point
-        goal: Goal point
+        start: The start point of the planner in the map coordinate system.
+        goal: The goal point of the planner in the map coordinate system.
     """
-    def __init__(self, map_: Map, start: tuple, goal: tuple) -> None:
+    def __init__(self, map_: BaseMap, start: tuple, goal: tuple) -> None:
         super().__init__()
         self.map_ = map_
         self.failed_info = [], {"success": False, "start": None, "goal": None, "length": 0, "cost": 0, "expand": []}

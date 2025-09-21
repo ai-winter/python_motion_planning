@@ -12,7 +12,7 @@ import numpy as np
 from python_motion_planning.common.env import Node
 
 
-class Map(ABC):
+class BaseMap(ABC):
     """
     Class for Path Planning Map.
 
@@ -22,7 +22,7 @@ class Map(ABC):
     """
     def __init__(self, bounds: Iterable, dtype: np.dtype) -> None:
         super().__init__()
-        self._bounds = np.asarray(bounds, dtype=np.float64)
+        self._bounds = np.asarray(bounds, dtype=float)
         self._dtype = dtype
 
         if len(self._bounds.shape) != 2 or self._bounds.shape[0] <= 1 or self._bounds.shape[1] != 2:
@@ -94,6 +94,19 @@ class Map(ABC):
         
         Returns:
             nodes: List of neighbor nodes.
+        """
+        pass
+
+    @abstractmethod
+    def isExpandable(self, point: tuple) -> bool:
+        """
+        Check if a point is expandable.
+        
+        Parameters:
+            point: Point to check.
+        
+        Returns:
+            expandable: True if the point is expandable, False otherwise.
         """
         pass
 

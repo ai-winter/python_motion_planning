@@ -15,5 +15,6 @@ class TYPES:
     OBSTACLE = 1
     START = 2
     GOAL = 3
-    CUSTOM = 4
-    INFLATION = 5
+    INFLATION = 4
+    EXPAND = 5
+    CUSTOM = 6

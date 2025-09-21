@@ -7,17 +7,17 @@
 from typing import Union
 import heapq
  
-from python_motion_planning.common import Map, Grid, Node, TYPES
-from python_motion_planning.path_planner import PathPlanner
+from python_motion_planning.common import BaseMap, Grid, Node, TYPES
+from python_motion_planning.path_planner import BasePathPlanner
 
-class AStar(PathPlanner):
+class AStar(BasePathPlanner):
     """
     Class for building path planner.
 
     Parameters:
         map_: The map which the planner is based on.
-        start: The start point of the planner.
-        goal: The goal point of the planner.
+        start: The start point of the planner in the map coordinate system.
+        goal: The goal point of the planner in the map coordinate system.
 
     Examples:
         >>> map_ = Grid(bounds=[[0, 15], [0, 15]])
@@ -35,7 +35,7 @@ class AStar(PathPlanner):
     References:
         [1] A Formal Basis for the heuristic Determination of Minimum Cost Paths
     """
-    def __init__(self, map_: Map, start: tuple, goal: tuple) -> None:
+    def __init__(self, map_: BaseMap, start: tuple, goal: tuple) -> None:
         super().__init__(map_, start, goal)
         self.start = start
         self.goal = goal
@@ -87,7 +87,7 @@ class AStar(PathPlanner):
             node = heapq.heappop(OPEN)
 
             # obstacle found
-            if self.map_.type_map[tuple(node.current)] == TYPES.OBSTACLE:
+            if not self.map_.isExpandable(node.current):
                 continue
 
             # exists in CLOSED list
@@ -125,6 +125,7 @@ class AStar(PathPlanner):
 
             CLOSED[node.current] = node
 
+        self.failed_info[1]["expand"] = list(CLOSED.values())
         return self.failed_info
 
     

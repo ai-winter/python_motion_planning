@@ -1,2 +1,2 @@
-from .map import *
+from .base_map import *
 from .grid import *

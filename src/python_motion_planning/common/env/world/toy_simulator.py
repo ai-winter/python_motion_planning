@@ -121,13 +121,13 @@ class ToySimulator(gym.Env):
                     j_impulse = -(1 + e) * rel_vel / (1 / a.mass + 1 / b.mass)
                     if j_impulse < 0:
                         # apply impulse
-                        a.vel = a.vel - (j_impulse / a.mass) * nvec
-                        b.vel = b.vel + (j_impulse / b.mass) * nvec
-                    # # positional correction (simple)
-                    # overlap = min_dist - dist
-                    # corr = nvec * (overlap / 2.0 + 1e-6)
-                    # a.pos = a.pos - corr
-                    # b.pos = b.pos + corr
+                        a.vel -= (j_impulse / a.mass) * nvec
+                        b.vel += (j_impulse / b.mass) * nvec
+                    # positional correction (simple)
+                    overlap = min_dist - dist
+                    corr = nvec * (overlap / 2.0 + 1e-6)
+                    a.pos = a.pos - corr
+                    b.pos = b.pos + corr
 
     def _resolve_boundary_collisions(self):
         grid = self.obstacle_grid.type_map
@@ -159,10 +159,10 @@ class ToySimulator(gym.Env):
                             dist = dist_sq**0.5 if dist_sq > 1e-8 else 1e-8
                             # normal vector
                             nx, ny = dx / dist, dy / dist
-                            # # positional correction (simple)
-                            # penetration = robot.radius - dist
-                            # robot.pos = np.array([robot.pos[0] + nx * penetration,
-                            #              robot.pos[1] + ny * penetration])
+                            # positional correction (simple)
+                            overlap = robot.radius - dist
+                            robot.pos = np.array([robot.pos[0] + nx * overlap,
+                                         robot.pos[1] + ny * overlap])
                             # velocity reflection
                             vn = robot.vel[0] * nx + robot.vel[1] * ny
                             if vn < 0:  # reflect only if moving towards the cell

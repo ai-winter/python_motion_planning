@@ -56,7 +56,9 @@ class Visualizer:
             TYPES.OBSTACLE: "#000000",
             TYPES.START: "#ff0000",
             TYPES.GOAL: "#1155cc",
-            TYPES.CUSTOM: "#dddddd",
+            TYPES.INFLATION: "#ffccff",
+            TYPES.EXPAND: "#eeeeee",
+            TYPES.CUSTOM: "#bbbbbb",
         }
         # self.norm = mcolors.BoundaryNorm(list(range(len(self.cmap_dict))), len(self.cmap_dict))
 
@@ -73,7 +75,8 @@ class Visualizer:
             equal: Whether to set axis equal.
         '''
         if grid_map.ndim == 2:
-            plt.imshow(np.transpose(grid_map.type_map.array), cmap=self.cmap, norm=self.norm, origin='lower', interpolation='nearest')
+            plt.imshow(np.transpose(grid_map.type_map.array), cmap=self.cmap, norm=self.norm, origin='lower', interpolation='nearest', 
+                extent=[*grid_map.bounds[0], *grid_map.bounds[1]])
             if equal: 
                 plt.axis("equal")
 
@@ -121,15 +124,21 @@ class Visualizer:
         self.plotGridMap(env.obstacle_grid)
 
         def update(frame):
-            actions = {}
-            for rid, robot in env.robots.items():
-                ob = robot.get_observation(env)
-                act = controllers[rid].get_action(ob)
-                actions[rid] = act
-            obs, rewards, dones, info = env.step(actions)
             # 每帧只更新机器人，不清理整个画布
             patches = []
             texts = []
+            actions = {}
+            for rid, robot in env.robots.items():
+                ob = robot.get_observation(env)
+                act, lookahead_pt = controllers[rid].get_action(ob)
+
+                if lookahead_pt is not None:
+                    lookahead_pt_patch = plt.Circle(lookahead_pt, 0.2, color=robot.color, alpha=0.5)
+                    self.ax.add_patch(lookahead_pt_patch)
+                    patches.append(lookahead_pt_patch)
+
+                actions[rid] = act
+            obs, rewards, dones, info = env.step(actions)
             for rid, robot in env.robots.items():
                 p, t = self.plotCircularRobot(robot)
                 patches.append(p)

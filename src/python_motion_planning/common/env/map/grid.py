@@ -5,13 +5,13 @@
 @update: 2025.9.5
 """
 from itertools import product
-from typing import Iterable, Union, Tuple, Callable
+from typing import Iterable, Union, Tuple, Callable, List
 import time
 
 import numpy as np
 
+from .base_map import BaseMap
 from python_motion_planning.common.env import Node, TYPES
-from python_motion_planning.common.env.map import Map
 from python_motion_planning.common.utils.geometry import dist
 
 
@@ -96,7 +96,7 @@ class GridTypeMap:
         np.copyto(self._array, new_array)
 
 
-class Grid(Map):
+class Grid(BaseMap):
     """
     Class for Grid Map.
     The shape of each dimension of the grid map is determined by the base world and resolution.
@@ -189,7 +189,7 @@ class Grid(Map):
             raise ValueError("Dtype must be one of {} instead of {}".format(self._dtype_options, self._dtype))
 
         self._resolution = resolution
-        self._shape = tuple([int((self.bounds[i, 1] - self.bounds[i, 0]) / self.resolution) + 1 for i in range(self.ndim)])
+        self._shape = tuple([int((self.bounds[i, 1] - self.bounds[i, 0]) / self.resolution) for i in range(self.ndim)])
 
         if type_map is None:
             self.type_map = GridTypeMap(np.zeros(self._shape, dtype=np.int8))
@@ -234,8 +234,8 @@ class Grid(Map):
         """
         if len(point) != self.ndim:
             raise ValueError("Point dimension does not match map dimension.")
-        
-        return tuple(x * self.resolution for x in point)
+
+        return tuple((x + 0.5) * self.resolution + float(self.bounds[i, 0]) for i, x in enumerate(point))
 
     def worldToMap(self, point: tuple) -> tuple:
         """
@@ -250,7 +250,7 @@ class Grid(Map):
         if len(point) != self.ndim:
             raise ValueError("Point dimension does not match map dimension.")
         
-        return tuple(round(x * (1.0 / self.resolution)) for x in point)
+        return tuple(round((x - float(self.bounds[i, 0])) * (1.0 / self.resolution) - 0.5) for i, x in enumerate(point))
 
     def getDistance(self, p1: tuple, p2: tuple) -> float:
         """
@@ -286,6 +286,18 @@ class Grid(Map):
             if not (0 <= point[i] < shape[i]):
                 return False
         return True
+
+    def isExpandable(self, point: tuple) -> bool:
+        """
+        Check if a point is expandable.
+        
+        Parameters:
+            point: Point to check.
+        
+        Returns:
+            expandable: True if the point is expandable, False otherwise.
+        """
+        return not self.type_map[point] == TYPES.OBSTACLE and not self.type_map[point] == TYPES.INFLATION and self.withinBounds(point)
 
     def getNeighbors(self, 
                     node: Node, 
@@ -325,14 +337,13 @@ class Grid(Map):
         #             neighbor_node = Node(point, parent=current_point)
         #             neighbors.append(neighbor_node)
         for neighbor in neighbors:
-            # print(neighbor)
-            if self.withinBounds(neighbor.current) and self.type_map[tuple(neighbor.current)] != TYPES.OBSTACLE:
+            if self.isExpandable(neighbor.current):
                 filtered_neighbors.append(neighbor)
 
         # print(filtered_neighbors)
         
         return filtered_neighbors
-        
+
     def lineOfSight(self, p1: tuple, p2: tuple) -> list:
         """
         N-dimensional line of sight (Bresenham's line algorithm)
@@ -344,7 +355,7 @@ class Grid(Map):
         Returns:
             points: List of point on the line of sight.
         """
-        if not self.withinBounds(p1) or not self.withinBounds(p2):
+        if not self.isExpandable(p1) or not self.isExpandable(p2):
             return []
 
         p1 = np.array(p1)
@@ -398,12 +409,12 @@ class Grid(Map):
         Returns:
             in_collision: True if the line of sight is in collision, False otherwise.
         """
-        if not self.withinBounds(p1) or not self.withinBounds(p2):
+        if not self.isExpandable(p1) or not self.isExpandable(p2):
             return True
 
         # Corner Case: Start and end points are the same
         if p1 == p2:
-            return self.type_map[p1] == TYPES.OBSTACLE
+            return False
         
         p1 = np.array(p1)
         p2 = np.array(p2)
@@ -425,7 +436,7 @@ class Grid(Map):
         current = p1
         
         # Check the start point
-        if self.type_map[tuple(current)] == TYPES.OBSTACLE:
+        if not self.isExpandable(tuple(current)):
             return True
         
         for _ in range(steps):
@@ -442,7 +453,7 @@ class Grid(Map):
                     error[d] -= delta2[primary_axis]
             
             # Check the current point
-            if self.type_map[tuple(current)] == TYPES.OBSTACLE:
+            if not self.isExpandable(tuple(current)):
                 return True
         
         return False
@@ -456,6 +467,34 @@ class Grid(Map):
         self.type_map[:, 0] = TYPES.OBSTACLE
         self.type_map[:, -1] = TYPES.OBSTACLE
 
+    def inflateObstacles(self, radius: float = 1.0) -> None:
+        """
+        Inflate the obstacles in the map.
+        
+        Parameters:
+            radius: Radius of the inflation.
+        """
+        for i in range(self.shape[0]):
+            for j in range(self.shape[1]):
+                if self.type_map[i, j] == TYPES.OBSTACLE:
+                    for k in range(round(i-radius), round(i+radius+1)):
+                        for l in range(round(j-radius), round(j+radius+1)):
+                            if k < 0 or k >= self.shape[0] or l < 0 or l >= self.shape[1]:
+                                continue
+                            if self.type_map[k, l] == TYPES.FREE and (k - i)**2 + (l - j)**2 <= radius**2:
+                                self.type_map[k, l] = TYPES.INFLATION
+
+    def fillExpands(self, expands: List[Node]) -> None:
+        """
+        Fill the expands in the map.
+        
+        Parameters:
+            expands: List of expands.
+        """
+        for expand in expands:
+            if self.type_map[expand.current] != TYPES.FREE:
+                continue
+            self.type_map[expand.current] = TYPES.EXPAND
 
     def _precompute_offsets(self):
         # Generate all possible offsets (-1, 0, +1) in each dimension
