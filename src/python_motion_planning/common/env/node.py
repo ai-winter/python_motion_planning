@@ -4,6 +4,8 @@
 @author: Wu Maojia, Yang Haodong 
 @update: 2025.9.5
 """
+from __future__ import annotations
+
 import numpy as np
 
 
@@ -58,18 +60,18 @@ class Node(object):
         if self.parent is not None and len(self.current) != len(self.parent):
             raise ValueError("The dimension of current " + str(self.current) + " and parent " + str(self.parent) + " must be the same.")
     
-    def __add__(self, node: "Node") -> "Node":
+    def __add__(self, node: Node) -> Node:
         return Node(tuple(x+y for x, y in zip(self._current, node._current)), self._current, self._g + node._g, self._h)
 
-    def __eq__(self, node: "Node") -> bool:
+    def __eq__(self, node: Node) -> bool:
         if not isinstance(node, Node):
             return False
         return self._current == node._current
     
-    def __ne__(self, node: "Node") -> bool:
+    def __ne__(self, node: Node) -> bool:
         return not self.__eq__(node)
 
-    def __lt__(self, node: "Node") -> bool:
+    def __lt__(self, node: Node) -> bool:
         return self._g + self._h < node._g + node._h or \
                 (self._g + self._h == node._g + node._h and self._h < node._h)
 

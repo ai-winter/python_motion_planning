@@ -2,7 +2,7 @@
 @file: map.py
 @breif: Map for Path Planning
 @author: Wu Maojia
-@update: 2025.3.29
+@update: 2025.9.5
 """
 from typing import Iterable, Union
 from abc import ABC, abstractmethod

@@ -2,17 +2,19 @@
 @file: visualization.py
 @breif: visualization
 @author: Yang Haodong, Wu Maojia
-@update: 2025.9.6
+@update: 2025.9.20
 """
-from typing import Union
+from typing import Union, Dict
 from collections import namedtuple
 
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+from matplotlib import animation
 
-from python_motion_planning.common.env import TYPES, world, Grid
+from python_motion_planning.controller import BaseController
+from python_motion_planning.common.env import TYPES, ToySimulator, Grid, CircularRobot, BallRobot
 
 ColorInfo = namedtuple('ColorInfo', 'idx color')
 
@@ -46,6 +48,7 @@ class Visualizer:
     def __init__(self, fig_name: str = ""):
         self.fig = plt.figure(fig_name)
         self.ax = self.fig.add_subplot()
+        self.ani = None
 
         # colors
         self.cmap_dict = {
@@ -79,34 +82,6 @@ class Visualizer:
         else:
             raise NotImplementedError
 
-        # # self.grid_map = env.grid_map
-        # self.grid_map = np.zeros((env.y_range, env.x_range))
-        # for (ox, oy) in env.getNodes():
-        #     self.grid_map[oy, ox] = TYPES.OBSTACLE_GRID
-        
-        # plt.imshow(self.map, cmap=self.cmap, norm=self.norm, origin='lower', interpolation='nearest')
-        # plt.axis("equal")
-
-    # def plotGrids(self, grids: list) -> None:
-    #     '''
-    #     Plot grids in grid map.
-
-    #     Parameters
-    #     ----------
-    #     grid_dict: grid information
-    #     '''  
-    #     if self.grid_map is None:
-    #         raise RuntimeWarning("Grid map is Null")
-        
-        
-    #     for grid in grids:
-    #         grid_x = int(grid["x"])
-    #         grid_y = int(grid["y"])
-    #         grid_name = grid["name"]
-    #         self.grid_map[grid_y, grid_x] = self.cmap_dict[grid_name].idx
-
-    #     plt.imshow(self.grid_map, cmap=self.cmap, norm=self.norm, origin='lower', interpolation='nearest')
-
     def setTitle(self, title: str) -> None:
         plt.title(title)
 
@@ -123,15 +98,50 @@ class Visualizer:
             linewidth: linewidth of path
             marker: marker of path
         '''
-        if name == "normal":
-            path_x = [path[i][0] for i in range(len(path))]
-            path_y = [path[i][1] for i in range(len(path))]
-            plt.plot(path_x, path_y, style, lw=linewidth, color=color, label=label, marker=marker)
-        else:
-            raise NotImplementedError
+        path_x = [path[i][0] for i in range(len(path))]
+        path_y = [path[i][1] for i in range(len(path))]
+        plt.plot(path_x, path_y, style, lw=linewidth, color=color, label=label, marker=marker)
         
         if label:
             plt.legend()
+
+    def plotCircularRobot(self, robot: CircularRobot, axis_equal: bool = True) -> None:
+        patch = plt.Circle(tuple(robot.pos), robot.radius, 
+            color=robot.color, alpha=robot.alpha, fill=robot.fill, linewidth=robot.linewidth, linestyle=robot.linestyle)
+        self.ax.add_patch(patch)
+
+        fontsize = robot.fontsize if robot.fontsize else robot.radius * 15
+
+        text = self.ax.text(*robot.pos, robot.text, color=robot.text_color, ha='center', va='center', fontsize=fontsize)
+        return patch, text
+
+    def renderToySimulator(self, env: ToySimulator, controllers: Dict[str, BaseController], steps: int = 1000, interval: int = 50) -> None:
+        # 先画静态的地图和路径
+        self.ax.clear()
+        self.plotGridMap(env.obstacle_grid)
+
+        def update(frame):
+            actions = {}
+            for rid, robot in env.robots.items():
+                ob = robot.get_observation(env)
+                act = controllers[rid].get_action(ob)
+                actions[rid] = act
+            obs, rewards, dones, info = env.step(actions)
+            # 每帧只更新机器人，不清理整个画布
+            patches = []
+            texts = []
+            for rid, robot in env.robots.items():
+                p, t = self.plotCircularRobot(robot)
+                patches.append(p)
+                texts.append(t)
+            return patches + texts
+
+        self.ani = animation.FuncAnimation(
+            self.fig, update, frames=steps, interval=interval, blit=True, repeat=False
+        )
+
+
+
 
     # def plotMarkers(self, markers: list, axis_equal: bool=True, name: str="normal", props: dict={}) -> None:
     #     '''

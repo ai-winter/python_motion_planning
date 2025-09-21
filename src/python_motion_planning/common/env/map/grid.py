@@ -177,7 +177,7 @@ class Grid(Map):
         True
     """
     def __init__(self, 
-                bounds: Iterable, 
+                bounds: Iterable = [[0, 30], [0, 40]], 
                 resolution: float = 1.0, 
                 type_map: Union[GridTypeMap, np.ndarray] = None, 
                 dtype: np.dtype = np.int32

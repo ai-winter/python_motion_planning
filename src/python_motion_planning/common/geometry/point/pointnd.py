@@ -78,6 +78,8 @@ class PointND(object):
             self._vec = np.array(vec, dtype=dtype)
             if len(self._vec.shape) != 1 or self._vec.size == 0:
                 raise ValueError("Input must be a non-empty 1D array")
+                
+            self._hash = hash(tuple(self._vec))
         except Exception as e:
             raise ValueError("Invalid input for PointND: {}".format(e))
 
@@ -101,15 +103,13 @@ class PointND(object):
         return self.__class__(self._vec * scalar)
 
     def __eq__(self, point: 'PointND') -> bool:
-        if not isinstance(point, PointND):
-            return False
-        return np.array_equal(self._vec, point._vec)
+        return self._hash == point._hash
 
     def __ne__(self, point: 'PointND') -> bool:
         return not self.__eq__(point)
 
     def __hash__(self) -> int:
-        return hash(tuple(self._vec))
+        return self._hash
 
     def __str__(self) -> str:
         return "PointND({})".format(self._vec.tolist())
@@ -222,6 +222,9 @@ class PointND(object):
         """
         point = self.__class__(self._vec.astype(dtype), dtype=dtype)
         return point
+        
+    def numpy(self):
+        return self._vec
 
 
 if __name__ == "__main__":
