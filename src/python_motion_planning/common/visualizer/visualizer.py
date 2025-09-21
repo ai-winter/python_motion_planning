@@ -118,10 +118,16 @@ class Visualizer:
         text = self.ax.text(*robot.pos, robot.text, color=robot.text_color, ha='center', va='center', fontsize=fontsize)
         return patch, text
 
-    def renderToySimulator(self, env: ToySimulator, controllers: Dict[str, BaseController], steps: int = 1000, interval: int = 50) -> None:
+    def renderToySimulator(self, env: ToySimulator, controllers: Dict[str, BaseController], steps: int = 1000, interval: int = 50,
+            show_traj: bool = True, traj_style: str = '-', traj_color: Dict[str, str] = None, traj_alpha: float = 0.7, traj_width = 1.5) -> None:
+        if traj_color is None:
+            traj_color = {rid: robot.color for rid, robot in env.robots.items()}
+
         # 先画静态的地图和路径
         self.ax.clear()
         self.plotGridMap(env.obstacle_grid)
+
+        trajectories = {rid: [] for rid in env.robots}
 
         def update(frame):
             # 每帧只更新机器人，不清理整个画布
@@ -129,6 +135,8 @@ class Visualizer:
             texts = []
             actions = {}
             for rid, robot in env.robots.items():
+                trajectories[rid].append(robot.pos.copy())
+
                 ob = robot.get_observation(env)
                 act, lookahead_pt = controllers[rid].get_action(ob)
 
@@ -138,11 +146,23 @@ class Visualizer:
                     patches.append(lookahead_pt_patch)
 
                 actions[rid] = act
+
             obs, rewards, dones, info = env.step(actions)
+
             for rid, robot in env.robots.items():
                 p, t = self.plotCircularRobot(robot)
                 patches.append(p)
                 texts.append(t)
+
+            # draw trajectories
+            if show_traj:
+                for rid, traj in trajectories.items():
+                    if len(traj) > 1:
+                        traj_x = [p[0] for p in traj]
+                        traj_y = [p[1] for p in traj]
+                        traj_line, = self.ax.plot(traj_x, traj_y, traj_style, color=traj_color[rid], alpha=traj_alpha, linewidth=traj_width)
+                        patches.append(traj_line)
+
             return patches + texts
 
         self.ani = animation.FuncAnimation(

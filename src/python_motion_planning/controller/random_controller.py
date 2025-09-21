@@ -1,8 +1,22 @@
+from typing import Tuple
+
 import numpy as np
 
 from .base_controller import BaseController
 
 class RandomController(BaseController):
-    """默认随机控制器：在 action_space 内均匀采样。"""
-    def get_action(self, obs: np.ndarray) -> np.ndarray:
+    """
+    Random controller
+    """
+    def get_action(self, obs: np.ndarray) -> Tuple[np.ndarray, tuple]:
+        """
+        Randomly sample action in action space.
+
+        Parameters:
+            obs: observation ([pos, vel, rel_pos_robot1, rel_pos_robot2, ...], each sub-vector length=dim)
+
+        Returns:
+            action: action ([acc], length=dim)
+            target: lookahead point
+        """
         return self.action_space.sample(), self.goal

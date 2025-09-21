@@ -14,7 +14,7 @@ from python_motion_planning.common.env import Node
 
 class BaseMap(ABC):
     """
-    Class for Path Planning Map.
+    Base class for Path Planning Map.
 
     Parameters:
         bounds: The size of map in the world (shape: (n, 2) (n>=2)). bounds[i, 0] means the lower bound of the world in the i-th dimension. bounds[i, 1] means the upper bound of the world in the i-th dimension.  

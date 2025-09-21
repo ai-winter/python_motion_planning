@@ -7,63 +7,57 @@ import math
 from python_motion_planning.common.env.types import TYPES
 from python_motion_planning.common.env.map import Grid
 from python_motion_planning.common.env.robot import BaseRobot
+from .base_world import BaseWorld
 
 
-class ToySimulator(gym.Env):
+class ToySimulator(BaseWorld):
     """
-    多智能体导航环境（可 N 维）
-    - robots: list of BaseRobot 的实例
-    - bounds: environment boundary as (min_vec, max_vec) each of length dim
-    - dt: 时间步长
-    - friction: 线性阻尼系数（v * (-friction) force），模型里转成加速度影响
-    - restitution: 边界/碰撞弹性系数 [0,1]
-    - max_episode_steps: 可选终止步数
-    """
-    metadata = {"render.modes": ["human"]}
+    Toy Simulator that supports multi-robot navigation in N-dimensions.
 
+    Parameters:
+        dim: dimension of the world (required >= 2)
+        obstacle_grid: obstacle grid
+        dt: the time step size
+        friction: the linear friction coefficient
+        restitution: the boundary/collision restitution coefficient [0,1]
+        max_episode_steps: the maximum number of steps per episode
+        robot_collisions: whether to resolve robot collisions
+        boundary_collisions: whether to resolve boundary collisions
+    """
     def __init__(self, dim: int = 2,
                  obstacle_grid: Grid = Grid(),
-                 dt: float = 0.05,
+                 dt: float = 0.1,
                  friction: float = 0.1,
                  restitution: float = 0.9,
-                 max_episode_steps: int = 1000):
+                 max_episode_steps: int = 1000,
+                 robot_collisions: bool = True,
+                 boundary_collisions: bool = True):
         super().__init__()
         self.dim = dim
         self.obstacle_grid = obstacle_grid
-        # self.bounds = (np.array(obstacle_grid.bounds[0], dtype=float), np.array(obstacle_grid.bounds[1], dtype=float))
         self.dt = float(dt)
         self.friction = float(friction)
         self.restitution = float(restitution)
         self.max_episode_steps = int(max_episode_steps)
-
-        self.robots: Dict[str, BaseRobot] = {}
+        self.robot_collisions = robot_collisions
+        self.boundary_collisions = boundary_collisions
         self.step_count = 0
-        # observation_space and action_space are per-robot; environment doesn't expose global spaces
-        # 但为了兼容 gym，提供 a dummy space
-        self.observation_space = spaces.Box(-np.inf, np.inf, shape=(1,), dtype=float)
-        self.action_space = spaces.Box(-np.inf, np.inf, shape=(1,), dtype=float)
-
-    def add_robot(self, rid: str, robot: BaseRobot):
-        if robot.dim != self.dim:
-            raise ValueError("Robot dimension must match environment dimension")
-        self.robots[rid] = robot
-
-    def reset(self, seed: Optional[int] = None):
-        self.step_count = 0
-        # optionally randomize initial states or rely on robots' initial pos/vel
-        # 返回 dict of observations keyed by robot index
-        obs = {}
-        for rid, robot in self.robots.items():
-            obs[rid] = robot.get_observation(self)
-        return obs, {}
 
     def step(self, actions: Dict[int, np.ndarray]):
         """
-        actions: dict mapping robot_index -> acceleration ndarray (dim,)
-        1) clip to robot action bounds
-        2) apply environment forces (friction) and integrate via semi-implicit Euler
-        3) handle collisions (robot-robot, robot-boundary)
-        返回：obs_dict, reward_dict, done_dict, info
+        Execute one time step in the environment.
+
+        Parameters:
+            actions: dict mapping robot_index -> acceleration ndarray (dim,)
+                1) clip to robot action bounds
+                2) apply environment forces (friction) and integrate via semi-implicit Euler
+                3) handle collisions (robot-robot, robot-boundary)
+
+        Returns:
+            obs_dict: dict mapping robot_index -> observation ndarray (dim,)
+            reward_dict: dict mapping robot_index -> reward scalar
+            done_dict: dict mapping robot_index -> bool
+            info: dict
         """
         self.step_count += 1
         # 1. assign actions (accelerations) to robots
@@ -78,11 +72,14 @@ class ToySimulator(gym.Env):
             robot_net = robot.acc + robot_env_acc
             # semi-implicit Euler: v += robot_net*dt, pos += v*dt
             robot.vel = robot.vel + robot_net * self.dt
+            robot.vel = robot.clip_velocity(robot.vel)
             robot.pos = robot.pos + robot.vel * self.dt
 
         # 3. collisions: pairwise robot-robot elastic collisions (simple impulse) and boundary collisions
-        self._resolve_robot_collisions()
-        self._resolve_boundary_collisions()
+        if self.robot_collisions:
+            self._resolve_robot_collisions()
+        if self.boundary_collisions:
+            self._resolve_boundary_collisions()
 
         obs = {rid: robot.get_observation(self) for rid, robot in self.robots.items()}
         # no rewards by default; you can extend
@@ -94,6 +91,9 @@ class ToySimulator(gym.Env):
         return obs, rewards, dones, {"terminated": terminated, "truncated": truncated, **info}
 
     def _resolve_robot_collisions(self):
+        """
+        Resolve robot-robot collisions.
+        """
         rids = list(self.robots.keys())
         n = len(rids)
         for i_ in range(n):
@@ -130,6 +130,9 @@ class ToySimulator(gym.Env):
                     b.pos = b.pos + corr
 
     def _resolve_boundary_collisions(self):
+        """
+        Resolve robot-boundary collisions.
+        """
         grid = self.obstacle_grid.type_map
         cell_size = self.obstacle_grid.resolution
         for rid, robot in self.robots.items():
@@ -168,26 +171,3 @@ class ToySimulator(gym.Env):
                             if vn < 0:  # reflect only if moving towards the cell
                                 robot.vel = np.array([robot.vel[0] - (1 + self.restitution) * vn * nx,
                                             robot.vel[1] - (1 + self.restitution) * vn * ny])
-
-    def render(self, mode="human", ax=None):
-        # delegated to demo functions; keep signature for Gym compatibility
-        raise NotImplementedError("render(): use provided demo_2d/demo_3d functions for visualization.")
-
-    def close(self):
-        pass
-
-    # helper to build spaces per-robot
-    def build_robot_spaces(self, robot: BaseRobot) -> Tuple[spaces.Box, spaces.Box]:
-        """
-        返回 (observation_space, action_space) for given robot
-        observation_space: shape (observation_size,)
-        action_space: shape (dim,) bounded by robot.action_min / action_max
-        """
-        obs_dim = robot.observation_size(self)
-        obs_low = -np.inf * np.ones(obs_dim)
-        obs_high = np.inf * np.ones(obs_dim)
-        obs_space = spaces.Box(obs_low, obs_high, dtype=float)
-        act_low = robot.action_min
-        act_high = robot.action_max
-        act_space = spaces.Box(act_low, act_high, dtype=float)
-        return obs_space, act_space
