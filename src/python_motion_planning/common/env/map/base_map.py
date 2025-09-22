@@ -45,7 +45,7 @@ class BaseMap(ABC):
         return self._dtype
 
     @abstractmethod
-    def mapToWorld(self, point: tuple) -> tuple:
+    def map_to_world(self, point: tuple) -> tuple:
         """
         Convert map coordinates to world coordinates.
         
@@ -58,7 +58,7 @@ class BaseMap(ABC):
         pass
 
     @abstractmethod
-    def worldToMap(self, point: tuple) -> tuple:
+    def world_to_map(self, point: tuple) -> tuple:
         """
         Convert world coordinates to map coordinates.
         
@@ -71,7 +71,7 @@ class BaseMap(ABC):
         pass
 
     @abstractmethod
-    def getDistance(self, p1: tuple, p2: tuple) -> float:
+    def get_distance(self, p1: tuple, p2: tuple) -> float:
         """
         Get the distance between two points.
 
@@ -85,7 +85,7 @@ class BaseMap(ABC):
         pass
         
     @abstractmethod
-    def getNeighbors(self, node: Node) -> list:
+    def get_neighbors(self, node: Node) -> list:
         """
         Get neighbor nodes of a given node.
         
@@ -98,7 +98,7 @@ class BaseMap(ABC):
         pass
 
     @abstractmethod
-    def isExpandable(self, point: tuple) -> bool:
+    def is_expandable(self, point: tuple) -> bool:
         """
         Check if a point is expandable.
         
@@ -111,7 +111,7 @@ class BaseMap(ABC):
         pass
 
     @abstractmethod
-    def inCollision(self, p1: tuple, p2: tuple) -> bool:
+    def in_collision(self, p1: tuple, p2: tuple) -> bool:
         """
         Check if the line of sight between two points is in collision.
         

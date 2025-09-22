@@ -33,7 +33,7 @@ class PID(PurePursuit):
                  lookahead_distance: float = 2.0,
                  k_p: float = 1.0,
                  k_i: float = 0.1,
-                 k_d: float = 0.1):
+                 k_d: float = 0.2):
         super().__init__(observation_space, action_space, path, dt, max_speed, lookahead_distance)
         
         # PID Parameters - support scalar or vector form (set different parameters for different dimensions)
@@ -41,8 +41,6 @@ class PID(PurePursuit):
         self.k_p = np.full(dim, k_p) if np.isscalar(k_p) else np.array(k_p)
         self.k_i = np.full(dim, k_i) if np.isscalar(k_i) else np.array(k_i)
         self.k_d = np.full(dim, k_d) if np.isscalar(k_d) else np.array(k_d)
-        
-        self.dt = dt
         
         # Initialize error terms
         self.reset()

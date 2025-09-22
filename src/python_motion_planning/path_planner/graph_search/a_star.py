@@ -43,7 +43,7 @@ class AStar(BasePathPlanner):
     def __str__(self) -> str:
         return "A*"
 
-    def getCost(self, p1: tuple, p2: tuple) -> float:
+    def get_cost(self, p1: tuple, p2: tuple) -> float:
         """
         Get the cost between two points. (default: distance defined in the map)
 
@@ -54,9 +54,9 @@ class AStar(BasePathPlanner):
         Returns:
             cost: Cost between two points.
         """
-        return self.map_.getDistance(p1, p2)
+        return self.map_.get_distance(p1, p2)
 
-    def getHeuristic(self, point: tuple) -> float:
+    def get_heuristic(self, point: tuple) -> float:
         """
         Get the heuristic value of the point. (default: cost between current point and goal point)
 
@@ -67,7 +67,7 @@ class AStar(BasePathPlanner):
         Returns:
             heuristic: Heuristic value of the point.
         """
-        return self.getCost(point, self.goal)
+        return self.get_cost(point, self.goal)
 
     def plan(self) -> Union[list, dict]:
         """
@@ -79,7 +79,7 @@ class AStar(BasePathPlanner):
         """
         # OPEN list (priority queue) and CLOSED list (hash table)
         OPEN = []
-        start_node = Node(self.start, None, 0, self.getHeuristic(self.start))
+        start_node = Node(self.start, None, 0, self.get_heuristic(self.start))
         heapq.heappush(OPEN, start_node)
         CLOSED = dict()
 
@@ -87,7 +87,7 @@ class AStar(BasePathPlanner):
             node = heapq.heappop(OPEN)
 
             # obstacle found
-            if not self.map_.isExpandable(node.current):
+            if not self.map_.is_expandable(node.current):
                 continue
 
             # exists in CLOSED list
@@ -97,7 +97,7 @@ class AStar(BasePathPlanner):
             # goal found
             if node.current == self.goal:
                 CLOSED[node.current] = node
-                path, length, cost = self.extractPath(CLOSED)
+                path, length, cost = self.extract_path(CLOSED)
                 return path, {
                     "success": True, 
                     "start": self.start, 
@@ -107,13 +107,13 @@ class AStar(BasePathPlanner):
                     "expand": list(CLOSED.values())
                 }
 
-            for node_n in self.map_.getNeighbors(node): 
+            for node_n in self.map_.get_neighbors(node): 
                 # exists in CLOSED list
                 if node_n.current in CLOSED:
                     continue
 
-                node_n.g = node.g + self.getCost(node.current, node_n.current)
-                node_n.h = self.getHeuristic(node_n.current)
+                node_n.g = node.g + self.get_cost(node.current, node_n.current)
+                node_n.h = self.get_heuristic(node_n.current)
 
                 # goal found
                 if node_n.current == self.goal:
@@ -129,7 +129,7 @@ class AStar(BasePathPlanner):
         return self.failed_info
 
     
-    def extractPath(self, closed_list: dict) -> tuple:
+    def extract_path(self, closed_list: dict) -> tuple:
         """
         Extract the path based on the CLOSED list.
 
@@ -146,8 +146,8 @@ class AStar(BasePathPlanner):
         path = [node.current]
         while node.current != self.start:
             node_parent = closed_list[node.parent]
-            length += self.map_.getDistance(node.current, node_parent.current)
-            cost += self.getCost(node.current, node_parent.current)
+            length += self.map_.get_distance(node.current, node_parent.current)
+            cost += self.get_cost(node.current, node_parent.current)
             node = node_parent
             path.append(node.current)
         path = path[::-1]   # make the order: start -> goal

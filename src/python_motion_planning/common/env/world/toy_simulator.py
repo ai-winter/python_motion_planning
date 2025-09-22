@@ -138,15 +138,15 @@ class ToySimulator(BaseWorld):
         for rid, robot in self.robots.items():
             min_pos = (robot.pos[0] - robot.radius, robot.pos[1] - robot.radius)
             max_pos = (robot.pos[0] + robot.radius, robot.pos[1] + robot.radius)
-            min_idx = self.obstacle_grid.worldToMap((min_pos[0], min_pos[1]))
+            min_idx = self.obstacle_grid.world_to_map((min_pos[0], min_pos[1]))
             min_idx = tuple(max(0, min_idx[d]) for d in range(self.dim))
-            max_idx = self.obstacle_grid.worldToMap((max_pos[0], max_pos[1]))
+            max_idx = self.obstacle_grid.world_to_map((max_pos[0], max_pos[1]))
             max_idx = tuple(min(grid.shape[d] - 1, max_idx[d]) for d in range(self.dim))
 
             for i in range(min_idx[0], max_idx[0] + 1):
                 for j in range(min_idx[1], max_idx[1] + 1):
                     if grid[i, j] == TYPES.OBSTACLE:
-                        cell_center = self.obstacle_grid.mapToWorld((i, j))
+                        cell_center = self.obstacle_grid.map_to_world((i, j))
                         cell_min = tuple(cell_center[d] - cell_size * 0.5 for d in range(self.dim))
                         cell_max = tuple(cell_center[d] + cell_size * 0.5 for d in range(self.dim))
                         

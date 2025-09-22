@@ -144,36 +144,36 @@ class Grid(BaseMap):
          [0 0 0 ... 0 0 0]]
         ), shape=(61, 81), dtype=int8)
 
-        >>> grid_map.mapToWorld((1, 2))
+        >>> grid_map.map_to_world((1, 2))
         (0.5, 1.0)
 
-        >>> grid_map.worldToMap((0.5, 1.0))
+        >>> grid_map.world_to_map((0.5, 1.0))
         (1, 2)
 
-        >>> grid_map.getNeighbors(Node((1, 2)))
+        >>> grid_map.get_neighbors(Node((1, 2)))
         [Node((0, 1), (1, 2), 0, 0), Node((0, 2), (1, 2), 0, 0), Node((0, 3), (1, 2), 0, 0), Node((1, 1), (1, 2), 0, 0), Node((1, 3), (1, 2), 0, 0), Node((2, 1), (1, 2), 0, 0), Node((2, 2), (1, 2), 0, 0), Node((2, 3), (1, 2), 0, 0)]
 
-        >>> grid_map.getNeighbors(Node((1, 2)), diagonal=False)
+        >>> grid_map.get_neighbors(Node((1, 2)), diagonal=False)
         [Node((2, 2), (1, 2), 0, 0), Node((0, 2), (1, 2), 0, 0), Node((1, 3), (1, 2), 0, 0), Node((1, 1), (1, 2), 0, 0)]
 
         >>> grid_map.type_map[1, 0] = TYPES.OBSTACLE     # place an obstacle
-        >>> grid_map.getNeighbors(Node((0, 0)))    # limited within the bounds
+        >>> grid_map.get_neighbors(Node((0, 0)))    # limited within the bounds
         [Node((0, 1), (0, 0), 0, 0), Node((1, 1), (0, 0), 0, 0)]
 
-        >>> grid_map.getNeighbors(Node((grid_map.shape[0] - 1, grid_map.shape[1] - 1)), diagonal=False)  # limited within the boundss
+        >>> grid_map.get_neighbors(Node((grid_map.shape[0] - 1, grid_map.shape[1] - 1)), diagonal=False)  # limited within the boundss
         [Node((59, 80), (60, 80), 0, 0), Node((60, 79), (60, 80), 0, 0)]
 
-        >>> grid_map.lineOfSight((1, 2), (3, 6))
+        >>> grid_map.line_of_sight((1, 2), (3, 6))
         [(1, 2), (1, 3), (2, 4), (2, 5), (3, 6)]
 
-        >>> grid_map.lineOfSight((1, 2), (1, 2))
+        >>> grid_map.line_of_sight((1, 2), (1, 2))
         [(1, 2)]
 
-        >>> grid_map.inCollision((1, 2), (3, 6))
+        >>> grid_map.in_collision((1, 2), (3, 6))
         False
 
         >>> grid_map.type_map[1, 3] = TYPES.OBSTACLE
-        >>> grid_map.inCollision((1, 2), (3, 6))
+        >>> grid_map.in_collision((1, 2), (3, 6))
         True
     """
     def __init__(self, 
@@ -222,7 +222,7 @@ class Grid(BaseMap):
     def shape(self) -> tuple:
         return self._shape
     
-    def mapToWorld(self, point: tuple) -> tuple:
+    def map_to_world(self, point: tuple) -> tuple:
         """
         Convert map coordinates to world coordinates.
         
@@ -237,7 +237,7 @@ class Grid(BaseMap):
 
         return tuple((x + 0.5) * self.resolution + float(self.bounds[i, 0]) for i, x in enumerate(point))
 
-    def worldToMap(self, point: tuple) -> tuple:
+    def world_to_map(self, point: tuple) -> tuple:
         """
         Convert world coordinates to map coordinates.
         
@@ -252,7 +252,7 @@ class Grid(BaseMap):
         
         return tuple(round((x - float(self.bounds[i, 0])) * (1.0 / self.resolution) - 0.5) for i, x in enumerate(point))
 
-    def getDistance(self, p1: tuple, p2: tuple) -> float:
+    def get_distance(self, p1: tuple, p2: tuple) -> float:
         """
         Get the distance between two points.
 
@@ -265,7 +265,7 @@ class Grid(BaseMap):
         """
         return dist(p1, p2, type='Euclidean')
 
-    def withinBounds(self, point: tuple) -> bool:
+    def within_bounds(self, point: tuple) -> bool:
         """
         Check if a point is within the bounds of the grid map.
         
@@ -287,7 +287,7 @@ class Grid(BaseMap):
                 return False
         return True
 
-    def isExpandable(self, point: tuple) -> bool:
+    def is_expandable(self, point: tuple) -> bool:
         """
         Check if a point is expandable.
         
@@ -297,9 +297,9 @@ class Grid(BaseMap):
         Returns:
             expandable: True if the point is expandable, False otherwise.
         """
-        return not self.type_map[point] == TYPES.OBSTACLE and not self.type_map[point] == TYPES.INFLATION and self.withinBounds(point)
+        return not self.type_map[point] == TYPES.OBSTACLE and not self.type_map[point] == TYPES.INFLATION and self.within_bounds(point)
 
-    def getNeighbors(self, 
+    def get_neighbors(self, 
                     node: Node, 
                     diagonal: bool = True
                     ) -> list:
@@ -332,19 +332,19 @@ class Grid(BaseMap):
         # Filter out positions outside map bounds
         # for pos in neighbor_positions:
         #     point = (pos, dtype=self.dtype)
-        #     if self.withinBounds(point):
+        #     if self.within_bounds(point):
         #         if self.type_map[tuple(point)] != TYPES.OBSTACLE:
         #             neighbor_node = Node(point, parent=current_point)
         #             neighbors.append(neighbor_node)
         for neighbor in neighbors:
-            if self.isExpandable(neighbor.current):
+            if self.is_expandable(neighbor.current):
                 filtered_neighbors.append(neighbor)
 
         # print(filtered_neighbors)
         
         return filtered_neighbors
 
-    def lineOfSight(self, p1: tuple, p2: tuple) -> list:
+    def line_of_sight(self, p1: tuple, p2: tuple) -> list:
         """
         N-dimensional line of sight (Bresenham's line algorithm)
         
@@ -355,7 +355,7 @@ class Grid(BaseMap):
         Returns:
             points: List of point on the line of sight.
         """
-        if not self.isExpandable(p1) or not self.isExpandable(p2):
+        if not self.is_expandable(p1) or not self.is_expandable(p2):
             return []
 
         p1 = np.array(p1)
@@ -398,7 +398,7 @@ class Grid(BaseMap):
 
         return result
 
-    def inCollision(self, p1: tuple, p2: tuple) -> bool:
+    def in_collision(self, p1: tuple, p2: tuple) -> bool:
         """
         Check if the line of sight between two points is in collision.
         
@@ -409,7 +409,7 @@ class Grid(BaseMap):
         Returns:
             in_collision: True if the line of sight is in collision, False otherwise.
         """
-        if not self.isExpandable(p1) or not self.isExpandable(p2):
+        if not self.is_expandable(p1) or not self.is_expandable(p2):
             return True
 
         # Corner Case: Start and end points are the same
@@ -436,7 +436,7 @@ class Grid(BaseMap):
         current = p1
         
         # Check the start point
-        if not self.isExpandable(tuple(current)):
+        if not self.is_expandable(tuple(current)):
             return True
         
         for _ in range(steps):
@@ -453,12 +453,12 @@ class Grid(BaseMap):
                     error[d] -= delta2[primary_axis]
             
             # Check the current point
-            if not self.isExpandable(tuple(current)):
+            if not self.is_expandable(tuple(current)):
                 return True
         
         return False
 
-    def fillBoundaryWithObstacles(self) -> None:
+    def fill_boundary_with_obstacles(self) -> None:
         """
         Fill the boundary of the map with obstacles.
         """
@@ -467,7 +467,7 @@ class Grid(BaseMap):
         self.type_map[:, 0] = TYPES.OBSTACLE
         self.type_map[:, -1] = TYPES.OBSTACLE
 
-    def inflateObstacles(self, radius: float = 1.0) -> None:
+    def inflate_obstacles(self, radius: float = 1.0) -> None:
         """
         Inflate the obstacles in the map.
         
@@ -484,7 +484,7 @@ class Grid(BaseMap):
                             if self.type_map[k, l] == TYPES.FREE and (k - i)**2 + (l - j)**2 <= radius**2:
                                 self.type_map[k, l] = TYPES.INFLATION
 
-    def fillExpands(self, expands: List[Node]) -> None:
+    def fill_expands(self, expands: List[Node]) -> None:
         """
         Fill the expands in the map.
         

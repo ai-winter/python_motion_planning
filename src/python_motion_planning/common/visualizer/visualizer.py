@@ -66,7 +66,7 @@ class Visualizer:
         self.norm = mcolors.BoundaryNorm([i for i in range(self.cmap.N + 1)], self.cmap.N)
         self.grid_map = None
 
-    def plotGridMap(self, grid_map: Grid, equal: bool = False) -> None:
+    def plot_grid_map(self, grid_map: Grid, equal: bool = False) -> None:
         '''
         Plot grid map with static obstacles.
 
@@ -85,10 +85,10 @@ class Visualizer:
         else:
             raise NotImplementedError
 
-    def setTitle(self, title: str) -> None:
+    def set_title(self, title: str) -> None:
         plt.title(title)
 
-    def plotPath(self, path: list, style: str = "-", color: str = "#13ae00", label: str = None, linewidth: float = 2, marker: str = None) -> None:
+    def plot_path(self, path: list, style: str = "-", color: str = "#13ae00", label: str = None, linewidth: float = 2, marker: str = None) -> None:
         '''
         Plot path-like information.
         The meaning of parameters are similar to matplotlib.pyplot.plot (https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html).
@@ -108,7 +108,7 @@ class Visualizer:
         if label:
             plt.legend()
 
-    def plotCircularRobot(self, robot: CircularRobot, axis_equal: bool = True) -> None:
+    def plot_circular_robot(self, robot: CircularRobot, axis_equal: bool = True) -> None:
         patch = plt.Circle(tuple(robot.pos), robot.radius, 
             color=robot.color, alpha=robot.alpha, fill=robot.fill, linewidth=robot.linewidth, linestyle=robot.linestyle)
         self.ax.add_patch(patch)
@@ -118,14 +118,14 @@ class Visualizer:
         text = self.ax.text(*robot.pos, robot.text, color=robot.text_color, ha='center', va='center', fontsize=fontsize)
         return patch, text
 
-    def renderToySimulator(self, env: ToySimulator, controllers: Dict[str, BaseController], steps: int = 1000, interval: int = 50,
+    def render_toy_simulator(self, env: ToySimulator, controllers: Dict[str, BaseController], steps: int = 1000, interval: int = 50,
             show_traj: bool = True, traj_style: str = '-', traj_color: Dict[str, str] = None, traj_alpha: float = 0.7, traj_width = 1.5) -> None:
         if traj_color is None:
             traj_color = {rid: robot.color for rid, robot in env.robots.items()}
 
         # 先画静态的地图和路径
         self.ax.clear()
-        self.plotGridMap(env.obstacle_grid)
+        self.plot_grid_map(env.obstacle_grid)
 
         trajectories = {rid: [] for rid in env.robots}
 
@@ -150,7 +150,7 @@ class Visualizer:
             obs, rewards, dones, info = env.step(actions)
 
             for rid, robot in env.robots.items():
-                p, t = self.plotCircularRobot(robot)
+                p, t = self.plot_circular_robot(robot)
                 patches.append(p)
                 texts.append(t)
 
