@@ -66,13 +66,14 @@ class Visualizer:
         self.norm = mcolors.BoundaryNorm([i for i in range(self.cmap.N + 1)], self.cmap.N)
         self.grid_map = None
 
-    def plot_grid_map(self, grid_map: Grid, equal: bool = False) -> None:
+    def plot_grid_map(self, grid_map: Grid, equal: bool = False, alpha: float = 0.1) -> None:
         '''
         Plot grid map with static obstacles.
 
         Parameters:
             map: Grid map or its type map.
             equal: Whether to set axis equal.
+            alpha: Alpha of occupancy for 3d visualization.
         '''
         if grid_map.ndim == 2:
             plt.imshow(np.transpose(grid_map.type_map.array), cmap=self.cmap, norm=self.norm, origin='lower', interpolation='nearest', 
@@ -81,9 +82,41 @@ class Visualizer:
                 plt.axis("equal")
 
         elif grid_map.ndim == 3:
-            raise NotImplementedError
+            self.ax = self.fig.add_subplot(projection='3d')
+
+            data = grid_map.type_map.array
+            nx, ny, nz = data.shape
+
+            filled = np.zeros_like(data, dtype=bool)
+            colors = np.zeros(data.shape + (4,), dtype=float)  # RGBA
+
+            for key, color in self.cmap_dict.items():
+                mask = (data == key)
+                if key == TYPES.FREE:
+                    continue
+                filled |= mask
+                rgba = matplotlib.colors.to_rgba(color, alpha=alpha)  # (r,g,b,a)
+                colors[mask] = rgba
+
+            self.ax.voxels(filled, facecolors=colors)
+
+            self.ax.set_xlabel("X")
+            self.ax.set_ylabel("Y")
+            self.ax.set_zlabel("Z")
+
+            # let voxels look not stretched
+            max_range = 0
+            for d in range(grid_map.ndim):
+                max_range = max(max_range, grid_map.bounds[d, 1] - grid_map.bounds[d, 0])
+            self.ax.set_xlim(grid_map.bounds[0, 0], grid_map.bounds[0, 0] + max_range)
+            self.ax.set_ylim(grid_map.bounds[1, 0], grid_map.bounds[1, 0] + max_range)
+            self.ax.set_zlim(grid_map.bounds[2, 0], grid_map.bounds[2, 0] + max_range)
+
+            if equal:
+                self.ax.set_box_aspect([1,1,1])
+
         else:
-            raise NotImplementedError
+            raise NotImplementedError(f"Grid map with ndim={grid_map.ndim} not supported.")
 
     def set_title(self, title: str) -> None:
         plt.title(title)
@@ -101,12 +134,16 @@ class Visualizer:
             linewidth: linewidth of path
             marker: marker of path
         '''
-        path_x = [path[i][0] for i in range(len(path))]
-        path_y = [path[i][1] for i in range(len(path))]
-        plt.plot(path_x, path_y, style, lw=linewidth, color=color, label=label, marker=marker)
-        
+        path = np.array(path)
+        if path.shape[1] == 2:
+            plt.plot(path[:, 0], path[:, 1], style, lw=linewidth, color=color, label=label, marker=marker)
+        elif path.shape[1] == 3:
+            self.ax.plot(path[:, 0], path[:, 1], path[:, 2], style, lw=linewidth, color=color, label=label, marker=marker)
+        else:
+            raise ValueError("Path dimension not supported")
+
         if label:
-            plt.legend()
+            self.ax.legend()
 
     def plot_circular_robot(self, robot: CircularRobot, axis_equal: bool = True) -> None:
         patch = plt.Circle(tuple(robot.pos), robot.radius, 

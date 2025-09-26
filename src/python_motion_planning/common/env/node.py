@@ -53,7 +53,7 @@ class Node(object):
     """
     def __init__(self, current: tuple, parent: tuple = None, g: float = 0, h: float = 0) -> None:
         self._current = current
-        self._parent = parent
+        self.parent = parent
         self._g = g
         self._h = h
 
@@ -79,7 +79,7 @@ class Node(object):
         return hash(self._current)
 
     def __str__(self) -> str:
-        return "Node({}, {}, {}, {})".format(self._current, self._parent, self._g, self._h)
+        return "Node({}, {}, {}, {})".format(self._current, self.parent, self._g, self._h)
 
     def __repr__(self) -> str:
         return self.__str__()
@@ -90,10 +90,6 @@ class Node(object):
     @property
     def current(self) -> tuple:
         return self._current
-
-    @property
-    def parent(self) -> tuple:
-        return self._parent
 
     @property
     def g(self) -> float:

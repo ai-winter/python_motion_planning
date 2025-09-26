@@ -12,7 +12,7 @@ from python_motion_planning.path_planner import BasePathPlanner
 
 class AStar(BasePathPlanner):
     """
-    Class for building path planner.
+    Class for A* path planner.
 
     Parameters:
         map_: The map which the planner is based on.
