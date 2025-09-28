@@ -14,19 +14,24 @@ class BaseController:
         observation_space: observation space ([pos, orient, lin_vel, ang_vel])
         action_space: action space ([lin_acc, ang_acc])
         dt: time step for control
-        path: path to follow
+        path: pose path to follow
         max_lin_speed: maximum linear speed of the robot
         max_ang_speed: maximum angular speed of the robot
+        goal_dist_tol: goal distance tolerance
+        goal_orient_tol: goal orient tolerance
     """
     def __init__(self, observation_space: spaces.Space, action_space: spaces.Box,
                  dt: float, path: List[Tuple[float, ...]] = [], 
-                 max_lin_speed: float = np.inf, max_ang_speed: float = np.inf):
+                 max_lin_speed: float = np.inf, max_ang_speed: float = np.inf,
+                 goal_dist_tol: float = 0.5, goal_orient_tol: float = np.pi / 4):
         self.observation_space = observation_space
         self.action_space = action_space
         self.dt = dt
         self.path = path
         self.max_lin_speed = max_lin_speed
         self.max_ang_speed = max_ang_speed
+        self.goal_dist_tol = goal_dist_tol
+        self.goal_orient_tol = goal_orient_tol
         
         # Guess dimension from action space
         if self.action_space.shape[0] == 3:
@@ -39,12 +44,12 @@ class BaseController:
             raise NotImplementedError("Action space shape must be 3 (dim=2) or 6 (dim=3). Other dimensions are not supported yet.")
 
         if len(self.path) > 0:
-            self.goal = self.path[-1]
             if len(self.path[0]) == self.dim:
                 self.path = Geometry.add_orient_to_2d_path(self.path)
+            self.goal = self.path[-1]
         else:
             self.goal = None
-            self.pose_path = False 
+            self.path = False 
 
     def reset(self):
         """
@@ -117,3 +122,12 @@ class BaseController:
         ang_vel = vel[self.dim:]
 
         return pose, vel, pos, orient, lin_vel, ang_vel
+
+    def _stop_if_reached(self, desired_vel: np.ndarray, pose: np.ndarray) -> np.ndarray:
+        pos = pose[:self.dim]
+        orient = pose[self.dim:]
+        if np.linalg.norm(pos - self.goal[:self.dim]) < self.goal_dist_tol:
+            desired_vel[:self.dim] = 0.0
+            if np.abs(Geometry.regularize_orient(orient - self.goal[self.dim:])) < self.goal_orient_tol:
+                desired_vel[self.dim:] = 0.0
+        return desired_vel

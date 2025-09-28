@@ -171,7 +171,7 @@ class Visualizer:
                     dx = np.cos(theta) * robot.radius
                     dy = np.sin(theta) * robot.radius
                     orient_patch = self.ax.arrow(lookahead_pose[0], lookahead_pose[1], dx, dy,
-                                                head_width=0.2*robot.radius, head_length=0.2*robot.radius,
+                                                width=0.2*robot.radius,
                                                 fc=robot.color, ec=robot.color, alpha=0.5)
                     patches.append(orient_patch)
 

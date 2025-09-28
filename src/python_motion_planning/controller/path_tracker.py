@@ -62,6 +62,7 @@ class PathTracker(BaseController):
         target_pose = self._get_lookahead_pose(pos)
 
         desired_vel = self._get_desired_vel(target_pose, pose)
+        desired_vel = self._stop_if_reached(desired_vel, pose)
         robot_vel = FrameTransformer.vel_world_to_robot(self.dim, vel, orient)
         action = self._get_desired_action(desired_vel, robot_vel, orient)
 

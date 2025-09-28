@@ -16,12 +16,12 @@ class CircularRobot:
         dim: Space dimension
         mass: Mass of the robot
         radius: Radius of the robot
-        pose: Current pose (position + orientation)
-        vel: Current velocity (linear + angular)
+        pose: Current pose (position + orientation) (world frame)
+        vel: Current velocity (linear + angular) (world frame)
         max_lin_speed: Maximum linear speed
         max_ang_speed: Maximum angular speed
-        action_min: Minimum action bounds
-        action_max: Maximum action bounds
+        action_min: Minimum action bounds (robot frame)
+        action_max: Maximum action bounds (robot frame)
         color: Visualization color
         alpha: Visualization alpha
         fill: Visualization fill
@@ -31,7 +31,7 @@ class CircularRobot:
         text_color: Visualization text color
         fontsize: Visualization text fontsize
     """
-    def __init__(self, dim: int = 2, mass: float = 1.0, radius: float = 0.1,
+    def __init__(self, dim: int = 2, mass: float = 1.0, radius: float = 0.5,
                  pose: Optional[np.ndarray] = None, vel: Optional[np.ndarray] = None, 
                  max_lin_speed: float = np.inf, max_ang_speed: float = np.inf,
                  action_min: Optional[np.ndarray] = None, action_max: Optional[np.ndarray] = None,
@@ -42,12 +42,6 @@ class CircularRobot:
             raise NotImplementedError(f"Only 2D and 3D are supported, got {dim}D")
 
         self.pose_dim = 3 if dim == 2 else 6
-
-        if len(pose) != self.pose_dim:
-            raise ValueError(f"len(pose) must be {self.pose_dim} if dim=={self.dim}, got {len(pose)}")
-        
-        if len(vel) != self.pose_dim:
-            raise ValueError(f"len(vel) must be {self.pose_dim} if dim=={self.dim}, got {len(vel)}")
             
         self.mass = float(mass)
         self.radius = float(radius)
@@ -57,6 +51,13 @@ class CircularRobot:
         # 3D: [x, y, z, roll, pitch, yaw]
         self.pose = np.zeros(self.pose_dim) if pose is None else np.array(pose, dtype=float)
         self.vel = np.zeros(self.pose_dim) if vel is None else np.array(vel, dtype=float)
+
+        if len(self.pose) != self.pose_dim:
+            raise ValueError(f"len(pose) must be {self.pose_dim} if dim=={self.dim}, got {len(pose)}")
+        
+        if len(self.vel) != self.pose_dim:
+            raise ValueError(f"len(vel) must be {self.pose_dim} if dim=={self.dim}, got {len(vel)}")
+
         self.max_lin_speed = max_lin_speed
         self.max_ang_speed = max_ang_speed
         
@@ -150,6 +151,25 @@ class CircularRobot:
         
         return np.array(obs, dtype=float)
     
+    def step(self, env_acc: np.ndarray, dt: float) -> None:
+        """
+        Take a step in the simulation.
+
+        Parameters:
+            env_acc: acceleration vector from the environment
+            dt: time step size
+        """
+        net_acc = self.acc + env_acc    # self.acc is clipped. env_acc no need to clip.
+
+        # semi-implicit Euler integration
+        self.vel = self.vel + net_acc * dt
+
+        # clip linear and angular velocity
+        self.vel = self.clip_velocity(self.vel)
+
+        # update pose
+        self.pose = self.pose + self.vel * dt
+
     def clip_linear_velocity(self, lv: np.ndarray) -> np.ndarray:
         """Clip linear velocity to maximum allowed value."""
         return lv if np.linalg.norm(lv) <= self.max_lin_speed else lv / np.linalg.norm(lv) * self.max_lin_speed

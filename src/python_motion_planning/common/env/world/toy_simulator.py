@@ -28,7 +28,7 @@ class ToySimulator(BaseWorld):
     def __init__(self, dim: int = 2,
                  obstacle_grid: Grid = Grid(),
                  dt: float = 0.1,
-                 friction: float = 0.1,
+                 friction: float = 0.015,
                  restitution: float = 0.9,
                  max_episode_steps: int = 1000,
                  robot_collisions: bool = True,
@@ -63,24 +63,15 @@ class ToySimulator(BaseWorld):
         self.step_count += 1
         # assign actions (accelerations) to robots
         for rid, robot in self.robots.items():
-            act = actions.get(rid, np.zeros_like(robot.acc))
+            act = actions.get(rid, np.zeros_like(robot.acc))    # robot frame
             act = robot.clip_action(np.array(act, dtype=float))
-            robot.acc = FrameTransformer.vel_robot_to_world(self.dim, act, robot.orient)
+            robot.acc = FrameTransformer.vel_robot_to_world(self.dim, act, robot.orient)    # world frame
 
         # apply environment forces -> compute net acceleration: robot_net_acc = robot.acc + robot_env_acc (friction)
         for rid, robot in self.robots.items():
             # friction as linear damping: a_fric = -friction * v / mass
-            robot_env_acc = - self.friction * robot.vel / (robot.mass + 1e-12)
-            robot_net_acc = robot.acc + robot_env_acc
-
-            # semi-implicit Euler integration
-            robot.vel = robot.vel + robot_net_acc * self.dt
-
-            # clip linear and angular velocity
-            robot.vel = robot.clip_velocity(robot.vel)
-
-            # update pose
-            robot.pose = robot.pose + robot.vel * self.dt
+            env_acc = self.calculate_frictional_acc(robot)
+            robot.step(env_acc, self.dt)
             
         # collisions: pairwise robot-robot elastic collisions and boundary collisions
         if self.robot_collisions:
@@ -100,6 +91,15 @@ class ToySimulator(BaseWorld):
         truncated = self.step_count >= self.max_episode_steps
         info = {}
         return obs, rewards, dones, {"terminated": terminated, "truncated": truncated, **info}
+
+    def calculate_frictional_acc(self, robot: BaseRobot) -> np.ndarray:
+        if np.linalg.norm(robot.vel) < 1e-6:
+            return np.zeros(robot.pose_dim)
+        robot_vel_direction = robot.vel / np.linalg.norm(robot.vel)
+        fri_acc = -self.friction * robot_vel_direction * 9.8    # 9.8 is gravitational acceleration
+        if np.linalg.norm(fri_acc * self.dt) > np.linalg.norm(robot.vel):
+            fri_acc = -robot.vel / self.dt
+        return fri_acc
 
     def _resolve_robot_collisions(self):
         """
