@@ -12,7 +12,7 @@ import numpy as np
 
 from .base_map import BaseMap
 from python_motion_planning.common.env import Node, TYPES
-from python_motion_planning.common.utils.geometry import dist
+from python_motion_planning.common.utils.geometry import Geometry
 
 
 class GridTypeMap:
@@ -263,7 +263,7 @@ class Grid(BaseMap):
         Returns:
             dist: Distance between two points.
         """
-        return dist(p1, p2, type='Euclidean')
+        return Geometry.dist(p1, p2, type='Euclidean')
 
     def within_bounds(self, point: tuple) -> bool:
         """

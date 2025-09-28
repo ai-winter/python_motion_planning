@@ -1,86 +1,85 @@
-"""
-@file: pid.py
-@breif: PID motion planning
-@author: Wu Maojia, Yang Haodong
-@update: 2025.9.21
-"""
-import numpy as np
 from typing import List, Tuple
+import math
 
-from .pure_pursuit import PurePursuit
+import numpy as np
 
-class PID(PurePursuit):
+from python_motion_planning.common.utils.geometry import Geometry
+from python_motion_planning.common.utils.frame_transformer import FrameTransformer
+from .path_tracker import PathTracker
+
+class PID(PathTracker):
     """
-    Class of PID (Proportional-Integral-Derivative) path-tracking controller.
+    PID-based path-tracking controller.
 
     Parameters:
-        observation_space: observation space ([pos, vel, rel_pos_robot1, rel_pos_robot2, ...], each sub-vector length=dim)
-        action_space: action space ([acc], length=dim)
-        path: path to follow
+        observation_space: observation space ([pos, orient, lin_vel, ang_vel])
+        action_space: action space ([lin_acc, ang_acc])
         dt: time step for control
-        max_speed: maximum speed of the robot
+        path: path to follow
+        max_lin_speed: maximum linear speed of the robot
+        max_ang_speed: maximum angular speed of the robot
         lookahead_distance: lookahead distance for path tracking
-        k_p: proportional gain
-        k_i: integral gain
-        k_d: derivative gain
+        k_theta: weight of theta error
+        Kp: proportional gain
+        Ki: integral gain
+        Kd: derivative gain
     """
     def __init__(self,
                  observation_space,
                  action_space,
-                 path: List[Tuple[float, ...]],
                  dt: float,
-                 max_speed: float = np.inf,
+                 path: List[Tuple[float, ...]] = [],
+                 max_lin_speed: float = np.inf, 
+                 max_ang_speed: float = np.inf,
                  lookahead_distance: float = 2.0,
-                 k_p: float = 1.0,
-                 k_i: float = 0.1,
-                 k_d: float = 0.2):
-        super().__init__(observation_space, action_space, path, dt, max_speed, lookahead_distance)
-        
-        # PID Parameters - support scalar or vector form (set different parameters for different dimensions)
-        dim = action_space.shape[0]
-        self.k_p = np.full(dim, k_p) if np.isscalar(k_p) else np.array(k_p)
-        self.k_i = np.full(dim, k_i) if np.isscalar(k_i) else np.array(k_i)
-        self.k_d = np.full(dim, k_d) if np.isscalar(k_d) else np.array(k_d)
-        
-        # Initialize error terms
-        self.reset()
+                 k_theta: float = 0.7,
+                 Kp: float = 1.0,
+                 Ki: float = 0.0,
+                 Kd: float = 0.1):
+        super().__init__(observation_space, action_space, dt,
+                         path, max_lin_speed, max_ang_speed,
+                         lookahead_distance, k_theta)
+        self.Kp = Kp
+        self.Ki = Ki
+        self.Kd = Kd
+
+        # integral and previous error for PID
+        self.integral_error = np.zeros(self.action_space.shape[0])
+        self.prev_error = np.zeros(self.action_space.shape[0])
 
     def reset(self):
         """
         Reset the controller to initial state.
         """
         super().reset()
-        dim = self.action_space.shape[0]
-        self.integral_error = np.zeros(dim)
-        self.prev_error = np.zeros(dim)     # previous error
+        self.integral_error = np.zeros(self.action_space.shape[0])
+        self.prev_error = np.zeros(self.action_space.shape[0])
 
-    def _get_acc(self, desired_vel: np.ndarray, vel: np.ndarray) -> np.ndarray:
+    def _get_desired_action(self, desired_vel: np.ndarray, vel: np.ndarray, orient: np.ndarray) -> np.ndarray:
         """
-        Calculates the acceleration vector.
+        Calculates the action to be taken using PID control to reach the desired velocity.
 
         Parameters:
-            desired_vel: The desired velocity vector.
-            vel: The current velocity vector.
+            desired_vel: Desired velocity in world frame.
+            vel: Current velocity in world frame.
+            orient: Current orientation in world frame.
 
         Returns:
-            The acceleration vector.
+            np.ndarray: Action to be taken ([lin_acc, ang_acc]).
         """
-        # Calculate velocity error
+        # velocity error
         error = desired_vel - vel
-        
-        # Calculate integral item (accumulate error)
+
+        # PID terms
         self.integral_error += error * self.dt
-        
-        # Calculate derivative item (error change rate)
         derivative_error = (error - self.prev_error) / self.dt
-        self.prev_error = error.copy()
-        
-        # PID control law
-        acc = (
-            self.k_p * error + 
-            self.k_i * self.integral_error + 
-            self.k_d * derivative_error
-        )
-        
-        acc = self.clip_action(acc)
-        return acc
+
+        control = (self.Kp * error +
+                   self.Ki * self.integral_error +
+                   self.Kd * derivative_error)
+
+        self.prev_error = error
+
+        action = self.clip_action(control)
+
+        return action

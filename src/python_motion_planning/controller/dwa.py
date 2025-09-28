@@ -18,8 +18,8 @@ class DWA(PurePursuit):
     Parameters:
         observation_space: gymnasium observation space
         action_space: gymnasium Box for acceleration (shape=(dim,))
-        path: list of path points (each is a tuple of length dim)
         dt: control timestep
+        path: list of path points (each is a tuple of length dim)
         max_speed: maximum speed magnitude (optional, used by clip_velocity)
         lookahead_distance: lookahead distance for lookahead point (inherited)
         predict_time: how long to predict forward (seconds)
@@ -33,8 +33,8 @@ class DWA(PurePursuit):
     def __init__(self,
                  observation_space,
                  action_space,
-                 path: List[Tuple[float, ...]],
                  dt: float,
+                 path: List[Tuple[float, ...]] = [],
                  max_speed: float = np.inf,
                  lookahead_distance: float = 2.0,
                  predict_time: float = 1.5,
@@ -44,7 +44,7 @@ class DWA(PurePursuit):
                  v_resolution: float = 0.1,
                  max_samples: int = 1024,
                  obstacles: Optional[np.ndarray] = None):
-        super().__init__(observation_space, action_space, path, dt, max_speed, lookahead_distance)
+        super().__init__(observation_space, action_space, dt, path, max_speed, lookahead_distance)
 
         self.predict_time = predict_time
         self.heading_weight = heading_weight

@@ -112,3 +112,4 @@ class BaseWorld(gym.Env):
         act_high = robot.action_max
         act_space = spaces.Box(act_low, act_high, dtype=float)
         return obs_space, act_space
+

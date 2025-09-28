@@ -16,34 +16,6 @@ from matplotlib import animation
 from python_motion_planning.controller import BaseController
 from python_motion_planning.common.env import TYPES, ToySimulator, Grid, CircularRobot, BallRobot
 
-ColorInfo = namedtuple('ColorInfo', 'idx color')
-
-'''
-extra_info = [
-    {"type": , "data": , "name": }`
-]
-
-type:
-    - value
-        - cost
-        - name
-        - success
-    - path
-        - normal
-        - line
-    - marker
-        - normal
-        - arrow
-    - grids
-        - expand
-    - agent
-    - callback
-    - frames
-        - agent
-        - line
-        - marker
-'''
-
 class Visualizer:
     def __init__(self, fig_name: str = ""):
         self.fig = plt.figure(fig_name)
@@ -151,9 +123,22 @@ class Visualizer:
         self.ax.add_patch(patch)
 
         fontsize = robot.fontsize if robot.fontsize else robot.radius * 15
-
         text = self.ax.text(*robot.pos, robot.text, color=robot.text_color, ha='center', va='center', fontsize=fontsize)
-        return patch, text
+
+        # === 新增：绘制朝向 ===
+        if robot.dim == 2:
+            theta = robot.orient[0]
+            dx = np.cos(theta) * robot.radius
+            dy = np.sin(theta) * robot.radius
+            orient_patch = self.ax.arrow(robot.pos[0], robot.pos[1], dx, dy,
+                                         head_width=0.1*robot.radius, head_length=0.2*robot.radius,
+                                         fc=robot.color, ec=robot.text_color)
+            return patch, text, orient_patch
+        elif robot.dim == 3:
+            # TODO: 可以用 quiver 绘制 3D 方向向量
+            return patch, text
+        else:
+            return patch, text
 
     def render_toy_simulator(self, env: ToySimulator, controllers: Dict[str, BaseController], steps: int = 1000, interval: int = 50,
             show_traj: bool = True, traj_style: str = '-', traj_color: Dict[str, str] = None, traj_alpha: float = 0.7, traj_width = 1.5) -> None:
@@ -175,21 +160,30 @@ class Visualizer:
                 trajectories[rid].append(robot.pos.copy())
 
                 ob = robot.get_observation(env)
-                act, lookahead_pt = controllers[rid].get_action(ob)
+                act, lookahead_pose = controllers[rid].get_action(ob)
 
-                if lookahead_pt is not None:
-                    lookahead_pt_patch = plt.Circle(lookahead_pt, 0.2, color=robot.color, alpha=0.5)
-                    self.ax.add_patch(lookahead_pt_patch)
-                    patches.append(lookahead_pt_patch)
+                if lookahead_pose is not None:
+                    lookahead_pose_patch = plt.Circle(lookahead_pose[:2], 0.2, color=robot.color, alpha=0.5)
+                    self.ax.add_patch(lookahead_pose_patch)
+                    patches.append(lookahead_pose_patch)
+
+                    theta = lookahead_pose[2]
+                    dx = np.cos(theta) * robot.radius
+                    dy = np.sin(theta) * robot.radius
+                    orient_patch = self.ax.arrow(lookahead_pose[0], lookahead_pose[1], dx, dy,
+                                                head_width=0.2*robot.radius, head_length=0.2*robot.radius,
+                                                fc=robot.color, ec=robot.color, alpha=0.5)
+                    patches.append(orient_patch)
 
                 actions[rid] = act
 
             obs, rewards, dones, info = env.step(actions)
 
             for rid, robot in env.robots.items():
-                p, t = self.plot_circular_robot(robot)
-                patches.append(p)
-                texts.append(t)
+                items = self.plot_circular_robot(robot)
+                for item in items:
+                    if item is not None:
+                        patches.append(item)
 
             # draw trajectories
             if show_traj:
@@ -206,6 +200,211 @@ class Visualizer:
             self.fig, update, frames=steps, interval=interval, blit=True, repeat=False
         )
 
+    def connect(self, name: str, func) -> None:
+        self.fig.canvas.mpl_connect(name, func)
+
+    def clean(self):
+        plt.cla()
+
+    def update(self):
+        self.fig.canvas.draw_idle()
+    
+    def show(self):
+        plt.show()
+
+    def legend(self):
+        plt.legend()
+
+
+
+# from typing import Union, Dict
+# from collections import namedtuple
+
+# import numpy as np
+# import matplotlib
+# import matplotlib.pyplot as plt
+# import matplotlib.colors as mcolors
+# from matplotlib import animation
+
+# from python_motion_planning.controller import BaseController
+# from python_motion_planning.common.env import TYPES, ToySimulator, Grid, CircularRobot, BallRobot
+
+# class Visualizer:
+#     def __init__(self, fig_name: str = ""):
+#         self.fig = plt.figure(fig_name)
+#         self.ax = self.fig.add_subplot()
+#         self.ani = None
+
+#         # colors
+#         self.cmap_dict = {
+#             TYPES.FREE: "#ffffff",
+#             TYPES.OBSTACLE: "#000000",
+#             TYPES.START: "#ff0000",
+#             TYPES.GOAL: "#1155cc",
+#             TYPES.INFLATION: "#ffccff",
+#             TYPES.EXPAND: "#eeeeee",
+#             TYPES.CUSTOM: "#bbbbbb",
+#         }
+#         # self.norm = mcolors.BoundaryNorm(list(range(len(self.cmap_dict))), len(self.cmap_dict))
+
+#         self.cmap = mcolors.ListedColormap([info for info in self.cmap_dict.values()])
+#         self.norm = mcolors.BoundaryNorm([i for i in range(self.cmap.N + 1)], self.cmap.N)
+#         self.grid_map = None
+
+#     def plot_grid_map(self, grid_map: Grid, equal: bool = False, alpha: float = 0.1) -> None:
+#         '''
+#         Plot grid map with static obstacles.
+
+#         Parameters:
+#             map: Grid map or its type map.
+#             equal: Whether to set axis equal.
+#             alpha: Alpha of occupancy for 3d visualization.
+#         '''
+#         if grid_map.ndim == 2:
+#             plt.imshow(np.transpose(grid_map.type_map.array), cmap=self.cmap, norm=self.norm, origin='lower', interpolation='nearest', 
+#                 extent=[*grid_map.bounds[0], *grid_map.bounds[1]])
+#             if equal: 
+#                 plt.axis("equal")
+
+#         elif grid_map.ndim == 3:
+#             self.ax = self.fig.add_subplot(projection='3d')
+
+#             data = grid_map.type_map.array
+#             nx, ny, nz = data.shape
+
+#             filled = np.zeros_like(data, dtype=bool)
+#             colors = np.zeros(data.shape + (4,), dtype=float)  # RGBA
+
+#             for key, color in self.cmap_dict.items():
+#                 mask = (data == key)
+#                 if key == TYPES.FREE:
+#                     continue
+#                 filled |= mask
+#                 rgba = matplotlib.colors.to_rgba(color, alpha=alpha)  # (r,g,b,a)
+#                 colors[mask] = rgba
+
+#             self.ax.voxels(filled, facecolors=colors)
+
+#             self.ax.set_xlabel("X")
+#             self.ax.set_ylabel("Y")
+#             self.ax.set_zlabel("Z")
+
+#             # let voxels look not stretched
+#             max_range = 0
+#             for d in range(grid_map.ndim):
+#                 max_range = max(max_range, grid_map.bounds[d, 1] - grid_map.bounds[d, 0])
+#             self.ax.set_xlim(grid_map.bounds[0, 0], grid_map.bounds[0, 0] + max_range)
+#             self.ax.set_ylim(grid_map.bounds[1, 0], grid_map.bounds[1, 0] + max_range)
+#             self.ax.set_zlim(grid_map.bounds[2, 0], grid_map.bounds[2, 0] + max_range)
+
+#             if equal:
+#                 self.ax.set_box_aspect([1,1,1])
+
+#         else:
+#             raise NotImplementedError(f"Grid map with ndim={grid_map.ndim} not supported.")
+
+#     def set_title(self, title: str) -> None:
+#         plt.title(title)
+
+#     def plot_path(self, path: list, style: str = "-", color: str = "#13ae00", label: str = None, linewidth: float = 2, marker: str = None) -> None:
+#         '''
+#         Plot path-like information.
+#         The meaning of parameters are similar to matplotlib.pyplot.plot (https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html).
+
+#         Parameters:
+#             path: point list of path
+#             style: style of path
+#             color: color of path
+#             label: label of path
+#             linewidth: linewidth of path
+#             marker: marker of path
+#         '''
+#         path = np.array(path)
+#         if path.shape[1] == 2:
+#             plt.plot(path[:, 0], path[:, 1], style, lw=linewidth, color=color, label=label, marker=marker)
+#         elif path.shape[1] == 3:
+#             self.ax.plot(path[:, 0], path[:, 1], path[:, 2], style, lw=linewidth, color=color, label=label, marker=marker)
+#         else:
+#             raise ValueError("Path dimension not supported")
+
+#         if label:
+#             self.ax.legend()
+
+#     def plot_circular_robot(self, robot: CircularRobot, axis_equal: bool = True) -> None:
+#         patch = plt.Circle(tuple(robot.pos), robot.radius, 
+#             color=robot.color, alpha=robot.alpha, fill=robot.fill, linewidth=robot.linewidth, linestyle=robot.linestyle)
+#         self.ax.add_patch(patch)
+
+#         fontsize = robot.fontsize if robot.fontsize else robot.radius * 15
+
+#         text = self.ax.text(*robot.pos, robot.text, color=robot.text_color, ha='center', va='center', fontsize=fontsize)
+#         return patch, text
+
+#     def render_toy_simulator(self, env: ToySimulator, controllers: Dict[str, BaseController], steps: int = 1000, interval: int = 50,
+#             show_traj: bool = True, traj_style: str = '-', traj_color: Dict[str, str] = None, traj_alpha: float = 0.7, traj_width = 1.5) -> None:
+#         if traj_color is None:
+#             traj_color = {rid: robot.color for rid, robot in env.robots.items()}
+
+#         # 先画静态的地图和路径
+#         self.ax.clear()
+#         self.plot_grid_map(env.obstacle_grid)
+
+#         trajectories = {rid: [] for rid in env.robots}
+
+#         def update(frame):
+#             # 每帧只更新机器人，不清理整个画布
+#             patches = []
+#             texts = []
+#             actions = {}
+#             for rid, robot in env.robots.items():
+#                 trajectories[rid].append(robot.pos.copy())
+
+#                 ob = robot.get_observation(env)
+#                 act, lookahead_pt = controllers[rid].get_action(ob)
+
+#                 if lookahead_pt is not None:
+#                     lookahead_pt_patch = plt.Circle(lookahead_pt, 0.2, color=robot.color, alpha=0.5)
+#                     self.ax.add_patch(lookahead_pt_patch)
+#                     patches.append(lookahead_pt_patch)
+
+#                 actions[rid] = act
+
+#             obs, rewards, dones, info = env.step(actions)
+
+#             for rid, robot in env.robots.items():
+#                 p, t = self.plot_circular_robot(robot)
+#                 patches.append(p)
+#                 texts.append(t)
+
+#             # draw trajectories
+#             if show_traj:
+#                 for rid, traj in trajectories.items():
+#                     if len(traj) > 1:
+#                         traj_x = [p[0] for p in traj]
+#                         traj_y = [p[1] for p in traj]
+#                         traj_line, = self.ax.plot(traj_x, traj_y, traj_style, color=traj_color[rid], alpha=traj_alpha, linewidth=traj_width)
+#                         patches.append(traj_line)
+
+#             return patches + texts
+
+#         self.ani = animation.FuncAnimation(
+#             self.fig, update, frames=steps, interval=interval, blit=True, repeat=False
+#         )
+
+#     def connect(self, name: str, func) -> None:
+#         self.fig.canvas.mpl_connect(name, func)
+
+#     def clean(self):
+#         plt.cla()
+
+#     def update(self):
+#         self.fig.canvas.draw_idle()
+    
+#     def show(self):
+#         plt.show()
+
+#     def legend(self):
+#         plt.legend()
 
 
 
@@ -312,21 +511,6 @@ class Visualizer:
     #         plt.xlabel(xlabels[i])
     #         plt.ylabel(ylabels[i])
     #         plt.title(fig_name)
-
-    def connect(self, name: str, func) -> None:
-        self.fig.canvas.mpl_connect(name, func)
-
-    def clean(self):
-        plt.cla()
-
-    def update(self):
-        self.fig.canvas.draw_idle()
-    
-    def show(self):
-        plt.show()
-
-    def legend(self):
-        plt.legend()
 
     # def plotArrow(self, x, y, theta, length, color):
     #     angle = np.deg2rad(30)
