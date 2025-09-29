@@ -7,8 +7,8 @@ name = "python-motion-planning"
 version = "1.1"
 description = "Motion planning algorithms for Python"
 maintainers = [
-    {name = "Yang Haodong", email = "913982779@qq.com"},
-    {name = "Wu Maojia", email = "2223942063@qq.com"}
+    {name = "Wu Maojia", email = "omige@mail.nwpu.edu.cn"},
+    {name = "Yang Haodong", email = "913982779@qq.com"}
 ]
 readme = "README.md"
 license = {file = "LICENSE"}

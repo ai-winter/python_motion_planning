@@ -13,19 +13,19 @@ class PathTracker(BaseController):
 
     Args:
         *args: see the parent class.
-        lookahead_distance: lookahead distance for path tracking
+        lookahead_distance: lookahead distance for path tracking (default: self.max_lin_speed)
         k_theta: weight of theta error
         pose_interp: whether to interpolate between poses. if not, poses on the segments are last pose
         **kwargs: see the parent class.
     """
     def __init__(self,
                  *args,
-                 lookahead_distance: float = 1.5,
+                 lookahead_distance: float = None,
                  k_theta: float = 0.8,
                  pose_interp: bool = False,
                  **kwargs):
         super().__init__(*args, **kwargs)
-        self.lookahead_distance = lookahead_distance
+        self.lookahead_distance = lookahead_distance if lookahead_distance is not None else self.max_lin_speed
         self.k_theta = k_theta
         self.pose_interp = pose_interp
         self.current_target_index = 0
@@ -91,11 +91,11 @@ class PathTracker(BaseController):
         if ang_distance > 1e-6:
             ang_direction /= ang_distance
 
-        max_lin_speed = np.linalg.norm(self.action_space.high[:self.dim])
-        max_ang_speed = np.linalg.norm(self.action_space.high[self.dim:])
-
-        desired_lin_speed = min(lin_distance / self.dt, max_lin_speed)
-        desired_ang_speed = min(ang_distance / self.dt, max_ang_speed)
+        
+        desired_lin_speed = min(lin_distance / self.dt, self.max_lin_speed)
+        assert desired_lin_speed >= 0    # TODO
+        desired_ang_speed = min(ang_distance / self.dt, self.max_ang_speed)
+        assert desired_ang_speed >= 0    # TODO
 
         desired_lin_vel = lin_direction * desired_lin_speed
         desired_ang_vel = ang_direction * desired_ang_speed
@@ -237,7 +237,7 @@ class PathTracker(BaseController):
                 proj = p2
                 theta_proj = path[i + 1, 2]
             else:
-                proj = p1 + y * d
+                proj = p1 + t * d
                 theta_proj = path[i, 2]
                 if self.pose_interp:
                     theta_proj += t * (path[i + 1, 2] - path[i, 2])

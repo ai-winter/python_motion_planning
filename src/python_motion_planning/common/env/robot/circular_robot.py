@@ -150,25 +150,46 @@ class CircularRobot:
         obs.extend(self.ang_vel.tolist())  # Angular velocity
         
         return np.array(obs, dtype=float)
-    
-    def step(self, env_acc: np.ndarray, dt: float) -> None:
+
+    def kinematic_model(self, pose: np.ndarray, vel: np.ndarray, acc: np.ndarray, env_acc: np.ndarray, dt: float) -> Tuple[np.ndarray, np.ndarray, dict]:
         """
-        Take a step in the simulation.
+        Kinematic model (used to simulate the robot motion without updating the robot state)
 
         Args:
-            env_acc: acceleration vector from the environment
-            dt: time step size
+            pose: robot pose    (world frame)
+            vel: robot velocity (world frame)
+            acc: robot acceleration action (world frame)
+            env_acc: environment acceleration (world frame)
+            dt: time step length
+
+        Returns:
+            pose: new robot pose    (world frame)
+            vel: new robot velocity (world frame)
+            info: auxiliary information
         """
-        net_acc = self.acc + env_acc    # self.acc is clipped. env_acc no need to clip.
+        net_acc = acc + env_acc    # acc is clipped. env_acc no need to clip.
 
         # semi-implicit Euler integration
-        self.vel = self.vel + net_acc * dt
+        vel = vel + net_acc * dt
 
         # clip linear and angular velocity
-        self.vel = self.clip_velocity(self.vel)
+        vel = self.clip_velocity(vel)
 
         # update pose
-        self.pose = self.pose + self.vel * dt
+        pose = pose + vel * dt
+
+        return pose, vel, {}
+
+    def step(self, env_acc: np.ndarray, dt: float) -> None:
+        """
+        Take a step in simulation using differential drive kinematics.
+        self.acc and self.vel are in world frame. You have to transform them into robot frame if needed.
+
+        Args:
+            env_acc: acceleration vector from environment
+            dt: time step size
+        """
+        self.pose, self.vel, info = self.kinematic_model(self.pose, self.vel, self.acc, env_acc, dt)
 
     def clip_linear_velocity(self, lv: np.ndarray) -> np.ndarray:
         """Clip linear velocity to maximum allowed value."""

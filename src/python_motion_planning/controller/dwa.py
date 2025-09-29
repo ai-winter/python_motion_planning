@@ -1,191 +1,191 @@
 from typing import List, Tuple, Optional
+import math
+
 import numpy as np
-from itertools import product
-from scipy.spatial.distance import cdist
 
-from .pure_pursuit import PurePursuit
+from python_motion_planning.common.env.map.grid import Grid
+from python_motion_planning.common.env.robot.base_robot import BaseRobot
+from python_motion_planning.common.utils.geometry import Geometry
+from python_motion_planning.common.utils.frame_transformer import FrameTransformer
+from .path_tracker import PathTracker
 
 
-class DWA(PurePursuit):
+class DWA(PathTracker):
     """
-    Dynamic Window Approach (DWA) controller.
+    Dynamic Window Approach (DWA) path-tracking controller.
 
-    Notes:
-        - observation `obs` is expected to be: [pos( dim ), vel( dim ), ...]
-        - action returned is acceleration vector (dim,)
-        - target returned is the lookahead point (from PurePursuit._get_lookahead_point)
-
-    Parameters:
-        observation_space: gymnasium observation space
-        action_space: gymnasium Box for acceleration (shape=(dim,))
-        dt: control timestep
-        path: list of path points (each is a tuple of length dim)
-        max_speed: maximum speed magnitude (optional, used by clip_velocity)
-        lookahead_distance: lookahead distance for lookahead point (inherited)
-        predict_time: how long to predict forward (seconds)
-        heading_weight: weight for heading (distance-to-target) cost
-        obstacle_weight: weight for obstacle cost (larger -> avoid obstacles more)
-        velocity_weight: weight for velocity (prefer larger speed if positive)
-        v_resolution: resolution when sampling velocities per-dimension
-        max_samples: maximum number of candidate velocities to evaluate (to avoid combinatorial explosion)
-        obstacles: optional np.ndarray of shape (M, dim) with obstacle points
+    Args:
+        *args: see the parent class.
+        robot_model: robot model for kinematic simulation
+        obstacle_grid: occupancy grid map for collision checking
+        v_reso: resolution of linear velocity sampling
+        w_reso: resolution of angular velocity sampling
+        predict_time: forward simulation time horizon
+        heading_weight: weight for heading term
+        velocity_weight: weight for velocity term
+        clearance_weight: weight for obstacle clearance term
+        **kwargs: see the parent class.
     """
     def __init__(self,
-                 observation_space,
-                 action_space,
-                 dt: float,
-                 path: List[Tuple[float, ...]] = [],
-                 max_speed: float = np.inf,
-                 lookahead_distance: float = 2.0,
-                 predict_time: float = 1.5,
-                 heading_weight: float = 1.0,
-                 obstacle_weight: float = 1.0,
+                 *args,
+                 robot_model: BaseRobot,
+                 obstacle_grid: Grid = None,
+                 v_reso: float = 0.1,
+                 w_reso: float = np.deg2rad(10.0),
+                 predict_time: float = 1.0,
+                 heading_weight: float = 0.8,
                  velocity_weight: float = 0.1,
-                 v_resolution: float = 0.1,
-                 max_samples: int = 1024,
-                 obstacles: Optional[np.ndarray] = None):
-        super().__init__(observation_space, action_space, dt, path, max_speed, lookahead_distance)
-
+                 clearance_weight: float = 0.1,
+                 **kwargs):
+        super().__init__(*args, **kwargs)
+        self.robot_model = robot_model
+        self.obstacle_grid = obstacle_grid
+        self.v_reso = v_reso
+        self.w_reso = w_reso
         self.predict_time = predict_time
         self.heading_weight = heading_weight
-        self.obstacle_weight = obstacle_weight
         self.velocity_weight = velocity_weight
-        self.v_resolution = v_resolution
-        self.max_samples = max_samples
+        self.clearance_weight = clearance_weight
 
-        # obstacles: None or array shape (M, dim)
-        self.obstacles = None if obstacles is None else np.asarray(obstacles)
-
-    def reset(self):
-        super().reset()
-        # nothing else to reset for now
-
-    def set_obstacles(self, obstacles: Optional[np.ndarray]):
-        """Set/replace obstacle list used by evaluation."""
-        self.obstacles = None if obstacles is None else np.asarray(obstacles)
-
-    def get_action(self, obs: np.ndarray) -> Tuple[np.ndarray, tuple]:
+    def get_action(self, obs: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """
-        Overrides PurePursuit.get_action: run DWA search and return acceleration + target.
+        Get action from observation using Dynamic Window Approach.
 
-        Parameters:
-            obs: observation array ([pos, vel, ...]) length at least 2*dim
+        Args:
+            obs: observation ([pos, orient, lin_vel, ang_vel])
 
         Returns:
-            acc: acceleration vector (dim,)
-            target: lookahead point (ndarray of length dim)
+            action: action in robot frame ([lin_acc, ang_acc])
+            target_pose: selected local goal ([pos, orient])
         """
         if self.goal is None:
             return np.zeros(self.action_space.shape), self.goal
 
-        dim = self.action_space.shape[0]
-        pos = obs[:dim].astype(float)
-        vel = obs[dim:2*dim].astype(float)
+        pose, vel, pos, orient, lin_vel, ang_vel = self.get_pose_velocity(obs)
 
-        # get lookahead target from parent
-        target = self._get_lookahead_point(pos)
+        # Find the lookahead pose
+        target_pose = self._get_lookahead_pose(pos)
 
-        # build dynamic window in velocity space for each dimension
-        # v_min = current_vel + acc_min * dt, v_max = current_vel + acc_max * dt
-        acc_min = self.action_space.low
-        acc_max = self.action_space.high
+        # compute dynamic window
+        dw = self._calc_dynamic_window(vel)
 
-        # per-dim v ranges
-        v_mins = vel + acc_min * self.dt
-        v_maxs = vel + acc_max * self.dt
+        # search best control within dynamic window
+        best_u, best_traj = self._evaluate_trajectories(pose, vel, target_pose, dw)
 
-        # ensure reasonable ordering
-        v_low = np.minimum(v_mins, v_maxs)
-        v_high = np.maximum(v_mins, v_maxs)
+        # compute action (acceleration) to reach best velocity
+        desired_vel = best_u
+        desired_vel = self._stop_if_reached(desired_vel, pose)
+        robot_vel = FrameTransformer.vel_world_to_robot(self.dim, vel, orient)
+        action = self._get_desired_action(desired_vel, robot_vel, orient)
 
-        # for sampling we will generate per-dim linspace
-        grids = []
-        counts = []
-        for i in range(dim):
-            span = float(v_high[i] - v_low[i])
-            if span <= 1e-8:
-                # degenerate: single value
-                grid = np.array([v_low[i]])
-            else:
-                num = max(2, int(np.ceil(span / self.v_resolution)) + 1)
-                grid = np.linspace(v_low[i], v_high[i], num=num)
-            grids.append(grid)
-            counts.append(len(grid))
+        # target pose = last point of best trajectory
+        # target_pose = best_traj[-1] if len(best_traj) > 0 else self.goal
+        return action, target_pose
 
-        # estimate total number of combos
-        total = int(np.prod(counts))
-        candidates = []
+    def _calc_dynamic_window(self, vel: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Calculate dynamic window [v_min, v_max, w_min, w_max].
 
-        # generate candidate velocities (avoid exploding)
-        if total <= self.max_samples:
-            # full grid
-            for comb in product(*grids):
-                candidates.append(np.array(comb, dtype=float))
-        else:
-            # sample randomly from hyper-rectangle uniformly (including some grid points)
-            # sample half from uniform, half from grid anchors
-            rng = np.random.default_rng()
-            n_rand = self.max_samples
-            # uniform sample within v_low..v_high
-            samples = rng.random((n_rand, dim)) * (v_high - v_low) + v_low
-            candidates = [s.astype(float) for s in samples]
+        Args:
+            vel: current velocity ([vx, vy, omega])
 
-        # Evaluate candidates
-        best_cost = float("inf")
-        best_vel = vel.copy()
+        Returns:
+            dw: dynamic window (lin_range, ang_range)
+        """
+        v = np.linalg.norm(vel[:self.dim])
+        w = vel[self.dim:]
 
-        # Precompute prediction steps
-        steps = max(1, int(np.ceil(self.predict_time / self.dt)))
-        traj_dt = self.dt
+        # velocity limits
+        v_min, v_max = 0.0, self.max_lin_speed
+        w_min, w_max = -self.max_ang_speed, self.max_ang_speed
 
-        # If obstacles exist, convert to numpy
-        obs_pts = None if self.obstacles is None else np.asarray(self.obstacles)
+        return (v_min, v_max, w_min, w_max)
 
-        for v_cand in candidates:
-            # Clip candidate velocity magnitude to overall max_speed if defined (preserve direction)
-            v_cand = self.clip_velocity(v_cand)
+    def _evaluate_trajectories(self, pose: np.ndarray, vel: np.ndarray, target_pose: np.ndarray,
+                               dw: Tuple[float, float, float, float]) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Evaluate trajectories in dynamic window and choose the best.
 
-            # Predict trajectory assuming constant velocity v_cand
-            # simple kinematic: pos_t+1 = pos_t + v_cand * dt
-            traj = np.zeros((steps, dim))
-            p = pos.copy()
-            for s in range(steps):
-                p = p + v_cand * traj_dt
-                traj[s, :] = p
+        Args:
+            pose: current pose ([x, y, theta])
+            vel: current velocity ([vx, vy, omega])
+            target_pose: target pose ([x, y, theta])
+            dw: dynamic window
 
-            final_pos = traj[-1]
+        Returns:
+            best_u: best velocity command [vx, vy, omega]
+            best_traj: best simulated trajectory
+        """
+        v_min, v_max, w_min, w_max = dw
+        best_score = -float("inf")
+        best_u = np.zeros_like(vel)
+        best_traj = []
 
-            # cost: heading = distance from final_pos to lookahead target (smaller better)
-            heading_cost = np.linalg.norm(final_pos - target)
+        for v in np.arange(v_min, v_max, self.v_reso):
+            for w in np.arange(w_min, w_max, self.w_reso):
+                orient = pose[self.dim:self.dim*2]
+                vel_world = FrameTransformer.vel_robot_to_world(self.dim, np.array([v, 0.0, w]), orient)
+                traj = self._forward_sim(pose, vel_world)
 
-            # obstacle cost: minimal distance from any obstacle to any traj point (smaller -> higher penalty)
-            if obs_pts is None or obs_pts.size == 0:
-                obstacle_cost = 0.0
-            else:
-                # compute pairwise distances (M x steps) and take min
-                D = cdist(obs_pts, traj)  # shape (M, steps)
-                min_D = float(np.min(D))
-                # map to cost: smaller distance -> larger cost. we use inverse-like transform
-                # avoid division by zero
-                obstacle_cost = 0.0 if min_D >= 1e6 else 1.0 / (min_D + 1e-6)
+                # evaluate cost terms
+                heading = self._heading_score(traj, target_pose)
+                velocity = v / self.max_lin_speed
+                clearance = self._clearance_score(traj)
 
-            # velocity cost: prefer larger speed (we will negate so smaller total better)
-            velocity_score = -np.linalg.norm(v_cand)
+                score = (self.heading_weight * heading +
+                         self.velocity_weight * velocity +
+                         self.clearance_weight * clearance)
 
-            # weighted sum (note obstacle_cost grows when close -> increases total cost)
-            total_cost = (self.heading_weight * heading_cost +
-                          self.obstacle_weight * obstacle_cost +
-                          self.velocity_weight * velocity_score)
+                if score > best_score:
+                    best_score = score
+                    best_u = np.array([v, 0.0, w])  # [vx, vy, omega]
+                    best_traj = traj
+        
+        return best_u, np.array(best_traj)
 
-            if total_cost < best_cost:
-                best_cost = total_cost
-                best_vel = v_cand
+    def _forward_sim(self, pose: np.ndarray, vel: np.ndarray) -> List[np.ndarray]:
+        """
+        Forward simulate trajectory using robot kinematic model.
 
-        # compute acceleration command
-        acc = (best_vel - vel) / self.dt
+        Returns:
+            traj: simulated trajectory (list of poses)
+        """
+        traj = [pose.copy()]
+        time = 0.0
+        while time <= self.predict_time:
+            pose, vel, _ = self.robot_model.kinematic_model(pose, vel, np.zeros_like(vel), np.zeros_like(vel), self.dt)
+            traj.append(pose)
+            time += self.dt
+        return traj
 
-        # clip to action bounds and return
-        acc = self.clip_action(acc)
-        best_vel = self.clip_velocity(best_vel)
+    def _heading_score(self, traj: List[np.ndarray], target_pose: np.ndarray) -> float:
+        """
+        Compute heading cost (distance to goal).
 
-        return acc, tuple(target)
+        Args:
+            traj: Trajectory.
+            target_pose: Target pose.
+
+        Returns:
+            Heading score.
+        """
+        last_pose = traj[-1]
+        dist = np.linalg.norm(last_pose[:2] - target_pose[:2])
+        # orient_dist = np.abs(last_pose[2] - target_pose[2])
+        return 1.0 / (dist + 1e-6)
+
+    def _clearance_score(self, traj: List[np.ndarray]) -> float:
+        """
+        Compute clearance score (min distance to obstacles).
+        If no grid map is provided, return 1.0.
+        """
+        if self.obstacle_grid is None:
+            return 1.0
+
+        min_dist = float("inf")
+        for p in traj:
+            grid_pt = self.obstacle_grid.world_to_map(tuple(p[:2]))
+            if not self.obstacle_grid.is_expandable(grid_pt):
+                return 0.0
+            # update min distance (Euclidean to occupied cells could be added here)
+        return np.clip(min_dist / 10.0, 0.0, 1.0)  # normalized

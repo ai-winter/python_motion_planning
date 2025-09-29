@@ -88,10 +88,10 @@ markdown_extensions:
 - tables
 site_name: Python-Motion-Planning
 site_description: Motion planning algorithms for Python.
-site_author: Yang Haodong, Wu Maojia
+site_author: Wu Maojia, Yang Haodong
 site_url: http://localhost:8000
 use_directory_urls: false
-copyright: Copyright @ 2023-2025, Yang Haodong, Wu Maojia.
+copyright: Copyright @ 2023-2025, Wu Maojia, Yang Haodong.
 repo_url: https://github.com/ai-winter/python_motion_planning/
 nav:
 - Home: index.md
@@ -253,9 +253,9 @@ plugins:
         paths:
         - pykit_tools
         options:
-          extensions:
-          - griffe_inherited_docstrings
-          - docstring_inheritance.griffe
+          # extensions:
+          # - griffe_inherited_docstrings
+          # - docstring_inheritance.griffe
           heading_level: 2
           show_root_heading: true
           show_symbol_type: true

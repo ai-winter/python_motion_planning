@@ -21,6 +21,7 @@ class ToySimulator(BaseWorld):
         obstacle_grid: obstacle grid
         friction: the linear friction coefficient
         restitution: the boundary/collision restitution coefficient [0,1]
+        noise: coefficient of random noise (normal distribution) acceleration proportional to speed exerted to robot [0,1]
         max_episode_steps: the maximum number of steps per episode
         robot_collisions: whether to resolve robot collisions
         boundary_collisions: whether to resolve boundary collisions
@@ -30,6 +31,7 @@ class ToySimulator(BaseWorld):
                  obstacle_grid: Grid = Grid(),
                  friction: float = 0.015,
                  restitution: float = 0.3,
+                 noise: float = 0.01,
                  max_episode_steps: int = 1000,
                  robot_collisions: bool = True,
                  boundary_collisions: bool = True):
@@ -39,6 +41,7 @@ class ToySimulator(BaseWorld):
         self.obstacle_grid = obstacle_grid
         self.friction = float(friction)
         self.restitution = float(restitution)
+        self.noise = float(noise)
         self.max_episode_steps = int(max_episode_steps)
         self.robot_collisions = robot_collisions
         self.boundary_collisions = boundary_collisions
@@ -70,7 +73,7 @@ class ToySimulator(BaseWorld):
         # apply environment forces -> compute net acceleration: robot_net_acc = robot.acc + robot_env_acc (friction)
         for rid, robot in self.robots.items():
             # friction as linear damping: a_fric = -friction * v / mass
-            env_acc = self.calculate_frictional_acc(robot)
+            env_acc = self.calculate_frictional_acc(robot) + self.generate_env_noise_acc(robot)
             robot.step(env_acc, self.dt)
             
         # collisions: pairwise robot-robot elastic collisions and boundary collisions
@@ -100,6 +103,13 @@ class ToySimulator(BaseWorld):
         if np.linalg.norm(fri_acc * self.dt) > np.linalg.norm(robot.vel):
             fri_acc = -robot.vel / self.dt
         return fri_acc
+
+    def generate_env_noise_acc(self, robot: BaseRobot) -> np.ndarray:
+        if np.linalg.norm(robot.vel) < 1e-6:
+            return np.zeros(robot.pose_dim)
+        std = np.abs(robot.vel) * self.noise + 1e-10
+        noise_acc = np.random.normal(loc=0.0, scale=std, size=robot.vel.shape)
+        return noise_acc
 
     def _resolve_robot_collisions(self):
         """
@@ -173,10 +183,10 @@ class ToySimulator(BaseWorld):
                             dist = dist_sq**0.5 if dist_sq > 1e-8 else 1e-8
                             # normal vector
                             nx, ny = dx / dist, dy / dist
-                            # positional correction (simple)
-                            overlap = robot.radius - dist
-                            robot.pos = np.array([robot.pos[0] + nx * overlap,
-                                         robot.pos[1] + ny * overlap])
+                            # # positional correction (simple)
+                            # overlap = robot.radius - dist
+                            # robot.pos = np.array([robot.pos[0] + nx * overlap,
+                            #              robot.pos[1] + ny * overlap])
                             # velocity reflection
                             vn = robot.lin_vel[0] * nx + robot.lin_vel[1] * ny
                             if vn < 0:  # reflect only if moving towards the cell

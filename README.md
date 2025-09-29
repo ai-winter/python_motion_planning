@@ -8,7 +8,7 @@
 * `Path Planning`: It's based on path constraints (such as obstacles), planning the optimal path sequence for the robot to travel without conflict between the start and goal.
 * `Trajectory planning`: It plans the motion state to approach the global path based on kinematics, dynamics constraints and path sequence.
 
-This repository provides the implementations of common `Motion planning` algorithms. **Your stars and forks are welcome**. Maintaining this repository requires a huge amount of work. **Therefore, you are also welcome to contribute to this repository by opening issues, submitting pull requests or joining our development team**.
+This repository provides the implementations of common `Motion planning` algorithms. **Your stars and forks are welcome**. Maintaining this repository requires a huge amount of work. **Therefore, you are also welcome to contribute to this repository by opening issues.**. If you want to submit pull requests or joining our development team, please [contact](#contact) us before you contribute.
 
 The theory analysis can be found at [motion-planning](https://blog.csdn.net/frigidwinter/category_11410243.html).
 
@@ -181,6 +181,15 @@ Planner      | Version                                                          
 ## Curve Generation
 
 * [Dubins: ]() On curves of minimal length with a constraint on average curvature, and with prescribed initial and terminal positions and tangents
+
+# Contact
+
+Maintainers:
+
+* [@omigeft](https://github.com/omigeft) (Wu Maojia)
+* [@ai-winter](https://github.com/ai-winter) (Yang Haodong)
+
+You can contact us via the information provided on our profile.
 
 # Acknowledgment
 

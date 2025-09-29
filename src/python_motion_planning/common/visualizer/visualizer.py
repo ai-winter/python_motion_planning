@@ -6,6 +6,7 @@
 """
 from typing import Union, Dict
 from collections import namedtuple
+import time
 
 import numpy as np
 import matplotlib
@@ -90,9 +91,6 @@ class Visualizer:
         else:
             raise NotImplementedError(f"Grid map with ndim={grid_map.ndim} not supported.")
 
-    def set_title(self, title: str) -> None:
-        plt.title(title)
-
     def plot_path(self, path: list, style: str = "-", color: str = "#13ae00", label: str = None, linewidth: float = 2, marker: str = None) -> None:
         '''
         Plot path-like information.
@@ -141,7 +139,8 @@ class Visualizer:
             return patch, text
 
     def render_toy_simulator(self, env: ToySimulator, controllers: Dict[str, BaseController], steps: int = 1000, interval: int = 50,
-            show_traj: bool = True, traj_style: str = '-', traj_color: Dict[str, str] = None, traj_alpha: float = 0.7, traj_width = 1.5) -> None:
+            show_traj: bool = True, traj_style: str = '-', traj_color: Dict[str, str] = None, traj_alpha: float = 0.7, traj_width = 1.5,
+            show_env_info: bool = False, limit_rtf: bool = True) -> None:
         if traj_color is None:
             traj_color = {rid: robot.color for rid, robot in env.robots.items()}
 
@@ -151,7 +150,14 @@ class Visualizer:
 
         trajectories = {rid: [] for rid in env.robots}
 
+        last_time = time.time()
+        if show_env_info:
+            env_info_text_black = self.ax.text(0.02, 0.95, "", transform=self.ax.transAxes, ha="left", va="top", alpha=0.5, color="black")
+            env_info_text_white = self.ax.text(0.02, 0.95, "", transform=self.ax.transAxes, ha="left", va="top", alpha=0.5, color="white")
+
         def update(frame):
+            nonlocal last_time
+
             # 每帧只更新机器人，不清理整个画布
             patches = []
             texts = []
@@ -194,11 +200,29 @@ class Visualizer:
                         traj_line, = self.ax.plot(traj_x, traj_y, traj_style, color=traj_color[rid], alpha=traj_alpha, linewidth=traj_width)
                         patches.append(traj_line)
 
+            elapsed = time.time() - last_time
+            if limit_rtf and elapsed < env.dt:
+                time.sleep(env.dt - elapsed)
+                elapsed = time.time() - last_time
+
+            if show_env_info:
+                sim_time = env.step_count * env.dt
+                rtf = env.dt / elapsed
+                env_info_text_black.set_text(f"Step: {env.step_count}, Time: {sim_time:.3f}s, RTF: {rtf:.3f}")
+                env_info_text_white.set_text(f"Step: {env.step_count}, Time: {sim_time:.3f}s, RTF: {rtf:.3f}")
+                texts.append(env_info_text_black)
+                texts.append(env_info_text_white)
+
+            last_time = time.time()
+
             return patches + texts
 
         self.ani = animation.FuncAnimation(
             self.fig, update, frames=steps, interval=interval, blit=True, repeat=False
         )
+
+    def set_title(self, title: str) -> None:
+        plt.title(title)
 
     def connect(self, name: str, func) -> None:
         self.fig.canvas.mpl_connect(name, func)
