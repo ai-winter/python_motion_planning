@@ -13,7 +13,7 @@ class BasePathPlanner(ABC):
     """
     Class for building path planner.
 
-    Parameters:
+    Args:
         map_: The map which the planner is based on.
         start: The start point of the planner in the map coordinate system.
         goal: The goal point of the planner in the map coordinate system.
@@ -21,6 +21,8 @@ class BasePathPlanner(ABC):
     def __init__(self, map_: BaseMap, start: tuple, goal: tuple) -> None:
         super().__init__()
         self.map_ = map_
+        self.start = start
+        self.goal = goal
         self.failed_info = [], {"success": False, "start": None, "goal": None, "length": 0, "cost": 0, "expand": []}
 
     @abstractmethod

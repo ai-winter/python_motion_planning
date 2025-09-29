@@ -56,7 +56,7 @@ def generate_api_docs(root_folder: str, output_folder: str, index_file: str, mkd
 
                 module_path = file_path.replace('.py', '').replace('/', '.').replace('\\', '.')
                 # Create a corresponding output directory that mirrors the input directory's structure
-                output_dir = os.path.join(output_folder, relative_root, file.replace('.py', ''))
+                output_dir = os.path.join(output_folder, 'api', relative_root, file.replace('.py', ''))
                 os.makedirs(output_dir, exist_ok=True)
 
                 # Generate Markdown files for each class
@@ -98,13 +98,13 @@ def generate_api_docs(root_folder: str, output_folder: str, index_file: str, mkd
         # write_nav(nav_structure)
 
     # Build the nav section of mkdocs.yml
-    nav = [{"Home": "index.md"}]
+    nav = [{"Home": "index.md"}, {"API Reference": []}]
     def build_nav(current_nav) -> list:
         if isinstance(current_nav, dict):
             return [{category: build_nav(subcategories)} for category, subcategories in sorted(current_nav.items())]
         else:
             return current_nav
-    nav.extend(build_nav(nav_structure))
+    nav[1]["API Reference"].extend(build_nav(nav_structure))
 
     print("\nGenerated nav for mkdocs.yml:")
     print(yaml.dump({"nav": nav}, allow_unicode=True, sort_keys=False))

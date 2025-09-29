@@ -19,7 +19,7 @@ class GridTypeMap:
     """
     Class for Grid Type Map. It is like a np.ndarray, except that its shape and dtype are fixed.
 
-    Parameters:
+    Args:
         type_map: The np.ndarray type map.
 
     Examples:
@@ -103,7 +103,7 @@ class Grid(BaseMap):
     For each dimension, the conversion equation is: shape_grid = shape_world * resolution + 1
     For example, if the base world is (30, 40) and the resolution is 0.5, the grid map will be (30 * 0.5 + 1, 40 * 0.5 + 1) = (61, 81).
 
-    Parameters:
+    Args:
         bounds: The size of map in the world (shape: (n, 2) (n>=2)). bounds[i, 0] means the lower bound of the world in the i-th dimension. bounds[i, 1] means the upper bound of the world in the i-th dimension.
         resolution: resolution of the grid map
         type_map: initial type map of the grid map (its shape must be the same as the converted grid map shape, and its dtype must be int)
@@ -226,7 +226,7 @@ class Grid(BaseMap):
         """
         Convert map coordinates to world coordinates.
         
-        Parameters:
+        Args:
             point: Point in map coordinates.
         
         Returns:
@@ -241,7 +241,7 @@ class Grid(BaseMap):
         """
         Convert world coordinates to map coordinates.
         
-        Parameters:
+        Args:
             point: Point in world coordinates.
         
         Returns:
@@ -256,7 +256,7 @@ class Grid(BaseMap):
         """
         Get the distance between two points.
 
-        Parameters:
+        Args:
             p1: Start point.
             p2: Goal point.
         
@@ -269,7 +269,7 @@ class Grid(BaseMap):
         """
         Check if a point is within the bounds of the grid map.
         
-        Parameters:
+        Args:
             point: Point to check.
         
         Returns:
@@ -287,17 +287,20 @@ class Grid(BaseMap):
                 return False
         return True
 
-    def is_expandable(self, point: tuple) -> bool:
+    def is_expandable(self, point: tuple, source_grid: int = TYPES.FREE) -> bool:
         """
         Check if a point is expandable.
         
-        Parameters:
+        Args:
             point: Point to check.
+            source_grid: Source grid type (if it is inflation, it can go to an inflated grid).
         
         Returns:
             expandable: True if the point is expandable, False otherwise.
         """
-        return not self.type_map[point] == TYPES.OBSTACLE and not self.type_map[point] == TYPES.INFLATION and self.within_bounds(point)
+        if source_grid == TYPES.INFLATION:
+            self.within_bounds(point) and not self.type_map[point] == TYPES.OBSTACLE
+        return self.within_bounds(point) and not self.type_map[point] == TYPES.OBSTACLE and not self.type_map[point] == TYPES.INFLATION
 
     def get_neighbors(self, 
                     node: Node, 
@@ -306,7 +309,7 @@ class Grid(BaseMap):
         """
         Get neighbor nodes of a given node.
         
-        Parameters:
+        Args:
             node: Node to get neighbor nodes.
             diagonal: Whether to include diagonal neighbors.
         
@@ -337,7 +340,7 @@ class Grid(BaseMap):
         #             neighbor_node = Node(point, parent=current_point)
         #             neighbors.append(neighbor_node)
         for neighbor in neighbors:
-            if self.is_expandable(neighbor.current):
+            if self.is_expandable(neighbor.current, self.type_map[node.current]):
                 filtered_neighbors.append(neighbor)
 
         # print(filtered_neighbors)
@@ -348,14 +351,14 @@ class Grid(BaseMap):
         """
         N-dimensional line of sight (Bresenham's line algorithm)
         
-        Parameters:
+        Args:
             p1: Start point of the line.
             p2: End point of the line.
         
         Returns:
             points: List of point on the line of sight.
         """
-        if not self.is_expandable(p1) or not self.is_expandable(p2):
+        if not self.is_expandable(p1, self.type_map[p2]) or not self.is_expandable(p2, self.type_map[p1]):
             return []
 
         p1 = np.array(p1)
@@ -402,14 +405,14 @@ class Grid(BaseMap):
         """
         Check if the line of sight between two points is in collision.
         
-        Parameters:
+        Args:
             p1: Start point of the line.
             p2: End point of the line.
         
         Returns:
             in_collision: True if the line of sight is in collision, False otherwise.
         """
-        if not self.is_expandable(p1) or not self.is_expandable(p2):
+        if not self.is_expandable(p1, self.type_map[p2]) or not self.is_expandable(p2, self.type_map[p1]):
             return True
 
         # Corner Case: Start and end points are the same
@@ -436,7 +439,7 @@ class Grid(BaseMap):
         current = p1
         
         # Check the start point
-        if not self.is_expandable(tuple(current)):
+        if not self.is_expandable(tuple(current), self.type_map[tuple(current)]):
             return True
         
         for _ in range(steps):
@@ -453,7 +456,7 @@ class Grid(BaseMap):
                     error[d] -= delta2[primary_axis]
             
             # Check the current point
-            if not self.is_expandable(tuple(current)):
+            if not self.is_expandable(tuple(current), self.type_map[tuple(current)]):
                 return True
         
         return False
@@ -471,7 +474,7 @@ class Grid(BaseMap):
         """
         Inflate the obstacles in the map.
         
-        Parameters:
+        Args:
             radius: Radius of the inflation.
         """
         for i in range(self.shape[0]):
@@ -488,7 +491,7 @@ class Grid(BaseMap):
         """
         Fill the expands in the map.
         
-        Parameters:
+        Args:
             expands: List of expands.
         """
         for expand in expands:

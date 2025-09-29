@@ -7,6 +7,8 @@
 import numpy as np
 import math
 
+from docstring_inheritance import GoogleDocstringInheritanceMeta
+
 from .local_planner import LocalPlanner
 from python_motion_planning.utils import Env, MathHelper
 

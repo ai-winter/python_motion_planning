@@ -11,34 +11,20 @@ class PID(PathTracker):
     """
     PID-based path-tracking controller.
 
-    Parameters:
-        observation_space: observation space ([pos, orient, lin_vel, ang_vel])
-        action_space: action space ([lin_acc, ang_acc])
-        dt: time step for control
-        path: path to follow
-        max_lin_speed: maximum linear speed of the robot
-        max_ang_speed: maximum angular speed of the robot
-        lookahead_distance: lookahead distance for path tracking
-        k_theta: weight of theta error
+    Args:
+        *args: see the parent class.
         Kp: proportional gain
         Ki: integral gain
         Kd: derivative gain
+        **kwargs: see the parent class.
     """
     def __init__(self,
-                 observation_space,
-                 action_space,
-                 dt: float,
-                 path: List[Tuple[float, ...]] = [],
-                 max_lin_speed: float = np.inf, 
-                 max_ang_speed: float = np.inf,
-                 lookahead_distance: float = 2.0,
-                 k_theta: float = 0.7,
+                 *args,
                  Kp: float = 1.0,
-                 Ki: float = 0.0,
-                 Kd: float = 0.1):
-        super().__init__(observation_space, action_space, dt,
-                         path, max_lin_speed, max_ang_speed,
-                         lookahead_distance, k_theta)
+                 Ki: float = 0.3,
+                 Kd: float = 0.3,
+                 **kwargs):
+        super().__init__(*args, **kwargs)
         self.Kp = Kp
         self.Ki = Ki
         self.Kd = Kd
@@ -59,7 +45,7 @@ class PID(PathTracker):
         """
         Calculates the action to be taken using PID control to reach the desired velocity.
 
-        Parameters:
+        Args:
             desired_vel: Desired velocity in world frame.
             vel: Current velocity in world frame.
             orient: Current orientation in world frame.

@@ -10,7 +10,7 @@ class BaseController:
     Base class for controllers.
     - The controller only knows observation_space, action_space
 
-    Parameters:
+    Args:
         observation_space: observation space ([pos, orient, lin_vel, ang_vel])
         action_space: action space ([lin_acc, ang_acc])
         dt: time step for control
@@ -61,7 +61,7 @@ class BaseController:
         """
         Get action from observation.
 
-        Parameters:
+        Args:
             obs: observation ([pos, orient, lin_vel, ang_vel])
 
         Returns:
@@ -74,7 +74,7 @@ class BaseController:
         """
         Clip the velocity to the maximum allowed value.
 
-        Parameters:
+        Args:
             v (np.ndarray): The velocity to clip.
 
         Returns:
@@ -90,7 +90,7 @@ class BaseController:
         """
         Clip action to action bounds.
 
-        Parameters:
+        Args:
             a(np.ndarray): Action vector
 
         Returns:
@@ -102,7 +102,7 @@ class BaseController:
         """
         Get pose and velocity from observation.
 
-        Parameters:
+        Args:
             obs: observation ([pos, orient, lin_vel, ang_vel])
 
         Returns:

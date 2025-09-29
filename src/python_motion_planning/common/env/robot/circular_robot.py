@@ -12,7 +12,7 @@ class CircularRobot:
     """
     Base class for circular robots with orientation support.
 
-    Parameters:
+    Args:
         dim: Space dimension
         mass: Mass of the robot
         radius: Radius of the robot
@@ -155,7 +155,7 @@ class CircularRobot:
         """
         Take a step in the simulation.
 
-        Parameters:
+        Args:
             env_acc: acceleration vector from the environment
             dt: time step size
         """
@@ -206,7 +206,7 @@ class CircularRobot:
 #     """
 #     Base class for circular robots.
 
-#     Parameters:
+#     Args:
 #         id: Unique robot ID
 #         dim: Space dimension
 #         mass: Mass of the robot
@@ -260,7 +260,7 @@ class CircularRobot:
 #         Default observation space: [pos, vel, rel_pos_robot1, rel_pos_robot2, ...], each sub-vector length=dim
 #         You can override this function to change the observation structure.
 
-#         Parameters:
+#         Args:
 #             env(BaseWorld): World environment
 
 #         Returns:
@@ -273,7 +273,7 @@ class CircularRobot:
 #         """
 #         Get observation vector for this robot.
 
-#         Parameters:
+#         Args:
 #             env(BaseWorld): World environment
 
 #         Returns:
@@ -293,7 +293,7 @@ class CircularRobot:
 #         """
 #         Clip the velocity to the maximum allowed value.
 
-#         Parameters:
+#         Args:
 #             v (np.ndarray): The velocity to clip.
 
 #         Returns:
@@ -305,7 +305,7 @@ class CircularRobot:
 #         """
 #         Clip action to action bounds.
 
-#         Parameters:
+#         Args:
 #             a(np.ndarray): Action vector
 
 #         Returns:

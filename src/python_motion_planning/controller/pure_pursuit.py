@@ -11,7 +11,7 @@ class PurePursuit(BaseController):
     """
     Class of Pure Pursuit path-tracking controller.
 
-    Parameters:
+    Args:
         observation_space: observation space ([pos, orient, lin_vel, ang_vel])
         action_space: action space ([lin_acc, ang_acc])
         dt: time step for control
@@ -44,7 +44,7 @@ class PurePursuit(BaseController):
         """
         Get action from observation.
 
-        Parameters:
+        Args:
             obs: observation ([pos, orient, lin_vel, ang_vel])
 
         Returns:
@@ -114,7 +114,7 @@ class PurePursuit(BaseController):
         """
         Calculates the action to be taken to reach the desired velocity.
 
-        Parameters:
+        Args:
             desired_vel: Desired velocity in world frame.
             vel: Current velocity in world frame.
             orient: Current orientation in world frame.
@@ -135,7 +135,7 @@ class PurePursuit(BaseController):
         If there are multiple intersections, return the one ahead of the robot along the path.
         If there are no intersections, return the closest pose on the path.
 
-        Parameters:
+        Args:
             pos: robot position (x, y)
 
         Returns:
@@ -172,7 +172,7 @@ class PurePursuit(BaseController):
         Find intersections between circle (center pos, radius r)
         and line segment p1-p2 (with orientation interpolation).
         
-        Parameters:
+        Args:
             pos: np.ndarray, circle center
             r: float, circle radius
             p1: np.ndarray, line segment start
@@ -214,7 +214,7 @@ class PurePursuit(BaseController):
         """
         Find the closest point (with theta interpolation) on a polyline path to pos.
         
-        Parameters:
+        Args:
             pos: query point (x, y)
             path: array shape (N, 3), columns = (x, y, theta)
 
@@ -265,7 +265,7 @@ class PurePursuit(BaseController):
 #     """
 #     Class of Pure Pursuit path-tracking controller.
 
-#     Parameters:
+#     Args:
 #         observation_space: observation space ([pos, vel, rel_pos_robot1, rel_pos_robot2, ...], each sub-vector length=dim)
 #         action_space: action space ([acc], length=dim)
 #         dt: time step for control
@@ -295,7 +295,7 @@ class PurePursuit(BaseController):
 #         """
 #         Get action from observation.
 
-#         Parameters:
+#         Args:
 #             obs: observation ([pos, vel, rel_pos_robot1, rel_pos_robot2, ...], each sub-vector length=dim)
 
 #         Returns:
@@ -321,7 +321,7 @@ class PurePursuit(BaseController):
 #         """
 #         Calculate the desired velocity.
 
-#         Parameters:
+#         Args:
 #             target: the lookahead point
 #             pos: the current position
 
@@ -345,7 +345,7 @@ class PurePursuit(BaseController):
 #         """
 #         Calculates the acceleration vector.
 
-#         Parameters:
+#         Args:
 #             desired_vel: The desired velocity vector.
 #             vel: The current velocity vector.
 
@@ -370,7 +370,7 @@ class PurePursuit(BaseController):
 #         If there are multiple intersections, return the one ahead of the robot along the path.
 #         If there are no intersections, return the closest point on the path.
 
-#         Parameters:
+#         Args:
 #             pos: robot position
 
 #         Returns:

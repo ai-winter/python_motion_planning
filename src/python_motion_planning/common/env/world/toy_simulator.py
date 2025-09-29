@@ -15,10 +15,10 @@ class ToySimulator(BaseWorld):
     """
     Toy Simulator that supports multi-robot navigation in N-dimensions.
 
-    Parameters:
+    Args:
         dim: dimension of the world (required >= 2)
-        obstacle_grid: obstacle grid
         dt: the time step size
+        obstacle_grid: obstacle grid
         friction: the linear friction coefficient
         restitution: the boundary/collision restitution coefficient [0,1]
         max_episode_steps: the maximum number of steps per episode
@@ -26,17 +26,17 @@ class ToySimulator(BaseWorld):
         boundary_collisions: whether to resolve boundary collisions
     """
     def __init__(self, dim: int = 2,
-                 obstacle_grid: Grid = Grid(),
                  dt: float = 0.1,
+                 obstacle_grid: Grid = Grid(),
                  friction: float = 0.015,
-                 restitution: float = 0.9,
+                 restitution: float = 0.3,
                  max_episode_steps: int = 1000,
                  robot_collisions: bool = True,
                  boundary_collisions: bool = True):
         super().__init__()
         self.dim = dim
-        self.obstacle_grid = obstacle_grid
         self.dt = float(dt)
+        self.obstacle_grid = obstacle_grid
         self.friction = float(friction)
         self.restitution = float(restitution)
         self.max_episode_steps = int(max_episode_steps)
@@ -48,7 +48,7 @@ class ToySimulator(BaseWorld):
         """
         Execute one time step in the environment.
 
-        Parameters:
+        Args:
             actions: dict mapping robot_index -> acceleration ndarray (dim,)
                 1) clip to robot action bounds
                 2) apply environment forces (friction) and integrate via semi-implicit Euler
@@ -202,7 +202,7 @@ class ToySimulator(BaseWorld):
 #     """
 #     Toy Simulator that supports multi-robot navigation in N-dimensions.
 
-#     Parameters:
+#     Args:
 #         dim: dimension of the world (required >= 2)
 #         obstacle_grid: obstacle grid
 #         dt: the time step size
@@ -235,7 +235,7 @@ class ToySimulator(BaseWorld):
 #         """
 #         Execute one time step in the environment.
 
-#         Parameters:
+#         Args:
 #             actions: dict mapping robot_index -> acceleration ndarray (dim,)
 #                 1) clip to robot action bounds
 #                 2) apply environment forces (friction) and integrate via semi-implicit Euler

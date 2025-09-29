@@ -7,12 +7,16 @@ from .geometry import Geometry
 
 
 class FrameTransformer:
+    """
+    Class for transforming between world and robot frames.
+    """
+
     @staticmethod
     def lin_vel_world_to_robot(dim: int, lin_vel: np.ndarray, orient: np.ndarray) -> np.ndarray:
         """
         Transform linear velocity from world frame to robot frame.
 
-        Parameters:
+        Args:
             dim (int): Space dimension.
             lin_vel (np.ndarray): Linear velocity in world frame [vx, vy] (2D) or [vx, vy, vz] (3D).
             orient (np.ndarray): Orientation of the robot.
@@ -37,7 +41,7 @@ class FrameTransformer:
         """
         Transform velocity from world frame to robot frame.
 
-        Parameters:
+        Args:
             dim (int): Space dimension.
             vel (np.ndarray): Velocity (linear and angular) in world frame.
             orient (np.ndarray): Orientation of the robot.
@@ -54,7 +58,7 @@ class FrameTransformer:
         """
         Transform linear velocity from robot frame to world frame.
 
-        Parameters:
+        Args:
             dim (int): Space dimension.
             lin_vel (np.ndarray): Linear velocity in robot frame.
             orient (np.ndarray): Orientation of the robot.
@@ -79,7 +83,7 @@ class FrameTransformer:
         """
         Transform velocity from robot frame to world frame.
 
-        Parameters:
+        Args:
             dim (int): Space dimension.
             vel (np.ndarray): Velocity (linear and angular) in robot frame.
             orient (np.ndarray): Orientation of the robot.
@@ -96,7 +100,7 @@ class FrameTransformer:
         """
         Transform a pos from world frame to robot frame.
         
-        Parameters:
+        Args:
             dim (int): Space dimension.
             pos_world (np.ndarray): Pos coordinates in world frame.
             robot_pose (np.ndarray): Robot pose in world frame.
@@ -128,7 +132,7 @@ class FrameTransformer:
         """
         Transform a pose (position and orientation) from world frame to robot frame.
         
-        Parameters:
+        Args:
             dim (int): Space dimension.
             pose_world (np.ndarray): Pose in world frame.
             robot_pose (np.ndarray): Robot pose in world frame.
@@ -156,7 +160,7 @@ class FrameTransformer:
         """
         Transform a pos from robot frame to world frame.
         
-        Parameters:
+        Args:
             dim (int): Space dimension.
             pos_robot (np.ndarray): Pos coordinates in robot frame.
             robot_pose (np.ndarray): Robot pose in world frame.
@@ -187,7 +191,7 @@ class FrameTransformer:
         """
         Transform a pose (position and orientation) from robot frame to world frame.
         
-        Parameters:
+        Args:
             dim (int): Space dimension.
             pose_robot (np.ndarray): Pose in robot frame.
             robot_pose (np.ndarray): Robot pose in world frame.

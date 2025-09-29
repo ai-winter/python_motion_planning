@@ -27,7 +27,7 @@ class BaseWorld(gym.Env):
         """
         Add a robot to the world.
 
-        Parameters:
+        Args:
             rid: unique robot id
             robot: robot instance
         """
@@ -39,7 +39,7 @@ class BaseWorld(gym.Env):
         """
         Reset the environment.
         
-        Parameters:
+        Args:
             seed: random seed
 
         Returns:
@@ -58,7 +58,7 @@ class BaseWorld(gym.Env):
         """
         Execute one time step in the environment.
 
-        Parameters:
+        Args:
             actions: dict mapping robot_index -> acceleration ndarray (dim,)
 
         Returns:
@@ -82,7 +82,7 @@ class BaseWorld(gym.Env):
         """
         Render the environment.
         
-        Parameters:
+        Args:
             mode: rendering mode
             ax: matplotlib axis to render to
         """
@@ -97,7 +97,7 @@ class BaseWorld(gym.Env):
         """
         Build observation and action spaces for given robot
 
-        Parameters:
+        Args:
             robot: given robot
         
         Returns:

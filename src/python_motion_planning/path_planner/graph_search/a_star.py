@@ -14,10 +14,12 @@ class AStar(BasePathPlanner):
     """
     Class for A* path planner.
 
-    Parameters:
-        map_: The map which the planner is based on.
-        start: The start point of the planner in the map coordinate system.
-        goal: The goal point of the planner in the map coordinate system.
+    Args:
+        *args: see the parent class.
+        *kwargs: see the parent class.
+
+    References:
+        [1] A Formal Basis for the heuristic Determination of Minimum Cost Paths
 
     Examples:
         >>> map_ = Grid(bounds=[[0, 15], [0, 15]])
@@ -31,14 +33,9 @@ class AStar(BasePathPlanner):
 
         >>> AStar(map_=map_, start=(6, 6), goal=(10, 10)).plan()
         ([], {'success': False, 'start': None, 'goal': None, 'length': 0, 'cost': 0, 'expand': []})
-
-    References:
-        [1] A Formal Basis for the heuristic Determination of Minimum Cost Paths
     """
-    def __init__(self, map_: BaseMap, start: tuple, goal: tuple) -> None:
-        super().__init__(map_, start, goal)
-        self.start = start
-        self.goal = goal
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
 
     def __str__(self) -> str:
         return "A*"
@@ -47,7 +44,7 @@ class AStar(BasePathPlanner):
         """
         Get the cost between two points. (default: distance defined in the map)
 
-        Parameters:
+        Args:
             p1: Start point.
             p2: Goal point.
         
@@ -60,7 +57,7 @@ class AStar(BasePathPlanner):
         """
         Get the heuristic value of the point. (default: cost between current point and goal point)
 
-        Parameters:
+        Args:
             p1: Start point.
             p2: Goal point.
         
@@ -133,7 +130,7 @@ class AStar(BasePathPlanner):
         """
         Extract the path based on the CLOSED list.
 
-        Parameters:
+        Args:
             closed_list (dict): CLOSED list
 
         Returns:

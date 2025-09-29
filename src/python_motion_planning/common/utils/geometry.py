@@ -10,12 +10,16 @@ import math
 import numpy as np
 
 class Geometry:
+    """
+    Geometry tools class
+    """
+
     @staticmethod
     def dist(p1: tuple, p2: tuple, type: str = 'Euclidean') -> float:
         """
         Calculate the distance between two points
 
-        Parameters:
+        Args:
             p1: First point
             p2: Second point
             type: Type of distance calculation, either 'Euclidean' or 'Manhattan'
@@ -32,12 +36,12 @@ class Geometry:
         else:
             raise ValueError("Invalid distance type")
 
-    @staticmethod
+    # @staticmethod
     # def angle(v1: tuple, v2: tuple) -> float:
     #     """
     #     Calculate the angle between two vectors
 
-    #     Parameters:
+    #     Args:
     #         v1: First vector
     #         v2: Second vector
 
@@ -74,7 +78,7 @@ class Geometry:
         """
         Add orientation information to a 2D point path. Each point in the path has a third value representing the angle (in radians) between the current point and the next point.
 
-        Parameters:
+        Args:
             path: a list of 2D points
             
         Returns:

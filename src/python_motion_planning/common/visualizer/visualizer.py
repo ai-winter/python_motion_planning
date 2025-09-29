@@ -42,7 +42,7 @@ class Visualizer:
         '''
         Plot grid map with static obstacles.
 
-        Parameters:
+        Args:
             map: Grid map or its type map.
             equal: Whether to set axis equal.
             alpha: Alpha of occupancy for 3d visualization.
@@ -98,7 +98,7 @@ class Visualizer:
         Plot path-like information.
         The meaning of parameters are similar to matplotlib.pyplot.plot (https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html).
 
-        Parameters:
+        Args:
             path: point list of path
             style: style of path
             color: color of path
@@ -255,7 +255,7 @@ class Visualizer:
 #         '''
 #         Plot grid map with static obstacles.
 
-#         Parameters:
+#         Args:
 #             map: Grid map or its type map.
 #             equal: Whether to set axis equal.
 #             alpha: Alpha of occupancy for 3d visualization.
@@ -311,7 +311,7 @@ class Visualizer:
 #         Plot path-like information.
 #         The meaning of parameters are similar to matplotlib.pyplot.plot (https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html).
 
-#         Parameters:
+#         Args:
 #             path: point list of path
 #             style: style of path
 #             color: color of path
@@ -475,7 +475,7 @@ class Visualizer:
     #     '''
     #     Plot agent with specifical pose.
 
-    #     Parameters
+    #     Args
     #     ----------
     #     pose: Pose of agent
     #     radius: Radius of agent

@@ -10,8 +10,9 @@ class DiffDriveRobot(CircularRobot):
     """
     Differential drive robot with non-holonomic constraints.
     Inherits from CircularRobot and overrides the dynamics.
+    action space should be [longitudinal_vel, 0.0, angular_vel] (lateral velocity should be 0.0)
 
-    Parameters:
+    Args:s
         wheel_base: Distance between left and right wheels
         wheel_radius: Radius of wheels (for conversion between wheel speed and linear velocity)
         Other parameters are the same as CircularRobot.
@@ -20,6 +21,9 @@ class DiffDriveRobot(CircularRobot):
         super().__init__(**kwargs)
         if self.dim != 2:
             raise NotImplementedError("DiffDriveRobot only supports 2D")
+
+        self.action_min[1] = 0.0
+        self.action_max[1] = 0.0
 
         self.wheel_base = float(wheel_base)
         self.wheel_radius = float(wheel_radius)
@@ -51,7 +55,7 @@ class DiffDriveRobot(CircularRobot):
         Take a step in simulation using differential drive kinematics.
         self.acc and self.vel are in world frame. You have to transform them into robot frame if needed.
 
-        Parameters:
+        Args:
             env_acc: acceleration vector from environment
             dt: time step size
         """

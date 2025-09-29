@@ -16,7 +16,7 @@ class BaseMap(ABC):
     """
     Base class for Path Planning Map.
 
-    Parameters:
+    Args:
         bounds: The size of map in the world (shape: (n, 2) (n>=2)). bounds[i, 0] means the lower bound of the world in the i-th dimension. bounds[i, 1] means the upper bound of the world in the i-th dimension.  
         dtype: data type of coordinates
     """
@@ -49,7 +49,7 @@ class BaseMap(ABC):
         """
         Convert map coordinates to world coordinates.
         
-        Parameters:
+        Args:
             point: Point in map coordinates.
         
         Returns:
@@ -62,7 +62,7 @@ class BaseMap(ABC):
         """
         Convert world coordinates to map coordinates.
         
-        Parameters:
+        Args:
             point: Point in world coordinates.
         
         Returns:
@@ -75,7 +75,7 @@ class BaseMap(ABC):
         """
         Get the distance between two points.
 
-        Parameters:
+        Args:
             p1: First point.
             p2: Second point.
         
@@ -89,7 +89,7 @@ class BaseMap(ABC):
         """
         Get neighbor nodes of a given node.
         
-        Parameters:
+        Args:
             node: Node to get neighbor nodes.
         
         Returns:
@@ -102,7 +102,7 @@ class BaseMap(ABC):
         """
         Check if a point is expandable.
         
-        Parameters:
+        Args:
             point: Point to check.
         
         Returns:
@@ -115,7 +115,7 @@ class BaseMap(ABC):
         """
         Check if the line of sight between two points is in collision.
         
-        Parameters:
+        Args:
             p1: Start point of the line.
             p2: End point of the line.
         

@@ -11,28 +11,23 @@ class PathTracker(BaseController):
     """
     Class of path-tracking controller.
 
-    Parameters:
-        observation_space: observation space ([pos, orient, lin_vel, ang_vel])
-        action_space: action space ([lin_acc, ang_acc])
-        dt: time step for control
-        path: path to follow
-        max_lin_speed: maximum linear speed of the robot
-        max_ang_speed: maximum angular speed of the robot
+    Args:
+        *args: see the parent class.
         lookahead_distance: lookahead distance for path tracking
         k_theta: weight of theta error
+        pose_interp: whether to interpolate between poses. if not, poses on the segments are last pose
+        **kwargs: see the parent class.
     """
     def __init__(self,
-                 observation_space,
-                 action_space,
-                 dt: float,
-                 path: List[Tuple[float, ...]] = [],
-                 max_lin_speed: float = np.inf, 
-                 max_ang_speed: float = np.inf,
-                 lookahead_distance: float = 2.0,
-                 k_theta: float = 0.7):
-        super().__init__(observation_space, action_space, dt, path, max_lin_speed, max_ang_speed)
+                 *args,
+                 lookahead_distance: float = 1.5,
+                 k_theta: float = 0.8,
+                 pose_interp: bool = False,
+                 **kwargs):
+        super().__init__(*args, **kwargs)
         self.lookahead_distance = lookahead_distance
         self.k_theta = k_theta
+        self.pose_interp = pose_interp
         self.current_target_index = 0
 
     def reset(self):
@@ -46,7 +41,7 @@ class PathTracker(BaseController):
         """
         Get action from observation.
 
-        Parameters:
+        Args:
             obs: observation in world frame ([pos, orient, lin_vel, ang_vel])
 
         Returns:
@@ -72,7 +67,7 @@ class PathTracker(BaseController):
         """
         Calculate the desired velocity in robot frame.
 
-        Parameters:
+        Args:
             target_pose: target pose in world frame
             cur_pose: current pose in world frame
 
@@ -114,7 +109,7 @@ class PathTracker(BaseController):
         """
         Calculates the action to be taken to reach the desired velocity.
 
-        Parameters:
+        Args:
             desired_vel: Desired velocity in robot frame.
             vel: Current velocity in robot frame.
             orient: Current orientation in world frame.
@@ -134,7 +129,7 @@ class PathTracker(BaseController):
         If there are multiple intersections, return the one ahead of the robot along the path.
         If there are no intersections, return the closest pose on the path.
 
-        Parameters:
+        Args:
             pos: robot position (x, y)
 
         Returns:
@@ -171,7 +166,7 @@ class PathTracker(BaseController):
         Find intersections between circle (center pos, radius r)
         and line segment p1-p2 (with orientation interpolation).
         
-        Parameters:
+        Args:
             pos: np.ndarray, circle center
             r: float, circle radius
             p1: np.ndarray, line segment start
@@ -202,7 +197,9 @@ class PathTracker(BaseController):
         for t in (t1, t2):
             if 0.0 <= t <= 1.0:
                 xy = p1 + t * d
-                theta = theta1 + t * (theta2 - theta1)
+                theta = theta1
+                if self.pose_interp:
+                    theta += t * (theta2 - theta1)
                 theta = Geometry.regularize_orient(theta)
                 pose = np.array([xy[0], xy[1], theta])
                 intersections.append((t, pose))
@@ -213,7 +210,7 @@ class PathTracker(BaseController):
         """
         Find the closest point (with theta interpolation) on a polyline path to pos.
         
-        Parameters:
+        Args:
             pos: query point (x, y)
             path: array shape (N, 3), columns = (x, y, theta)
 
@@ -240,8 +237,11 @@ class PathTracker(BaseController):
                 proj = p2
                 theta_proj = path[i + 1, 2]
             else:
-                proj = p1 + t * d
-                theta_proj = Geometry.regularize_orient(path[i, 2] + t * (path[i + 1, 2] - path[i, 2]))
+                proj = p1 + y * d
+                theta_proj = path[i, 2]
+                if self.pose_interp:
+                    theta_proj += t * (path[i + 1, 2] - path[i, 2])
+                theta_proj = Geometry.regularize_orient(theta_proj)
 
             dist_sq = np.dot(pos - proj, pos - proj)
             if dist_sq < min_dist_sq:

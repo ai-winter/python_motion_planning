@@ -15,17 +15,16 @@ class ThetaStar(AStar):
     """
     Class for Theta* path planner.
 
-    Parameters:
-        map_: The map which the planner is based on.
-        start: The start point of the planner in the map coordinate system.
-        goal: The goal point of the planner in the map coordinate system.
+    Args:
+        *args: see the parent class.
+        **kwargs: see the parent class.
 
     References:
         [1] Theta*: Any-Angle Path Planning on Grids
         [2] Any-angle path planning on non-uniform costmaps
     """
-    def __init__(self, map_: BaseMap, start: tuple, goal: tuple) -> None:
-        super().__init__(map_, start, goal)
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
 
     def __str__(self) -> str:
         return "Theta*"
@@ -100,7 +99,7 @@ class ThetaStar(AStar):
         """
         Update extend node information with current node's parent node.
 
-        Parameters:
+        Args:
             node_p (Node): parent node
             node_n (Node): next node
         """
