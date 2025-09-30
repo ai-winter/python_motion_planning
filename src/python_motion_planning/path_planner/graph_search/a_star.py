@@ -84,7 +84,7 @@ class AStar(BasePathPlanner):
             node = heapq.heappop(OPEN)
 
             # obstacle found
-            if not self.map_.is_expandable(node.current):
+            if not self.map_.is_expandable(node.current, node.parent):
                 continue
 
             # exists in CLOSED list

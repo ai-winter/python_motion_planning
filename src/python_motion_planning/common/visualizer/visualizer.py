@@ -130,6 +130,8 @@ class Visualizer:
             marker: marker of path
         '''
         path = np.array(path)
+        if len(path.shape) < 2:
+            return
         if path.shape[1] == 2:
             plt.plot(path[:, 0], path[:, 1], style, lw=linewidth, color=color, label=label, marker=marker)
         elif path.shape[1] == 3:

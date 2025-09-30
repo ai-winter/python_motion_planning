@@ -309,7 +309,7 @@ class Grid(BaseMap):
         if not self.within_bounds(point):
             return False
         if src_point is not None:
-            if self._esdf[point] < self._esdf[src_point]:
+            if self._esdf[point] >= self._esdf[src_point]:
                 return True
         return not self.type_map[point] == TYPES.OBSTACLE and not self.type_map[point] == TYPES.INFLATION
 
@@ -369,9 +369,6 @@ class Grid(BaseMap):
         Returns:
             points: List of point on the line of sight.
         """
-        if not self.is_expandable(p1, p2) or not self.is_expandable(p2, p1):
-            return []
-
         p1 = np.array(p1)
         p2 = np.array(p2)
 
@@ -423,7 +420,7 @@ class Grid(BaseMap):
         Returns:
             in_collision: True if the line of sight is in collision, False otherwise.
         """
-        if not self.is_expandable(p1, p2) or not self.is_expandable(p2, p1):
+        if not self.is_expandable(p1) or not self.is_expandable(p2, p1):
             return True
 
         # Corner Case: Start and end points are the same
@@ -449,11 +446,12 @@ class Grid(BaseMap):
         steps = abs_delta[primary_axis]
         current = p1
         
-        # Check the start point
-        if not self.is_expandable(tuple(current), tuple(current)):
-            return True
+        # # Check the start point
+        # if not self.is_expandable(tuple(current)):
+        #     return True
         
         for _ in range(steps):
+            last_point = current.copy()
             current[primary_axis] += primary_step
             
             # Update the error for the primary dimension
@@ -467,7 +465,7 @@ class Grid(BaseMap):
                     error[d] -= delta2[primary_axis]
             
             # Check the current point
-            if not self.is_expandable(tuple(current), tuple(current)):
+            if not self.is_expandable(tuple(current), tuple(last_point)):
                 return True
         
         return False
@@ -488,15 +486,19 @@ class Grid(BaseMap):
         Args:
             radius: Radius of the inflation.
         """
+        self.update_esdf()
         for i in range(self.shape[0]):
             for j in range(self.shape[1]):
-                if self.type_map[i, j] == TYPES.OBSTACLE:
-                    for k in range(round(i-radius), round(i+radius+1)):
-                        for l in range(round(j-radius), round(j+radius+1)):
-                            if k < 0 or k >= self.shape[0] or l < 0 or l >= self.shape[1]:
-                                continue
-                            if self.type_map[k, l] == TYPES.FREE and (k - i)**2 + (l - j)**2 <= radius**2:
-                                self.type_map[k, l] = TYPES.INFLATION
+                if self.esdf[i, j] <= radius and self.type_map[i, j] == TYPES.FREE:
+                    self.type_map[i, j] = TYPES.INFLATION
+
+                # if self.type_map[i, j] == TYPES.OBSTACLE:
+                #     for k in range(round(i-radius), round(i+radius+1)):
+                #         for l in range(round(j-radius), round(j+radius+1)):
+                #             if k < 0 or k >= self.shape[0] or l < 0 or l >= self.shape[1]:
+                #                 continue
+                #             if self.type_map[k, l] == TYPES.FREE and (k - i)**2 + (l - j)**2 <= radius**2:
+                #                 self.type_map[k, l] = TYPES.INFLATION
 
     def fill_expands(self, expands: List[Node]) -> None:
         """
