@@ -12,7 +12,7 @@ class DiffDriveRobot(CircularRobot):
     Inherits from CircularRobot and overrides the dynamics.
     action space should be [longitudinal_vel, 0.0, angular_vel] (lateral velocity should be 0.0)
 
-    Args:s
+    Args:
         wheel_base: Distance between left and right wheels
         wheel_radius: Radius of wheels (for conversion between wheel speed and linear velocity)
         Other parameters are the same as CircularRobot.
@@ -22,6 +22,7 @@ class DiffDriveRobot(CircularRobot):
         if self.dim != 2:
             raise NotImplementedError("DiffDriveRobot only supports 2D")
 
+        # diff-drive robot does not have lateral control
         self.action_min[1] = 0.0
         self.action_max[1] = 0.0
 

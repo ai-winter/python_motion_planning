@@ -72,7 +72,7 @@ class Geometry:
         Regularize orientation to be within (-pi, pi]
         """
         return np.mod(orient + np.pi, 2 * np.pi) - np.pi
-
+        
     @staticmethod
     def add_orient_to_2d_path(path: List[Tuple[float, float]]) -> List[Tuple[float, float, float]]:
         """

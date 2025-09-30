@@ -9,6 +9,7 @@ from typing import Iterable, Union, Tuple, Callable, List
 import time
 
 import numpy as np
+from scipy import ndimage
 
 from .base_map import BaseMap
 from python_motion_planning.common.env import Node, TYPES
@@ -121,7 +122,7 @@ class Grid(BaseMap):
         array([[ 0., 30.],
                [ 0., 40.]])
 
-        >>> grid_map.ndim
+        >>> grid_map.dim
         2
 
         >>> grid_map.resolution
@@ -189,7 +190,7 @@ class Grid(BaseMap):
             raise ValueError("Dtype must be one of {} instead of {}".format(self._dtype_options, self._dtype))
 
         self._resolution = resolution
-        self._shape = tuple([int((self.bounds[i, 1] - self.bounds[i, 0]) / self.resolution) for i in range(self.ndim)])
+        self._shape = tuple([int((self.bounds[i, 1] - self.bounds[i, 0]) / self.resolution) for i in range(self.dim)])
 
         if type_map is None:
             self.type_map = GridTypeMap(np.zeros(self._shape, dtype=np.int8))
@@ -207,6 +208,9 @@ class Grid(BaseMap):
                 raise ValueError("Type map must be GridTypeMap or numpy.ndarray instead of {}".format(type(type_map)))
 
         self._precompute_offsets()
+        
+        self._esdf = np.zeros(self._shape, dtype=np.float32)
+        self.update_esdf()
     
     def __str__(self) -> str:
         return "Grid(bounds={}, resolution={})".format(self.bounds, self.resolution)
@@ -222,6 +226,10 @@ class Grid(BaseMap):
     def shape(self) -> tuple:
         return self._shape
     
+    @property
+    def esdf(self) -> np.ndarray:
+        return self._esdf
+    
     def map_to_world(self, point: tuple) -> tuple:
         """
         Convert map coordinates to world coordinates.
@@ -232,7 +240,7 @@ class Grid(BaseMap):
         Returns:
             point: Point in world coordinates.
         """
-        if len(point) != self.ndim:
+        if len(point) != self.dim:
             raise ValueError("Point dimension does not match map dimension.")
 
         return tuple((x + 0.5) * self.resolution + float(self.bounds[i, 0]) for i, x in enumerate(point))
@@ -247,7 +255,7 @@ class Grid(BaseMap):
         Returns:
             point: Point in map coordinates.
         """
-        if len(point) != self.ndim:
+        if len(point) != self.dim:
             raise ValueError("Point dimension does not match map dimension.")
         
         return tuple(round((x - float(self.bounds[i, 0])) * (1.0 / self.resolution) - 0.5) for i, x in enumerate(point))
@@ -275,32 +283,35 @@ class Grid(BaseMap):
         Returns:
             bool: True if the point is within the bounds of the map, False otherwise.
         """
-        # if point.ndim != self.ndim:
+        # if point.dim != self.dim:
         #     raise ValueError("Point dimension does not match map dimension.")
 
-        # return all(0 <= point[i] < self.shape[i] for i in range(self.ndim))
-        ndim = self.ndim
+        # return all(0 <= point[i] < self.shape[i] for i in range(self.dim))
+        dim = self.dim
         shape = self.shape
         
-        for i in range(ndim):
+        for i in range(dim):
             if not (0 <= point[i] < shape[i]):
                 return False
         return True
 
-    def is_expandable(self, point: tuple, source_grid: int = TYPES.FREE) -> bool:
+    def is_expandable(self, point: tuple, src_point: tuple = None) -> bool:
         """
         Check if a point is expandable.
         
         Args:
             point: Point to check.
-            source_grid: Source grid type (if it is inflation, it can go to an inflated grid).
+            src_point: Source point.
         
         Returns:
             expandable: True if the point is expandable, False otherwise.
         """
-        if source_grid == TYPES.INFLATION:
-            self.within_bounds(point) and not self.type_map[point] == TYPES.OBSTACLE
-        return self.within_bounds(point) and not self.type_map[point] == TYPES.OBSTACLE and not self.type_map[point] == TYPES.INFLATION
+        if not self.within_bounds(point):
+            return False
+        if src_point is not None:
+            if self._esdf[point] < self._esdf[src_point]:
+                return True
+        return not self.type_map[point] == TYPES.OBSTACLE and not self.type_map[point] == TYPES.INFLATION
 
     def get_neighbors(self, 
                     node: Node, 
@@ -316,7 +327,7 @@ class Grid(BaseMap):
         Returns:
             nodes: List of neighbor nodes.
         """
-        if node.ndim != self.ndim:
+        if node.dim != self.dim:
             raise ValueError("Node dimension does not match map dimension.")
 
         # current_point = node.current.astype(self.dtype)
@@ -340,7 +351,7 @@ class Grid(BaseMap):
         #             neighbor_node = Node(point, parent=current_point)
         #             neighbors.append(neighbor_node)
         for neighbor in neighbors:
-            if self.is_expandable(neighbor.current, self.type_map[node.current]):
+            if self.is_expandable(neighbor.current, node.current):
                 filtered_neighbors.append(neighbor)
 
         # print(filtered_neighbors)
@@ -358,7 +369,7 @@ class Grid(BaseMap):
         Returns:
             points: List of point on the line of sight.
         """
-        if not self.is_expandable(p1, self.type_map[p2]) or not self.is_expandable(p2, self.type_map[p1]):
+        if not self.is_expandable(p1, p2) or not self.is_expandable(p2, p1):
             return []
 
         p1 = np.array(p1)
@@ -412,7 +423,7 @@ class Grid(BaseMap):
         Returns:
             in_collision: True if the line of sight is in collision, False otherwise.
         """
-        if not self.is_expandable(p1, self.type_map[p2]) or not self.is_expandable(p2, self.type_map[p1]):
+        if not self.is_expandable(p1, p2) or not self.is_expandable(p2, p1):
             return True
 
         # Corner Case: Start and end points are the same
@@ -439,7 +450,7 @@ class Grid(BaseMap):
         current = p1
         
         # Check the start point
-        if not self.is_expandable(tuple(current), self.type_map[tuple(current)]):
+        if not self.is_expandable(tuple(current), tuple(current)):
             return True
         
         for _ in range(steps):
@@ -456,7 +467,7 @@ class Grid(BaseMap):
                     error[d] -= delta2[primary_axis]
             
             # Check the current point
-            if not self.is_expandable(tuple(current), self.type_map[tuple(current)]):
+            if not self.is_expandable(tuple(current), tuple(current)):
                 return True
         
         return False
@@ -499,18 +510,35 @@ class Grid(BaseMap):
                 continue
             self.type_map[expand.current] = TYPES.EXPAND
 
+    def update_esdf(self) -> None:
+        """
+        Update the ESDF (signed Euclidean Distance Field) based on the obstacles in the map.
+        - Obstacle grid ESDF = 0
+        - Free grid ESDF > 0. The value is the distance to the nearest obstacle
+        """
+        obstacle_mask = (self.type_map.array == TYPES.OBSTACLE)
+        free_mask = ~obstacle_mask
+
+        # distance to obstacles
+        dist_outside = ndimage.distance_transform_edt(free_mask, sampling=self.resolution)
+        # distance to free space (internal distance of obstacles)
+        dist_inside = ndimage.distance_transform_edt(obstacle_mask, sampling=self.resolution)
+
+        self._esdf = dist_outside.astype(np.float32)
+        self._esdf[obstacle_mask] = -dist_inside[obstacle_mask]
+
     def _precompute_offsets(self):
         # Generate all possible offsets (-1, 0, +1) in each dimension
-        self._diagonal_offsets = np.array(np.meshgrid(*[[-1, 0, 1]]*self.ndim), dtype=self.dtype).T.reshape(-1, self.ndim)
+        self._diagonal_offsets = np.array(np.meshgrid(*[[-1, 0, 1]]*self.dim), dtype=self.dtype).T.reshape(-1, self.dim)
         # Remove the zero offset (current node itself)
         self._diagonal_offsets = self._diagonal_offsets[np.any(self._diagonal_offsets != 0, axis=1)]
         # self._diagonal_offsets = [Node((offset.tolist(), dtype=self.dtype)) for offset in self._diagonal_offsets]
         self._diagonal_offsets = [Node(tuple(offset.tolist())) for offset in self._diagonal_offsets]
 
         # Generate only orthogonal offsets (one dimension changes by ±1)
-        self._orthogonal_offsets = np.zeros((2*self.ndim, self.ndim), dtype=self.dtype)
-        for dim in range(self.ndim):
-            self._orthogonal_offsets[2*dim, dim] = 1
-            self._orthogonal_offsets[2*dim+1, dim] = -1
+        self._orthogonal_offsets = np.zeros((2*self.dim, self.dim), dtype=self.dtype)
+        for d in range(self.dim):
+            self._orthogonal_offsets[2*d, d] = 1
+            self._orthogonal_offsets[2*d+1, d] = -1
         # self._orthogonal_offsets = [Node((offset.tolist(), dtype=self.dtype)) for offset in self._orthogonal_offsets]
         self._orthogonal_offsets = [Node(tuple(offset.tolist())) for offset in self._orthogonal_offsets]

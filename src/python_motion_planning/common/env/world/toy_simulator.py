@@ -157,11 +157,11 @@ class ToySimulator(BaseWorld):
         grid = self.obstacle_grid.type_map
         cell_size = self.obstacle_grid.resolution
         for rid, robot in self.robots.items():
-            min_pos = (robot.pos[0] - robot.radius, robot.pos[1] - robot.radius)
-            max_pos = (robot.pos[0] + robot.radius, robot.pos[1] + robot.radius)
-            min_idx = self.obstacle_grid.world_to_map((min_pos[0], min_pos[1]))
+            min_pos = tuple(robot.pos[d] - robot.radius for d in range(self.dim))
+            max_pos = tuple(robot.pos[d] + robot.radius for d in range(self.dim))
+            min_idx = self.obstacle_grid.world_to_map(tuple(min_pos[d] for d in range(self.dim)))
             min_idx = tuple(max(0, min_idx[d]) for d in range(self.dim))
-            max_idx = self.obstacle_grid.world_to_map((max_pos[0], max_pos[1]))
+            max_idx = self.obstacle_grid.world_to_map(tuple(max_pos[d] for d in range(self.dim)))
             max_idx = tuple(min(grid.shape[d] - 1, max_idx[d]) for d in range(self.dim))
 
             for i in range(min_idx[0], max_idx[0] + 1):
@@ -183,189 +183,12 @@ class ToySimulator(BaseWorld):
                             dist = dist_sq**0.5 if dist_sq > 1e-8 else 1e-8
                             # normal vector
                             nx, ny = dx / dist, dy / dist
-                            # # positional correction (simple)
-                            # overlap = robot.radius - dist
-                            # robot.pos = np.array([robot.pos[0] + nx * overlap,
-                            #              robot.pos[1] + ny * overlap])
+                            # positional correction (simple)
+                            overlap = robot.radius - dist
+                            robot.pos = np.array([robot.pos[0] + nx * overlap,
+                                         robot.pos[1] + ny * overlap])
                             # velocity reflection
                             vn = robot.lin_vel[0] * nx + robot.lin_vel[1] * ny
                             if vn < 0:  # reflect only if moving towards the cell
                                 robot.lin_vel = np.array([robot.lin_vel[0] - (1 + self.restitution) * vn * nx,
                                             robot.lin_vel[1] - (1 + self.restitution) * vn * ny])
-
-
-
-
-# from typing import List, Dict, Tuple, Optional
-# import numpy as np
-# import gymnasium as gym
-# from gymnasium import spaces
-# import math
-
-# from python_motion_planning.common.env.types import TYPES
-# from python_motion_planning.common.env.map import Grid
-# from python_motion_planning.common.env.robot import BaseRobot
-# from .base_world import BaseWorld
-
-
-# class ToySimulator(BaseWorld):
-#     """
-#     Toy Simulator that supports multi-robot navigation in N-dimensions.
-
-#     Args:
-#         dim: dimension of the world (required >= 2)
-#         obstacle_grid: obstacle grid
-#         dt: the time step size
-#         friction: the linear friction coefficient
-#         restitution: the boundary/collision restitution coefficient [0,1]
-#         max_episode_steps: the maximum number of steps per episode
-#         robot_collisions: whether to resolve robot collisions
-#         boundary_collisions: whether to resolve boundary collisions
-#     """
-#     def __init__(self, dim: int = 2,
-#                  obstacle_grid: Grid = Grid(),
-#                  dt: float = 0.1,
-#                  friction: float = 0.1,
-#                  restitution: float = 0.9,
-#                  max_episode_steps: int = 1000,
-#                  robot_collisions: bool = True,
-#                  boundary_collisions: bool = True):
-#         super().__init__()
-#         self.dim = dim
-#         self.obstacle_grid = obstacle_grid
-#         self.dt = float(dt)
-#         self.friction = float(friction)
-#         self.restitution = float(restitution)
-#         self.max_episode_steps = int(max_episode_steps)
-#         self.robot_collisions = robot_collisions
-#         self.boundary_collisions = boundary_collisions
-#         self.step_count = 0
-
-#     def step(self, actions: Dict[int, np.ndarray]):
-#         """
-#         Execute one time step in the environment.
-
-#         Args:
-#             actions: dict mapping robot_index -> acceleration ndarray (dim,)
-#                 1) clip to robot action bounds
-#                 2) apply environment forces (friction) and integrate via semi-implicit Euler
-#                 3) handle collisions (robot-robot, robot-boundary)
-
-#         Returns:
-#             obs_dict: dict mapping robot_index -> observation ndarray (dim,)
-#             reward_dict: dict mapping robot_index -> reward scalar
-#             done_dict: dict mapping robot_index -> bool
-#             info: dict
-#         """
-#         self.step_count += 1
-#         # 1. assign actions (accelerations) to robots
-#         for rid, robot in self.robots.items():
-#             act = actions.get(rid, np.zeros(self.dim))
-#             robot.acc = robot.clip_action(np.array(act, dtype=float))
-
-#         # 2. apply environment forces -> compute net acceleration: robot_net = robot.acc + robot_env (friction)
-#         for rid, robot in self.robots.items():
-#             # friction as linear damping: a_fric = -friction * v / mass
-#             robot_env_acc = - self.friction * robot.vel / (robot.mass + 1e-12)
-#             robot_net = robot.acc + robot_env_acc
-#             # semi-implicit Euler: v += robot_net*dt, pos += v*dt
-#             robot.vel = robot.vel + robot_net * self.dt
-#             robot.vel = robot.clip_velocity(robot.vel)
-#             robot.pos = robot.pos + robot.vel * self.dt
-
-#         # 3. collisions: pairwise robot-robot elastic collisions (simple impulse) and boundary collisions
-#         if self.robot_collisions:
-#             self._resolve_robot_collisions()
-#         if self.boundary_collisions:
-#             self._resolve_boundary_collisions()
-
-#         obs = {rid: robot.get_observation(self) for rid, robot in self.robots.items()}
-#         # no rewards by default; you can extend
-#         rewards = {rid: 0.0 for rid in self.robots}
-#         dones = {rid: False for rid in self.robots}
-#         terminated = False
-#         truncated = self.step_count >= self.max_episode_steps
-#         info = {}
-#         return obs, rewards, dones, {"terminated": terminated, "truncated": truncated, **info}
-
-#     def _resolve_robot_collisions(self):
-#         """
-#         Resolve robot-robot collisions.
-#         """
-#         rids = list(self.robots.keys())
-#         n = len(rids)
-#         for i_ in range(n):
-#             for j_ in range(i_ + 1, n):
-#                 i = rids[i_]
-#                 j = rids[j_]
-#                 a = self.robots[i]
-#                 b = self.robots[j]
-#                 delta = b.pos - a.pos
-#                 dist = np.linalg.norm(delta)
-#                 min_dist = a.radius + b.radius
-#                 if dist < min_dist:
-#                     if dist < 1e-8:
-#                         # numeric edge-case: jitter them slightly
-#                         delta = np.random.randn(self.dim) * 1e-6
-#                         dist = np.linalg.norm(delta)
-
-#                     # push them apart and compute elastic collision impulse
-#                     # normal vector
-#                     nvec = delta / dist
-#                     # relative velocity along normal
-#                     rel_vel = np.dot(b.vel - a.vel, nvec)
-#                     # compute impulse scalar (elastic) with restitution
-#                     e = self.restitution
-#                     j_impulse = -(1 + e) * rel_vel / (1 / a.mass + 1 / b.mass)
-#                     if j_impulse < 0:
-#                         # apply impulse
-#                         a.vel -= (j_impulse / a.mass) * nvec
-#                         b.vel += (j_impulse / b.mass) * nvec
-#                     # positional correction (simple)
-#                     overlap = min_dist - dist
-#                     corr = nvec * (overlap / 2.0 + 1e-6)
-#                     a.pos = a.pos - corr
-#                     b.pos = b.pos + corr
-
-#     def _resolve_boundary_collisions(self):
-#         """
-#         Resolve robot-boundary collisions.
-#         """
-#         grid = self.obstacle_grid.type_map
-#         cell_size = self.obstacle_grid.resolution
-#         for rid, robot in self.robots.items():
-#             min_pos = (robot.pos[0] - robot.radius, robot.pos[1] - robot.radius)
-#             max_pos = (robot.pos[0] + robot.radius, robot.pos[1] + robot.radius)
-#             min_idx = self.obstacle_grid.world_to_map((min_pos[0], min_pos[1]))
-#             min_idx = tuple(max(0, min_idx[d]) for d in range(self.dim))
-#             max_idx = self.obstacle_grid.world_to_map((max_pos[0], max_pos[1]))
-#             max_idx = tuple(min(grid.shape[d] - 1, max_idx[d]) for d in range(self.dim))
-
-#             for i in range(min_idx[0], max_idx[0] + 1):
-#                 for j in range(min_idx[1], max_idx[1] + 1):
-#                     if grid[i, j] == TYPES.OBSTACLE:
-#                         cell_center = self.obstacle_grid.map_to_world((i, j))
-#                         cell_min = tuple(cell_center[d] - cell_size * 0.5 for d in range(self.dim))
-#                         cell_max = tuple(cell_center[d] + cell_size * 0.5 for d in range(self.dim))
-                        
-#                         # closest point in cell
-#                         closest_x = max(cell_min[0], min(robot.pos[0], cell_max[0]))
-#                         closest_y = max(cell_min[1], min(robot.pos[1], cell_max[1]))
-
-#                         dx = robot.pos[0] - closest_x
-#                         dy = robot.pos[1] - closest_y
-#                         dist_sq = dx*dx + dy*dy
-
-#                         if dist_sq < robot.radius * robot.radius:
-#                             dist = dist_sq**0.5 if dist_sq > 1e-8 else 1e-8
-#                             # normal vector
-#                             nx, ny = dx / dist, dy / dist
-#                             # positional correction (simple)
-#                             overlap = robot.radius - dist
-#                             robot.pos = np.array([robot.pos[0] + nx * overlap,
-#                                          robot.pos[1] + ny * overlap])
-#                             # velocity reflection
-#                             vn = robot.vel[0] * nx + robot.vel[1] * ny
-#                             if vn < 0:  # reflect only if moving towards the cell
-#                                 robot.vel = np.array([robot.vel[0] - (1 + self.restitution) * vn * nx,
-#                                             robot.vel[1] - (1 + self.restitution) * vn * ny])

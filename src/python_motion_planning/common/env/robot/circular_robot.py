@@ -7,6 +7,8 @@
 from typing import List, Dict, Tuple, Optional
 import numpy as np
 
+from python_motion_planning.common.utils.geometry import Geometry
+
 
 class CircularRobot:
     """
@@ -49,13 +51,13 @@ class CircularRobot:
         # Pose: position + orientation
         # 2D: [x, y, theta] where theta is angle in radians
         # 3D: [x, y, z, roll, pitch, yaw]
-        self.pose = np.zeros(self.pose_dim) if pose is None else np.array(pose, dtype=float)
-        self.vel = np.zeros(self.pose_dim) if vel is None else np.array(vel, dtype=float)
+        self._pose = np.zeros(self.pose_dim) if pose is None else np.array(pose, dtype=float)
+        self._vel = np.zeros(self.pose_dim) if vel is None else np.array(vel, dtype=float)
 
-        if len(self.pose) != self.pose_dim:
+        if len(self._pose) != self.pose_dim:
             raise ValueError(f"len(pose) must be {self.pose_dim} if dim=={self.dim}, got {len(pose)}")
         
-        if len(self.vel) != self.pose_dim:
+        if len(self._vel) != self.pose_dim:
             raise ValueError(f"len(vel) must be {self.pose_dim} if dim=={self.dim}, got {len(vel)}")
 
         self.max_lin_speed = max_lin_speed
@@ -85,44 +87,65 @@ class CircularRobot:
         self.fontsize = fontsize
 
     @property
+    def pose(self):
+        """Get position + orientation"""
+        return self._pose
+
+    @pose.setter
+    def pose(self, value: np.ndarray) -> None:
+        """Set position + orientation"""
+        self._pose[:self.dim] = value[:self.dim]
+        self._pose[self.dim:] = Geometry.regularize_orient(value[self.dim:])
+
+    @property
+    def vel(self):
+        """Get linear + angular velocity"""
+        return self._vel
+
+    @vel.setter
+    def vel(self, value: np.ndarray) -> None:
+        """Set linear + angular velocity"""
+        self._vel = value 
+
+    @property
     def pos(self):
         """Get position from pose"""
-        return self.pose[:self.dim]
+        return self._pose[:self.dim]
     
     @pos.setter
-    def pos(self, value):
+    def pos(self, value: np.ndarray):
         """Set position in pose"""
-        self.pose[:self.dim] = value
+        self._pose[:self.dim] = value
 
     @property
     def orient(self):
         """Get orientation from pose"""
-        return self.pose[self.dim:self.dim*2]
+        return self._pose[self.dim:]
 
     @orient.setter
-    def orient(self, value):
+    def orient(self, value: np.ndarray):
         """Set orientation in pose"""
-        self.pose[self.dim:self.dim*2] = value
+        self._pose[self.dim:] = Geometry.regularize_orient(value)
 
     @property
     def lin_vel(self):
         """Get linear velocity"""
-        return self.vel[:self.dim]
+        return self._vel[:self.dim]
 
     @lin_vel.setter
-    def lin_vel(self, value):
+    def lin_vel(self, value: np.ndarray):
         """Set linear velocity"""
-        self.vel[:self.dim] = value
+        self._vel[:self.dim] = value
 
     @property
     def ang_vel(self):
         """Get angular velocity"""
-        return self.vel[self.dim:self.dim*2]
+        return self._vel[self.dim:]
     
     @ang_vel.setter
-    def ang_vel(self, value):
+    def ang_vel(self, value: np.ndarray):
         """Set angular velocity"""
-        self.vel[self.dim:self.dim*2] = value
+        self._vel[self.dim:] = value
 
     def observation_size(self, env) -> int:
         """
@@ -212,124 +235,3 @@ class CircularRobot:
     def clip_action(self, a: np.ndarray) -> np.ndarray:
         """Clip action to action bounds."""
         return np.minimum(np.maximum(a, self.action_min), self.action_max)
-
-
-
-    
-
-
-# from typing import List, Dict, Tuple, Optional
-
-# import numpy as np
-
-
-# class CircularRobot:
-#     """
-#     Base class for circular robots.
-
-#     Args:
-#         id: Unique robot ID
-#         dim: Space dimension
-#         mass: Mass of the robot
-#         radius: Radius of the robot
-#         pos: Current position
-#         vel: Current velocity
-#         action_min: Minimum action bounds
-#         action_max: Maximum action bounds
-#         color: Visualization color
-#         alpha: Visualization alpha
-#         fill: Visualization fill
-#         linewidth: Visualization linewidth
-#         linestyle: Visualization linestyle
-#         text: Visualization text (visualized in the center of the robot)
-#         text_color: Visualization text color
-#         fontsize: Visualization text fontsize
-#     """
-#     def __init__(self, id: str = "1", dim: int = 2, mass: float = 1.0, radius: float = 0.1,
-#                  pos: Optional[np.ndarray] = None, vel: Optional[np.ndarray] = None, max_speed: float = np.inf,
-#                  action_min: Optional[np.ndarray] = None, action_max: Optional[np.ndarray] = None,
-#                  color: str = "C0", alpha: float = 1.0, fill: bool = True, linewidth: float = 1.0, linestyle: str = "-",
-#                  text: str = "", text_color: str = 'white', fontsize: str = None):
-#         self.dim = dim
-#         self.mass = float(mass)
-#         self.radius = float(radius)
-#         self.pos = np.zeros(dim) if pos is None else np.array(pos, dtype=float)
-#         self.vel = np.zeros(dim) if vel is None else np.array(vel, dtype=float)
-#         self.max_speed = max_speed
-#         # acceleration is set externally by controller each step
-#         self.acc = np.zeros(dim)
-#         # action bounds per-dim (controller output bounds)
-#         if action_min is None:
-#             action_min = -np.ones(dim) * 1.0
-#         if action_max is None:
-#             action_max = np.ones(dim) * 1.0
-#         self.action_min = np.array(action_min, dtype=float)
-#         self.action_max = np.array(action_max, dtype=float)
-
-#         # visualization parameters
-#         self.color = color
-#         self.alpha = alpha
-#         self.fill = fill
-#         self.linewidth = linewidth
-#         self.linestyle = linestyle
-#         self.text = text
-#         self.text_color = text_color
-#         self.fontsize = fontsize
-
-#     def observation_size(self, env) -> int:
-#         """
-#         Default observation space: [pos, vel, rel_pos_robot1, rel_pos_robot2, ...], each sub-vector length=dim
-#         You can override this function to change the observation structure.
-
-#         Args:
-#             env(BaseWorld): World environment
-
-#         Returns:
-#             int: Observation size
-#         """
-#         n_robots = len(env.robots)
-#         return 2 * self.dim + (n_robots - 1) * self.dim
-
-#     def get_observation(self, env) -> np.ndarray:
-#         """
-#         Get observation vector for this robot.
-
-#         Args:
-#             env(BaseWorld): World environment
-
-#         Returns:
-#             np.ndarray: Observation vector (Default: [pos, vel, rel_pos_robot1, rel_pos_robot2, ...], each sub-vector length=dim)
-#         """
-#         obs = []
-#         obs.extend(self.pos.tolist())
-#         obs.extend(self.vel.tolist())
-#         for rid, robot in env.robots.items():
-#             if robot is self:
-#                 continue
-#             rel = (robot.pos - self.pos)
-#             obs.extend(rel.tolist())
-#         return np.array(obs, dtype=float)
-    
-#     def clip_velocity(self, v: np.ndarray) -> np.ndarray:
-#         """
-#         Clip the velocity to the maximum allowed value.
-
-#         Args:
-#             v (np.ndarray): The velocity to clip.
-
-#         Returns:
-#             np.ndarray: The clipped velocity.
-#         """
-#         return v if np.linalg.norm(v) <= self.max_speed else v / np.linalg.norm(v) * self.max_speed
-
-#     def clip_action(self, a: np.ndarray) -> np.ndarray:
-#         """
-#         Clip action to action bounds.
-
-#         Args:
-#             a(np.ndarray): Action vector
-
-#         Returns:
-#             np.ndarray: Clipped action vector
-#         """
-#         return np.minimum(np.maximum(a, self.action_min), self.action_max)

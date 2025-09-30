@@ -13,7 +13,7 @@ class Node(object):
     """
     Class for map nodes.
 
-    Parameters:
+    Args:
         current: current point
         parent: point of parent node
         g: path cost
@@ -48,7 +48,7 @@ class Node(object):
         >>> node1.h
         2
 
-        >>> node1.ndim
+        >>> node1.dim
         2
     """
     def __init__(self, current: tuple, parent: tuple = None, g: float = 0, h: float = 0) -> None:
@@ -108,5 +108,5 @@ class Node(object):
         self._h = value
 
     @property
-    def ndim(self) -> int:
+    def dim(self) -> int:
         return len(self.current)

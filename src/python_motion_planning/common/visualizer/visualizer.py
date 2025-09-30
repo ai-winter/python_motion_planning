@@ -39,22 +39,43 @@ class Visualizer:
         self.norm = mcolors.BoundaryNorm([i for i in range(self.cmap.N + 1)], self.cmap.N)
         self.grid_map = None
 
-    def plot_grid_map(self, grid_map: Grid, equal: bool = False, alpha: float = 0.1) -> None:
+    def plot_grid_map(self, grid_map: Grid, equal: bool = False, alpha_3d: float = 0.1,
+                        show_esdf: bool = False, alpha_esdf: float = 0.5) -> None:
         '''
         Plot grid map with static obstacles.
 
         Args:
             map: Grid map or its type map.
             equal: Whether to set axis equal.
-            alpha: Alpha of occupancy for 3d visualization.
+            alpha_3d: Alpha of occupancy for 3d visualization.
+            show_esdf: Whether to show esdf.
+            alpha_esdf: Alpha of esdf.
         '''
-        if grid_map.ndim == 2:
-            plt.imshow(np.transpose(grid_map.type_map.array), cmap=self.cmap, norm=self.norm, origin='lower', interpolation='nearest', 
-                extent=[*grid_map.bounds[0], *grid_map.bounds[1]])
+        if grid_map.dim == 2:
+            plt.imshow(
+                np.transpose(grid_map.type_map.array), 
+                cmap=self.cmap, 
+                norm=self.norm, 
+                origin='lower', 
+                interpolation='nearest', 
+                extent=[*grid_map.bounds[0], *grid_map.bounds[1]]
+                )
+
+            if show_esdf:   # draw esdf hotmap
+                plt.imshow(
+                    np.transpose(grid_map.esdf),
+                    cmap="jet",
+                    origin="lower",
+                    interpolation="nearest",
+                    extent=[*grid_map.bounds[0], *grid_map.bounds[1]],
+                    alpha=alpha_esdf
+                )
+                plt.colorbar(label="ESDF distance")
+                
             if equal: 
                 plt.axis("equal")
 
-        elif grid_map.ndim == 3:
+        elif grid_map.dim == 3:
             self.ax = self.fig.add_subplot(projection='3d')
 
             data = grid_map.type_map.array
@@ -68,10 +89,14 @@ class Visualizer:
                 if key == TYPES.FREE:
                     continue
                 filled |= mask
-                rgba = matplotlib.colors.to_rgba(color, alpha=alpha)  # (r,g,b,a)
+                rgba = matplotlib.colors.to_rgba(color, alpha=alpha_3d)  # (r,g,b,a)
                 colors[mask] = rgba
 
             self.ax.voxels(filled, facecolors=colors)
+
+            if show_esdf:
+                # TODO
+                raise NotImplementedError
 
             self.ax.set_xlabel("X")
             self.ax.set_ylabel("Y")
@@ -79,7 +104,7 @@ class Visualizer:
 
             # let voxels look not stretched
             max_range = 0
-            for d in range(grid_map.ndim):
+            for d in range(grid_map.dim):
                 max_range = max(max_range, grid_map.bounds[d, 1] - grid_map.bounds[d, 0])
             self.ax.set_xlim(grid_map.bounds[0, 0], grid_map.bounds[0, 0] + max_range)
             self.ax.set_ylim(grid_map.bounds[1, 0], grid_map.bounds[1, 0] + max_range)
@@ -89,7 +114,7 @@ class Visualizer:
                 self.ax.set_box_aspect([1,1,1])
 
         else:
-            raise NotImplementedError(f"Grid map with ndim={grid_map.ndim} not supported.")
+            raise NotImplementedError(f"Grid map with dim={grid_map.dim} not supported.")
 
     def plot_path(self, path: list, style: str = "-", color: str = "#13ae00", label: str = None, linewidth: float = 2, marker: str = None) -> None:
         '''
@@ -139,14 +164,18 @@ class Visualizer:
             return patch, text
 
     def render_toy_simulator(self, env: ToySimulator, controllers: Dict[str, BaseController], steps: int = 1000, interval: int = 50,
-            show_traj: bool = True, traj_style: str = '-', traj_color: Dict[str, str] = None, traj_alpha: float = 0.7, traj_width = 1.5,
-            show_env_info: bool = False, limit_rtf: bool = True) -> None:
-        if traj_color is None:
+            show_traj: bool = True, traj_kwargs: dict = {"linestyle": '-', "alpha": 0.7, "linewidth": 1.5},
+            show_env_info: bool = False, limit_rtf: bool = True, grid_kwargs: dict = {},
+            show_pred_traj: bool = True) -> None:
+
+        if traj_kwargs.get("color") is None:
             traj_color = {rid: robot.color for rid, robot in env.robots.items()}
+        else:
+            traj_color = {rid: traj_kwargs.get("color") for rid, robot in env.robots.items()}
 
         # 先画静态的地图和路径
         self.ax.clear()
-        self.plot_grid_map(env.obstacle_grid)
+        self.plot_grid_map(env.obstacle_grid, **grid_kwargs)
 
         trajectories = {rid: [] for rid in env.robots}
 
@@ -160,7 +189,6 @@ class Visualizer:
 
             # 每帧只更新机器人，不清理整个画布
             patches = []
-            texts = []
             actions = {}
             for rid, robot in env.robots.items():
                 trajectories[rid].append(robot.pos.copy())
@@ -197,8 +225,17 @@ class Visualizer:
                     if len(traj) > 1:
                         traj_x = [p[0] for p in traj]
                         traj_y = [p[1] for p in traj]
-                        traj_line, = self.ax.plot(traj_x, traj_y, traj_style, color=traj_color[rid], alpha=traj_alpha, linewidth=traj_width)
+                        traj_line, = self.ax.plot(traj_x, traj_y, color=traj_color[rid], **traj_kwargs)
                         patches.append(traj_line)
+
+            if show_pred_traj:
+                for rid, controller in controllers.items():
+                    pred_traj = controller.pred_traj
+                    if len(pred_traj) > 1:
+                        pred_traj_x = [p[0] for p in pred_traj]
+                        pred_traj_y = [p[1] for p in pred_traj]
+                        pred_traj_line, = self.ax.plot(pred_traj_x, pred_traj_y, color=traj_color[rid], **traj_kwargs)
+                        patches.append(pred_traj_line)
 
             elapsed = time.time() - last_time
             if limit_rtf and elapsed < env.dt:
@@ -210,12 +247,12 @@ class Visualizer:
                 rtf = env.dt / elapsed
                 env_info_text_black.set_text(f"Step: {env.step_count}, Time: {sim_time:.3f}s, RTF: {rtf:.3f}")
                 env_info_text_white.set_text(f"Step: {env.step_count}, Time: {sim_time:.3f}s, RTF: {rtf:.3f}")
-                texts.append(env_info_text_black)
-                texts.append(env_info_text_white)
+                patches.append(env_info_text_black)
+                patches.append(env_info_text_white)
 
             last_time = time.time()
 
-            return patches + texts
+            return patches
 
         self.ani = animation.FuncAnimation(
             self.fig, update, frames=steps, interval=interval, blit=True, repeat=False
@@ -284,13 +321,13 @@ class Visualizer:
 #             equal: Whether to set axis equal.
 #             alpha: Alpha of occupancy for 3d visualization.
 #         '''
-#         if grid_map.ndim == 2:
+#         if grid_map.dim == 2:
 #             plt.imshow(np.transpose(grid_map.type_map.array), cmap=self.cmap, norm=self.norm, origin='lower', interpolation='nearest', 
 #                 extent=[*grid_map.bounds[0], *grid_map.bounds[1]])
 #             if equal: 
 #                 plt.axis("equal")
 
-#         elif grid_map.ndim == 3:
+#         elif grid_map.dim == 3:
 #             self.ax = self.fig.add_subplot(projection='3d')
 
 #             data = grid_map.type_map.array
@@ -315,7 +352,7 @@ class Visualizer:
 
 #             # let voxels look not stretched
 #             max_range = 0
-#             for d in range(grid_map.ndim):
+#             for d in range(grid_map.dim):
 #                 max_range = max(max_range, grid_map.bounds[d, 1] - grid_map.bounds[d, 0])
 #             self.ax.set_xlim(grid_map.bounds[0, 0], grid_map.bounds[0, 0] + max_range)
 #             self.ax.set_ylim(grid_map.bounds[1, 0], grid_map.bounds[1, 0] + max_range)
@@ -325,7 +362,7 @@ class Visualizer:
 #                 self.ax.set_box_aspect([1,1,1])
 
 #         else:
-#             raise NotImplementedError(f"Grid map with ndim={grid_map.ndim} not supported.")
+#             raise NotImplementedError(f"Grid map with dim={grid_map.dim} not supported.")
 
 #     def set_title(self, title: str) -> None:
 #         plt.title(title)

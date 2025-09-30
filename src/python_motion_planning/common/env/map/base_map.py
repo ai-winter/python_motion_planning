@@ -28,16 +28,16 @@ class BaseMap(ABC):
         if len(self._bounds.shape) != 2 or self._bounds.shape[0] <= 1 or self._bounds.shape[1] != 2:
             raise ValueError(f"The shape of bounds must be (n, 2) (n>=2) instead of {self._bounds.shape}")
 
-        for dim in range(self._bounds.shape[0]):
-            if self._bounds[dim, 0] >= self._bounds[dim, 1]:
-                raise ValueError(f"The lower bound of the world in the {dim}-th dimension must be smaller than the upper bound of the world in the {dim}-th dimension.")
+        for d in range(self._bounds.shape[0]):
+            if self._bounds[d, 0] >= self._bounds[d, 1]:
+                raise ValueError(f"The lower bound of the world in the {d}-th dimension must be smaller than the upper bound of the world in the {d}-th dimension.")
 
     @property
     def bounds(self) -> np.ndarray:
         return self._bounds
 
     @property
-    def ndim(self) -> int:
+    def dim(self) -> int:
         return self._bounds.shape[0]
 
     @property

@@ -51,6 +51,8 @@ class BaseController:
             self.goal = None
             self.path = False 
 
+        self.pred_traj = np.array([])
+
     def reset(self):
         """
         Reset the controller to initial state.
@@ -124,6 +126,16 @@ class BaseController:
         return pose, vel, pos, orient, lin_vel, ang_vel
 
     def _stop_if_reached(self, desired_vel: np.ndarray, pose: np.ndarray) -> np.ndarray:
+        """
+        Stop if the robot has reached the target (within the tolerance).
+
+        Args:
+            desired_vel: the desired velocity (robot frame)
+            pose: the current pose (world frame)
+        
+        Returns:
+            desired_vel: the desired velocity (robot frame)
+        """
         pos = pose[:self.dim]
         orient = pose[self.dim:]
         if np.linalg.norm(pos - self.goal[:self.dim]) < self.goal_dist_tol:
