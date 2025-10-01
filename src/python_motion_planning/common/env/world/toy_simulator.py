@@ -113,7 +113,7 @@ class ToySimulator(BaseWorld):
 
     def _resolve_robot_collisions(self):
         """
-        Resolve robot-robot collisions.
+        Resolve CircularRobot-CircularRobot collisions.
         """
         rids = list(self.robots.keys())
         n = len(rids)

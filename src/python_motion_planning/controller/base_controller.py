@@ -24,7 +24,7 @@ class BaseController:
     def __init__(self, observation_space: spaces.Space, action_space: spaces.Box,
                  dt: float, path: List[Tuple[float, ...]] = [], 
                  max_lin_speed: float = np.inf, max_ang_speed: float = np.inf,
-                 goal_dist_tol: float = 0.5, goal_orient_tol: float = np.pi / 4,
+                 goal_dist_tol: float = 0.5, goal_orient_tol: float = np.deg2rad(5),
                  eps: float = 1e-8):
         self.observation_space = observation_space
         self.action_space = action_space
@@ -145,4 +145,5 @@ class BaseController:
             desired_vel[:self.dim] = 0.0
             if np.abs(Geometry.regularize_orient(orient - self.goal[self.dim:])) < self.goal_orient_tol:
                 desired_vel[self.dim:] = 0.0
+                
         return desired_vel

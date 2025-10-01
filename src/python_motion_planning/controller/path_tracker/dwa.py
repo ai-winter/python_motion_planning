@@ -30,11 +30,11 @@ class DWA(PathTracker):
                  *args,
                  robot_model: BaseRobot,
                  obstacle_grid: Grid = None,
-                 vel_reso: float = np.array([0.1, 0.1, np.deg2rad(15)]),
+                 vel_reso: float = np.array([0.2, 0.2, np.deg2rad(15)]),
                  predict_time: float = None,
-                 heading_weight: float = 0.6,
-                 velocity_weight: float = 0.05,
-                 clearance_weight: float = 0.35,
+                 heading_weight: float = 0.5,
+                 velocity_weight: float = 0.2,
+                 clearance_weight: float = 0.3,
                  **kwargs):
         super().__init__(*args, **kwargs)
         if robot_model.dim != self.dim:

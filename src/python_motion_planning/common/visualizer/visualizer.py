@@ -13,9 +13,10 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from matplotlib import animation
+import matplotlib.patheffects as path_effects
 
 from python_motion_planning.controller import BaseController
-from python_motion_planning.common.env import TYPES, ToySimulator, Grid, CircularRobot, BallRobot
+from python_motion_planning.common.env import TYPES, ToySimulator, Grid, CircularRobot
 
 class Visualizer:
     def __init__(self, fig_name: str = ""):
@@ -147,10 +148,9 @@ class Visualizer:
             color=robot.color, alpha=robot.alpha, fill=robot.fill, linewidth=robot.linewidth, linestyle=robot.linestyle)
         self.ax.add_patch(patch)
 
-        fontsize = robot.fontsize if robot.fontsize else robot.radius * 15
+        fontsize = robot.fontsize if robot.fontsize else robot.radius * 10
         text = self.ax.text(*robot.pos, robot.text, color=robot.text_color, ha='center', va='center', fontsize=fontsize)
 
-        # === 新增：绘制朝向 ===
         if robot.dim == 2:
             theta = robot.orient[0]
             dx = np.cos(theta) * robot.radius
@@ -160,14 +160,14 @@ class Visualizer:
                                          fc=robot.color, ec=robot.text_color)
             return patch, text, orient_patch
         elif robot.dim == 3:
-            # TODO: 可以用 quiver 绘制 3D 方向向量
+            # TODO: quiver for 3D vector
             return patch, text
         else:
             return patch, text
 
     def render_toy_simulator(self, env: ToySimulator, controllers: Dict[str, BaseController], steps: int = 1000, interval: int = 50,
             show_traj: bool = True, traj_kwargs: dict = {"linestyle": '-', "alpha": 0.7, "linewidth": 1.5},
-            show_env_info: bool = False, limit_rtf: bool = True, grid_kwargs: dict = {},
+            show_env_info: bool = False, rtf_limit: float = 1.0, grid_kwargs: dict = {},
             show_pred_traj: bool = True) -> None:
 
         if traj_kwargs.get("color") is None:
@@ -183,8 +183,10 @@ class Visualizer:
 
         last_time = time.time()
         if show_env_info:
-            env_info_text_black = self.ax.text(0.02, 0.95, "", transform=self.ax.transAxes, ha="left", va="top", alpha=0.5, color="black")
-            env_info_text_white = self.ax.text(0.02, 0.95, "", transform=self.ax.transAxes, ha="left", va="top", alpha=0.5, color="white")
+            # env_info_text_black = self.ax.text(0.02, 0.95, "", transform=self.ax.transAxes, ha="left", va="top", alpha=0.5, color="black", bbox=dict(pad=0, facecolor='none', edgecolor='none'))
+            # env_info_text_white = self.ax.text(0.02, 0.95, "", transform=self.ax.transAxes, ha="left", va="top", alpha=0.5, color="white")
+            env_info_text = self.ax.text(0.02, 0.95, "", transform=self.ax.transAxes, ha="left", va="top", alpha=0.5, color="white")
+            env_info_text.set_path_effects([path_effects.withStroke(linewidth=2, foreground='black')])
 
         def update(frame):
             nonlocal last_time
@@ -240,17 +242,19 @@ class Visualizer:
                         patches.append(pred_traj_line)
 
             elapsed = time.time() - last_time
-            if limit_rtf and elapsed < env.dt:
-                time.sleep(env.dt - elapsed)
+            if rtf_limit and env.dt / elapsed > rtf_limit:
+                time.sleep(env.dt / rtf_limit - elapsed)
                 elapsed = time.time() - last_time
 
             if show_env_info:
                 sim_time = env.step_count * env.dt
                 rtf = env.dt / elapsed
-                env_info_text_black.set_text(f"Step: {env.step_count}, Time: {sim_time:.3f}s, RTF: {rtf:.3f}")
-                env_info_text_white.set_text(f"Step: {env.step_count}, Time: {sim_time:.3f}s, RTF: {rtf:.3f}")
-                patches.append(env_info_text_black)
-                patches.append(env_info_text_white)
+                # env_info_text_black.set_text(f"Step: {env.step_count}, Time: {sim_time:.3f}s, RTF: {rtf:.3f}")
+                # env_info_text_white.set_text(f"Step: {env.step_count}, Time: {sim_time:.3f}s, RTF: {rtf:.3f}")
+                env_info_text.set_text(f"Step: {env.step_count}, Time: {sim_time:.3f}s, RTF: {rtf:.3f}")
+                # patches.append(env_info_text_black)
+                # patches.append(env_info_text_white)
+                patches.append(env_info_text)
 
             last_time = time.time()
 

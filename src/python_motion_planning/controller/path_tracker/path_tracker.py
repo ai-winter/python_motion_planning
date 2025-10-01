@@ -5,7 +5,7 @@ import numpy as np
 
 from python_motion_planning.common.utils.geometry import Geometry
 from python_motion_planning.common.utils.frame_transformer import FrameTransformer
-from .base_controller import BaseController
+from python_motion_planning.controller.base_controller import BaseController
 
 class PathTracker(BaseController):
     """
@@ -77,25 +77,26 @@ class PathTracker(BaseController):
         rel_pose = FrameTransformer.pose_world_to_robot(self.dim, target_pose, cur_pose)
 
         lin_direction = rel_pose[:self.dim]
+        lin_distance = np.linalg.norm(lin_direction)
+
         angle_lin_diff = np.array([math.atan2(lin_direction[1], lin_direction[0])])
         angle_ang_diff = rel_pose[self.dim:]
-        ang_direction = Geometry.regularize_orient(
-            self.k_theta * angle_lin_diff +
-            (1.0 - self.k_theta) * angle_ang_diff
-            )
-
-        lin_distance = np.linalg.norm(lin_direction)
+        if lin_distance < self.goal_dist_tol:
+            ang_direction = Geometry.regularize_orient(angle_ang_diff)
+        else:
+            ang_direction = Geometry.regularize_orient(
+                self.k_theta * angle_lin_diff +
+                (1.0 - self.k_theta) * angle_ang_diff
+                )
         ang_distance = np.linalg.norm(ang_direction)
+
         if lin_distance > self.eps:
             lin_direction /= lin_distance
         if ang_distance > self.eps:
             ang_direction /= ang_distance
-
         
         desired_lin_speed = min(lin_distance / self.dt, self.max_lin_speed)
-        assert desired_lin_speed >= 0    # TODO
         desired_ang_speed = min(ang_distance / self.dt, self.max_ang_speed)
-        assert desired_ang_speed >= 0    # TODO
 
         desired_lin_vel = lin_direction * desired_lin_speed
         desired_ang_vel = ang_direction * desired_ang_speed

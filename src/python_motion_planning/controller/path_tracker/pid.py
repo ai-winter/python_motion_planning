@@ -21,8 +21,8 @@ class PID(PathTracker):
     def __init__(self,
                  *args,
                  Kp: float = 1.0,
-                 Ki: float = 0.3,
-                 Kd: float = 0.3,
+                 Ki: float = 0.1,
+                 Kd: float = 0.1,
                  **kwargs):
         super().__init__(*args, **kwargs)
         self.Kp = Kp
