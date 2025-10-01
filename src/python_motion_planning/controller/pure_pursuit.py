@@ -39,7 +39,7 @@ class PurePursuit(PathTracker):
         L = math.hypot(x, y)
 
         # if lookahead distance is (nearly) zero, no movement
-        if L < 1e-6:
+        if L < self.eps:
             desired_vel = np.zeros(self.action_space.shape[0])
             return self.clip_velocity(desired_vel)
 

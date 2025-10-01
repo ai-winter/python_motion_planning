@@ -119,7 +119,7 @@ class DWA(PathTracker):
             if low < 0 and high > 0:
                 sample_points = np.append(sample_points, [0.0])
 
-            sample_points = np.unique(np.round(sample_points / 1e-6) * 1e-6)  # unique with 1e-6 precision
+            sample_points = np.unique(np.round(sample_points / self.eps) * self.eps)  # unique with numerical precision
 
             vel_points.append(sample_points)
         
@@ -242,7 +242,7 @@ class DWA(PathTracker):
             
         normalized_min_dist = min_dist / self.robot_model.radius
 
-        if normalized_min_dist < 1e-6:
+        if normalized_min_dist < self.eps:
             return -float("inf")
 
         return np.clip(1.0 - 1.0 / normalized_min_dist, 0.0, 1.0)  # normalized

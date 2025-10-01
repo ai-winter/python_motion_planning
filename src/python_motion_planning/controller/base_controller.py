@@ -19,11 +19,13 @@ class BaseController:
         max_ang_speed: maximum angular speed of the robot
         goal_dist_tol: goal distance tolerance
         goal_orient_tol: goal orient tolerance
+        eps: epsilon (numerical precision)
     """
     def __init__(self, observation_space: spaces.Space, action_space: spaces.Box,
                  dt: float, path: List[Tuple[float, ...]] = [], 
                  max_lin_speed: float = np.inf, max_ang_speed: float = np.inf,
-                 goal_dist_tol: float = 0.5, goal_orient_tol: float = np.pi / 4):
+                 goal_dist_tol: float = 0.5, goal_orient_tol: float = np.pi / 4,
+                 eps: float = 1e-8):
         self.observation_space = observation_space
         self.action_space = action_space
         self.dt = dt
@@ -32,6 +34,7 @@ class BaseController:
         self.max_ang_speed = max_ang_speed
         self.goal_dist_tol = goal_dist_tol
         self.goal_orient_tol = goal_orient_tol
+        self.eps = eps
         
         # Guess dimension from action space
         if self.action_space.shape[0] == 3:

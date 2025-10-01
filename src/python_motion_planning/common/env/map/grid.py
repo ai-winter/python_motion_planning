@@ -181,7 +181,8 @@ class Grid(BaseMap):
                 bounds: Iterable = [[0, 30], [0, 40]], 
                 resolution: float = 1.0, 
                 type_map: Union[GridTypeMap, np.ndarray] = None, 
-                dtype: np.dtype = np.int32
+                dtype: np.dtype = np.int32,
+                inflation_radius: float = 0.0,
                 ) -> None:
         super().__init__(bounds, dtype)
 
@@ -210,7 +211,11 @@ class Grid(BaseMap):
         self._precompute_offsets()
         
         self._esdf = np.zeros(self._shape, dtype=np.float32)
-        self.update_esdf()
+        # self.update_esdf()    # updated in self.inflate_obstacles()
+
+        self.inflation_radius = inflation_radius
+        if self.inflation_radius >= 1:
+            self.inflate_obstacles(self.inflation_radius)
     
     def __str__(self) -> str:
         return "Grid(bounds={}, resolution={})".format(self.bounds, self.resolution)
@@ -491,14 +496,7 @@ class Grid(BaseMap):
             for j in range(self.shape[1]):
                 if self.esdf[i, j] <= radius and self.type_map[i, j] == TYPES.FREE:
                     self.type_map[i, j] = TYPES.INFLATION
-
-                # if self.type_map[i, j] == TYPES.OBSTACLE:
-                #     for k in range(round(i-radius), round(i+radius+1)):
-                #         for l in range(round(j-radius), round(j+radius+1)):
-                #             if k < 0 or k >= self.shape[0] or l < 0 or l >= self.shape[1]:
-                #                 continue
-                #             if self.type_map[k, l] == TYPES.FREE and (k - i)**2 + (l - j)**2 <= radius**2:
-                #                 self.type_map[k, l] = TYPES.INFLATION
+        self.inflation_radius = radius
 
     def fill_expands(self, expands: List[Node]) -> None:
         """

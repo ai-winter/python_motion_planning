@@ -86,9 +86,9 @@ class PathTracker(BaseController):
 
         lin_distance = np.linalg.norm(lin_direction)
         ang_distance = np.linalg.norm(ang_direction)
-        if lin_distance > 1e-6:
+        if lin_distance > self.eps:
             lin_direction /= lin_distance
-        if ang_distance > 1e-6:
+        if ang_distance > self.eps:
             ang_direction /= ang_distance
 
         
@@ -141,7 +141,7 @@ class PathTracker(BaseController):
         end_pose = path[-1]
 
         # check goal distance
-        if np.dot(end_pose[:self.dim] - pos, end_pose[:self.dim] - pos) <= r * r + 1e-6:
+        if np.dot(end_pose[:self.dim] - pos, end_pose[:self.dim] - pos) <= r * r + self.eps:
             return end_pose
 
         # collect intersections
@@ -180,7 +180,7 @@ class PathTracker(BaseController):
         d = p2 - p1
         v = pos - p1
         a = np.dot(d, d)
-        if a < 1e-10:
+        if a < self.eps:
             return []
 
         b = -2 * np.dot(v, d)
@@ -226,7 +226,7 @@ class PathTracker(BaseController):
             d = p2 - p1
             v = pos - p1
             a = np.dot(d, d)
-            if a < 1e-10:
+            if a < self.eps:
                 continue
 
             t = np.dot(v, d) / a
