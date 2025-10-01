@@ -64,7 +64,7 @@ class ThetaStar(AStar):
                     "goal": self.goal, 
                     "length": length, 
                     "cost": cost, 
-                    "expand": list(CLOSED.values())
+                    "expand": CLOSED
                 }
 
             for node_n in self.map_.get_neighbors(node): 
@@ -92,7 +92,7 @@ class ThetaStar(AStar):
 
             CLOSED[node.current] = node
 
-        self.failed_info[1]["expand"] = list(CLOSED.values())
+        self.failed_info[1]["expand"] = CLOSED
         return self.failed_info
 
     def updateVertex(self, node_p: Node, node_n: Node) -> None:

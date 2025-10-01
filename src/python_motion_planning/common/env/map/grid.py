@@ -5,7 +5,7 @@
 @update: 2025.9.5
 """
 from itertools import product
-from typing import Iterable, Union, Tuple, Callable, List
+from typing import Iterable, Union, Tuple, Callable, List, Dict
 import time
 
 import numpy as np
@@ -235,7 +235,7 @@ class Grid(BaseMap):
     def esdf(self) -> np.ndarray:
         return self._esdf
     
-    def map_to_world(self, point: tuple) -> tuple:
+    def map_to_world(self, point: Tuple[int, ...]) -> tuple:
         """
         Convert map coordinates to world coordinates.
         
@@ -250,7 +250,7 @@ class Grid(BaseMap):
 
         return tuple((x + 0.5) * self.resolution + float(self.bounds[i, 0]) for i, x in enumerate(point))
 
-    def world_to_map(self, point: tuple) -> tuple:
+    def world_to_map(self, point: Tuple[float, ...]) -> tuple:
         """
         Convert world coordinates to map coordinates.
         
@@ -265,7 +265,7 @@ class Grid(BaseMap):
         
         return tuple(round((x - float(self.bounds[i, 0])) * (1.0 / self.resolution) - 0.5) for i, x in enumerate(point))
 
-    def get_distance(self, p1: tuple, p2: tuple) -> float:
+    def get_distance(self, p1: Tuple[int, int], p2: Tuple[int, int]) -> float:
         """
         Get the distance between two points.
 
@@ -278,7 +278,7 @@ class Grid(BaseMap):
         """
         return Geometry.dist(p1, p2, type='Euclidean')
 
-    def within_bounds(self, point: tuple) -> bool:
+    def within_bounds(self, point: Tuple[int, ...]) -> bool:
         """
         Check if a point is within the bounds of the grid map.
         
@@ -300,7 +300,7 @@ class Grid(BaseMap):
                 return False
         return True
 
-    def is_expandable(self, point: tuple, src_point: tuple = None) -> bool:
+    def is_expandable(self, point: Tuple[int, ...], src_point: Tuple[int, ...] = None) -> bool:
         """
         Check if a point is expandable.
         
@@ -363,7 +363,7 @@ class Grid(BaseMap):
         
         return filtered_neighbors
 
-    def line_of_sight(self, p1: tuple, p2: tuple) -> list:
+    def line_of_sight(self, p1: Tuple[int, ...], p2: Tuple[int, ...]) -> list:
         """
         N-dimensional line of sight (Bresenham's line algorithm)
         
@@ -414,7 +414,7 @@ class Grid(BaseMap):
 
         return result
 
-    def in_collision(self, p1: tuple, p2: tuple) -> bool:
+    def in_collision(self, p1: Tuple[int, ...], p2: Tuple[int, ...]) -> bool:
         """
         Check if the line of sight between two points is in collision.
         
@@ -498,17 +498,17 @@ class Grid(BaseMap):
                     self.type_map[i, j] = TYPES.INFLATION
         self.inflation_radius = radius
 
-    def fill_expands(self, expands: List[Node]) -> None:
+    def fill_expands(self, expands: Dict[Tuple[int, int], Node]) -> None:
         """
         Fill the expands in the map.
         
         Args:
             expands: List of expands.
         """
-        for expand in expands:
-            if self.type_map[expand.current] != TYPES.FREE:
+        for expand in expands.keys():
+            if self.type_map[expand] != TYPES.FREE:
                 continue
-            self.type_map[expand.current] = TYPES.EXPAND
+            self.type_map[expand] = TYPES.EXPAND
 
     def update_esdf(self) -> None:
         """
@@ -526,6 +526,30 @@ class Grid(BaseMap):
 
         self._esdf = dist_outside.astype(np.float32)
         self._esdf[obstacle_mask] = -dist_inside[obstacle_mask]
+
+    def path_map_to_world(self, path: List[Tuple[int, int]]) -> List[Tuple[float, float]]:
+        """
+        Convert path from map coordinates to world coordinates
+
+        Args:
+            path: a list of map coordinates
+        
+        Returns:
+            path: a list of world coordinates
+        """
+        return [self.map_to_world(p) for p in path]
+
+    def path_world_to_map(self, path: List[Tuple[float, float]]) -> List[Tuple[int, int]]:
+        """
+        Convert path from world coordinates to map coordinates
+
+        Args:
+            path: a list of world coordinates
+        
+        Returns:
+            path: a list of map coordinates
+        """
+        return [self.world_to_map(p) for p in path]
 
     def _precompute_offsets(self):
         # Generate all possible offsets (-1, 0, +1) in each dimension

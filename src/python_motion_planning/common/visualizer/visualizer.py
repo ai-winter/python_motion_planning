@@ -4,7 +4,7 @@
 @author: Yang Haodong, Wu Maojia
 @update: 2025.9.20
 """
-from typing import Union, Dict
+from typing import Union, Dict, List, Tuple
 from collections import namedtuple
 import time
 
@@ -16,7 +16,7 @@ from matplotlib import animation
 import matplotlib.patheffects as path_effects
 
 from python_motion_planning.controller import BaseController
-from python_motion_planning.common.env import TYPES, ToySimulator, Grid, CircularRobot
+from python_motion_planning.common.env import TYPES, ToySimulator, Grid, CircularRobot, Node
 
 class Visualizer:
     def __init__(self, fig_name: str = ""):
@@ -39,6 +39,10 @@ class Visualizer:
         self.cmap = mcolors.ListedColormap([info for info in self.cmap_dict.values()])
         self.norm = mcolors.BoundaryNorm([i for i in range(self.cmap.N + 1)], self.cmap.N)
         self.grid_map = None
+        self.dim = None
+
+    def __del__(self):
+        self.close()
 
     def plot_grid_map(self, grid_map: Grid, equal: bool = False, alpha_3d: float = 0.1,
                         show_esdf: bool = False, alpha_esdf: float = 0.5) -> None:
@@ -52,6 +56,8 @@ class Visualizer:
             show_esdf: Whether to show esdf.
             alpha_esdf: Alpha of esdf.
         '''
+        self.grid_map = grid_map
+        self.dim = grid_map.dim
         if grid_map.dim == 2:
             plt.imshow(
                 np.transpose(grid_map.type_map.array), 
@@ -117,7 +123,9 @@ class Visualizer:
         else:
             raise NotImplementedError(f"Grid map with dim={grid_map.dim} not supported.")
 
-    def plot_path(self, path: list, style: str = "-", color: str = "#13ae00", label: str = None, linewidth: float = 2, marker: str = None) -> None:
+    def plot_path(self, path: List[Union[Tuple[int, ...], Tuple[float, ...]]], 
+                    style: str = "-", color: str = "#13ae00", label: str = None, 
+                    linewidth: float = 2, marker: str = None, map_frame: bool = True) -> None:
         '''
         Plot path-like information.
         The meaning of parameters are similar to matplotlib.pyplot.plot (https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html).
@@ -129,19 +137,79 @@ class Visualizer:
             label: label of path
             linewidth: linewidth of path
             marker: marker of path
+            map_frame: whether path is in map frame or not (world frame)
         '''
+        if map_frame:
+            path = [self.grid_map.map_to_world(point) for point in path]
+
         path = np.array(path)
-        if len(path.shape) < 2:
-            return
-        if path.shape[1] == 2:
-            plt.plot(path[:, 0], path[:, 1], style, lw=linewidth, color=color, label=label, marker=marker)
-        elif path.shape[1] == 3:
+        
+        if self.dim == 2:
+            self.ax.plot(path[:, 0], path[:, 1], style, lw=linewidth, color=color, label=label, marker=marker)
+        elif self.dim == 3:
             self.ax.plot(path[:, 0], path[:, 1], path[:, 2], style, lw=linewidth, color=color, label=label, marker=marker)
         else:
-            raise ValueError("Path dimension not supported")
+            raise ValueError("Dimension not supported")
 
         if label:
             self.ax.legend()
+
+    def plot_expand_tree(self, expand_tree: Dict[Union[Tuple[int, ...], Tuple[float, ...]], Node], 
+                        node_color: str = "C5", 
+                        edge_color: str = "C6", 
+                        node_size: float = 10, 
+                        linewidth: float = 1.0, 
+                        node_alpha: float = 1.0,
+                        edge_alpha: float = 1.0,
+                        connect_to_parent: bool = True,
+                        map_frame: bool = True) -> None:
+        """
+        Visualize an expand tree (e.g. RRT).
+        
+        Args:
+            expand_tree: Dict mapping coordinate tuple -> Node (world frame).
+            node_color: Color of the nodes.
+            edge_color: Color of the edges (parent -> child).
+            node_size: Size of node markers.
+            linewidth: Line width of edges.
+            connect_to_parent: Whether to draw parent-child connections.
+            map_frame: whether path is in map frame or not (world frame)
+        """
+        if self.dim == 2:
+            for coord, node in expand_tree.items():
+                current = node.current
+                if map_frame:
+                    current = self.grid_map.map_to_world(current)
+
+                self.ax.scatter(current[0], current[1],
+                                c=node_color, s=node_size, zorder=3, alpha=node_alpha)
+                if connect_to_parent and node.parent is not None:
+                    parent = node.parent
+                    if map_frame:
+                        parent = self.grid_map.map_to_world(parent)
+                    self.ax.plot([parent[0], current[0]],
+                                [parent[1], current[1]],
+                                color=edge_color, linewidth=linewidth, zorder=2, alpha=edge_alpha)
+
+        elif self.dim == 3:
+            for coord, node in expand_tree.items():
+                current = node.current
+                if map_frame:
+                    current = self.grid_map.map_to_world(current)
+
+                self.ax.scatter(current[0], current[1], current[2],
+                                c=node_color, s=node_size, zorder=3, alpha=node_alpha)
+                if connect_to_parent and node.parent is not None:
+                    parent = node.parent
+                    if map_frame:
+                        parent = self.grid_map.map_to_world(parent)
+                    self.ax.plot([parent[0], current[0]],
+                                [parent[1], current[1]],
+                                [parent[2], current[2]],
+                                color=edge_color, linewidth=linewidth, zorder=2, alpha=edge_alpha)
+
+        else:
+            raise ValueError("Dimension must be 2 or 3")
 
     def plot_circular_robot(self, robot: CircularRobot, axis_equal: bool = True) -> None:
         patch = plt.Circle(tuple(robot.pos), robot.radius, 
@@ -165,7 +233,8 @@ class Visualizer:
         else:
             return patch, text
 
-    def render_toy_simulator(self, env: ToySimulator, controllers: Dict[str, BaseController], steps: int = 1000, interval: int = 50,
+    def render_toy_simulator(self, env: ToySimulator, controllers: Dict[str, BaseController],
+            steps: int = 1000, interval: int = 50,
             show_traj: bool = True, traj_kwargs: dict = {"linestyle": '-', "alpha": 0.7, "linewidth": 1.5},
             show_env_info: bool = False, rtf_limit: float = 1.0, grid_kwargs: dict = {},
             show_pred_traj: bool = True) -> None:
@@ -281,6 +350,9 @@ class Visualizer:
 
     def legend(self):
         plt.legend()
+    
+    def close(self):
+        plt.close()
 
 
 
