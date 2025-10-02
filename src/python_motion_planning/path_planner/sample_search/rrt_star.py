@@ -14,10 +14,7 @@ class RRTStar(RRT):
 
     Args:
         *args: see the parent class.
-        max_dist: Maximum expansion distance for each step (default: 5.0).
-        sample_num: Maximum number of samples to generate (default: 100000).
-        goal_sample_rate: Probability of sampling the goal directly (default: 0.05).
-        radius: Radius for finding nearby nodes during rewiring (default: 10.0).
+        radius: Radius for finding nearby nodes during rewiring.
         *kwargs: see the parent class.
 
     References:

@@ -9,7 +9,7 @@ from python_motion_planning.controller.base_controller import BaseController
 
 class PathTracker(BaseController):
     """
-    Class of path-tracking controller.
+    Class of proportional path-tracking controller.
 
     Args:
         *args: see the parent class.

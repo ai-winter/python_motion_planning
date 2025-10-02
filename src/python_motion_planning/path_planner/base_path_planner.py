@@ -21,6 +21,7 @@ class BasePathPlanner(ABC):
     def __init__(self, map_: BaseMap, start: tuple, goal: tuple) -> None:
         super().__init__()
         self.map_ = map_
+        self.map_.update_esdf()
         self.start = start
         self.goal = goal
         self.failed_info = [], {"success": False, "start": None, "goal": None, "length": 0, "cost": 0, "expand": {}}

@@ -316,6 +316,7 @@ class Grid(BaseMap):
         if src_point is not None:
             if self._esdf[point] >= self._esdf[src_point]:
                 return True
+                
         return not self.type_map[point] == TYPES.OBSTACLE and not self.type_map[point] == TYPES.INFLATION
 
     def get_neighbors(self, 
@@ -479,10 +480,17 @@ class Grid(BaseMap):
         """
         Fill the boundary of the map with obstacles.
         """
-        self.type_map[0, :] = TYPES.OBSTACLE
-        self.type_map[-1, :] = TYPES.OBSTACLE
-        self.type_map[:, 0] = TYPES.OBSTACLE
-        self.type_map[:, -1] = TYPES.OBSTACLE
+        for d in range(self.dim):
+            # Create a tuple of slice objects to select boundary elements in current dimension
+            # First boundary (start index)
+            slices_start = [slice(None)] * self.dim
+            slices_start[d] = 0
+            self.type_map[tuple(slices_start)] = TYPES.OBSTACLE
+            
+            # Last boundary (end index)
+            slices_end = [slice(None)] * self.dim
+            slices_end[d] = -1
+            self.type_map[tuple(slices_end)] = TYPES.OBSTACLE
 
     def inflate_obstacles(self, radius: float = 1.0) -> None:
         """
@@ -492,10 +500,8 @@ class Grid(BaseMap):
             radius: Radius of the inflation.
         """
         self.update_esdf()
-        for i in range(self.shape[0]):
-            for j in range(self.shape[1]):
-                if self.esdf[i, j] <= radius and self.type_map[i, j] == TYPES.FREE:
-                    self.type_map[i, j] = TYPES.INFLATION
+        mask = (self.esdf <= radius) & (self.type_map.array == TYPES.FREE)
+        self.type_map[mask] = TYPES.INFLATION
         self.inflation_radius = radius
 
     def fill_expands(self, expands: Dict[Tuple[int, int], Node]) -> None:

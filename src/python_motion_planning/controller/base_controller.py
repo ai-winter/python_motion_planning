@@ -141,9 +141,13 @@ class BaseController:
         """
         pos = pose[:self.dim]
         orient = pose[self.dim:]
-        if np.linalg.norm(pos - self.goal[:self.dim]) < self.goal_dist_tol:
+        goal_pos = self.goal[:self.dim]
+        goal_orient = self.goal[self.dim:]
+
+        if np.linalg.norm(pos - goal_pos) < self.goal_dist_tol:
             desired_vel[:self.dim] = 0.0
-            if np.abs(Geometry.regularize_orient(orient - self.goal[self.dim:])) < self.goal_orient_tol:
+
+            if np.abs(Geometry.regularize_orient(orient - goal_orient)) < self.goal_orient_tol:
                 desired_vel[self.dim:] = 0.0
-                
+
         return desired_vel

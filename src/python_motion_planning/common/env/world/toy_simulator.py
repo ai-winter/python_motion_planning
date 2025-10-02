@@ -47,6 +47,13 @@ class ToySimulator(BaseWorld):
         self.boundary_collisions = boundary_collisions
         self.step_count = 0
 
+    @property
+    def time(self) -> float:
+        """
+        Returns the current accumulated time.
+        """
+        return self.step_count * self.dt
+
     def step(self, actions: Dict[int, np.ndarray]):
         """
         Execute one time step in the environment.

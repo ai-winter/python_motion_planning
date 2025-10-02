@@ -48,7 +48,7 @@ class PurePursuit(PathTracker):
         # forward x, lateral y. Angular velocity = kappa * v.
         kappa = (2.0 * y) / (L * L)
 
-        desired_lin_speed = self.max_lin_speed * np.sign(x)
+        desired_lin_speed = min(self.max_lin_speed, L / self.dt) * (1.0 if x >= 0 else -1.0)
         desired_ang_speed = max(min(kappa * desired_lin_speed, self.max_ang_speed), -self.max_ang_speed)
 
         desired_lin_vel = np.array([desired_lin_speed, 0.0])
@@ -56,5 +56,5 @@ class PurePursuit(PathTracker):
 
         desired_vel = np.concatenate([desired_lin_vel, desired_ang_vel])
         desired_vel = self.clip_velocity(desired_vel)
-
+    
         return desired_vel

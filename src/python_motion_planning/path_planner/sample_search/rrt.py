@@ -119,14 +119,16 @@ class RRT(BasePathPlanner):
         if random.random() < self.goal_sample_rate:
             return Node(self.goal, None, 0, 0)
             
+        point = []
         # Generate random integer point within grid bounds
-        x_min, x_max = self.bounds[0]
-        y_min, y_max = self.bounds[1]
-        x = random.randint(int(x_min), int(x_max))
-        y = random.randint(int(y_min), int(y_max))
-        return Node((x, y), None, 0, 0)
+        for d in range(self.map_.dim):
+            d_min, d_max = self.bounds[d]
+            point.append(random.randint(int(d_min), int(d_max)))
+        point = tuple(point)
 
-    def _get_nearest_node(self, tree: Dict[tuple, Node], 
+        return Node(point, None, 0, 0)
+
+    def _get_nearest_node(self, tree: Dict[Tuple[int, ...], Node], 
                          node_rand: Node) -> Node:
         """
         Find the nearest node in the tree to a random sample.
@@ -161,22 +163,29 @@ class RRT(BasePathPlanner):
         Returns:
             node: New node in direction of random sample
         """
-        # Calculate direction vector
-        dx = node_rand.current[0] - node_near.current[0]
-        dy = node_rand.current[1] - node_near.current[1]
-        dist = math.hypot(dx, dy)
+        # Calculate differences for each dimension
+        diffs = [node_rand.current[i] - node_near.current[i] for i in range(self.map_.dim)]
+        
+        # Calculate Euclidean distance in n-dimensional space
+        dist = math.sqrt(sum(diff**2 for diff in diffs))
         
         # Handle case where nodes are coincident
         if math.isclose(dist, 0):
             return None
             
-        # Create new node within max distance
+        # If within max distance, use the random node directly
         if dist <= self.max_dist:
             return node_rand
             
-        # Scale vector to max distance
+        # Otherwise scale to maximum distance
         scale = self.max_dist / dist
-        new_x = node_near.current[0] + scale * dx
-        new_y = node_near.current[1] + scale * dy
-        new_x, new_y = round(new_x), round(new_y)
-        return Node((new_x, new_y), None, 0, 0)
+        new_coords = [
+            node_near.current[i] + scale * diffs[i] 
+            for i in range(self.map_.dim)
+        ]
+        
+        # Round coordinates if original points were integers
+        if all(isinstance(coord, int) for coord in node_near.current):
+            new_coords = [round(coord) for coord in new_coords]
+            
+        return Node(tuple(new_coords), None, 0, 0)
