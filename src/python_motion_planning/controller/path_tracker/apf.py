@@ -28,6 +28,9 @@ class APF(PathTracker):
         rep_weight: weight factor for repulsive potential
         rep_range: influence range for repulsive potential
         **kwargs: see the parent class.
+
+    References:
+        [1] Real-time obstacle avoidance for manipulators and mobile robots
     """
     def __init__(self,
                  *args,

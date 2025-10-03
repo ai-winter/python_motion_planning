@@ -22,6 +22,9 @@ class PID(PathTracker):
         Ki: integral gain
         Kd: derivative gain
         **kwargs: see the parent class.
+
+    References:
+        [1] Directional stability of automatically steered bodies
     """
     def __init__(self,
                  *args,

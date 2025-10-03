@@ -30,6 +30,9 @@ class DWA(PathTracker):
         velocity_weight: weight for velocity term
         clearance_weight: weight for obstacle clearance term
         **kwargs: see the parent class.
+
+    References:
+        [1] The Dynamic Window Approach to Collision Avoidance
     """
     def __init__(self,
                  *args,

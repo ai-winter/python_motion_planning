@@ -19,6 +19,9 @@ class PurePursuit(PathTracker):
     Args:
         *args: see the parent class.
         **kwargs: see the parent class.
+
+    References:
+        [1] Implementation of the Pure Pursuit Path Tracking Algorithm.
     """
     def __init__(self,
                  *args,
