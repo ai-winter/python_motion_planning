@@ -42,4 +42,4 @@ logs/
 
 # temporary files
 tmp/
-tmp.*
+tmp*
