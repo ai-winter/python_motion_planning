@@ -1,3 +1,8 @@
+"""
+@file: base_controller.py
+@author: Wu Maojia
+@update: 2025.10.3
+"""
 from typing import List, Tuple
 
 import numpy as np

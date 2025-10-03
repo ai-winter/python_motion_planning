@@ -1,8 +1,7 @@
 """
 @file: node.py
-@breif: map node data stucture
 @author: Wu Maojia, Yang Haodong 
-@update: 2025.9.5
+@update: 2025.10.3
 """
 from __future__ import annotations
 

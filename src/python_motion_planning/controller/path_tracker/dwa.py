@@ -1,3 +1,8 @@
+"""
+@file: dwa.py
+@author: Wu Maojia
+@update: 2025.10.3
+"""
 from typing import List, Tuple, Optional
 import math
 

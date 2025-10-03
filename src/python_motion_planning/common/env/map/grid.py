@@ -1,8 +1,7 @@
 """
 @file: grid.py
-@breif: Grid Map for Path Planning
 @author: Wu Maojia
-@update: 2025.9.5
+@update: 2025.10.3
 """
 from itertools import product
 from typing import Iterable, Union, Tuple, Callable, List, Dict
@@ -11,7 +10,7 @@ import time
 import numpy as np
 from scipy import ndimage
 
-from .base_map import BaseMap
+from python_motion_planning.common.env.map.base_map import BaseMap
 from python_motion_planning.common.env import Node, TYPES
 from python_motion_planning.common.utils.geometry import Geometry
 
@@ -109,18 +108,17 @@ class Grid(BaseMap):
         resolution: resolution of the grid map
         type_map: initial type map of the grid map (its shape must be the same as the converted grid map shape, and its dtype must be int)
         dtype: data type of coordinates (must be int)
+        inflation_radius: radius of the inflation
 
     Examples:
-        >>> bounds = [[0, 30], [0, 40]]
-        >>> type_map = np.zeros((61, 81), dtype=np.int8)
-        >>> grid_map = Grid(bounds=bounds, resolution=0.5, type_map=type_map)
+        >>> grid_map = Grid(bounds=[[0, 51], [0, 31]], resolution=0.5)
         >>> grid_map
-        Grid(bounds=[[ 0. 30.]
-         [ 0. 40.]], resolution=0.5)
+        Grid(bounds=[[ 0. 51.]
+         [ 0. 31.]], resolution=0.5)
 
         >>> grid_map.bounds    # bounds of the base world
-        array([[ 0., 30.],
-               [ 0., 40.]])
+        array([[ 0., 51.],
+               [ 0., 31.]])
 
         >>> grid_map.dim
         2
@@ -129,7 +127,7 @@ class Grid(BaseMap):
         0.5
 
         >>> grid_map.shape   # shape of the grid map
-        (61, 81)
+        (102, 62)
 
         >>> grid_map.dtype
         <class 'numpy.int32'>
@@ -143,13 +141,13 @@ class Grid(BaseMap):
          [0 0 0 ... 0 0 0]
          [0 0 0 ... 0 0 0]
          [0 0 0 ... 0 0 0]]
-        ), shape=(61, 81), dtype=int8)
+        ), shape=(102, 62), dtype=int8)
 
         >>> grid_map.map_to_world((1, 2))
-        (0.5, 1.0)
+        (0.75, 1.25)
 
         >>> grid_map.world_to_map((0.5, 1.0))
-        (1, 2)
+        (0, 2)
 
         >>> grid_map.get_neighbors(Node((1, 2)))
         [Node((0, 1), (1, 2), 0, 0), Node((0, 2), (1, 2), 0, 0), Node((0, 3), (1, 2), 0, 0), Node((1, 1), (1, 2), 0, 0), Node((1, 3), (1, 2), 0, 0), Node((2, 1), (1, 2), 0, 0), Node((2, 2), (1, 2), 0, 0), Node((2, 3), (1, 2), 0, 0)]
@@ -159,10 +157,10 @@ class Grid(BaseMap):
 
         >>> grid_map.type_map[1, 0] = TYPES.OBSTACLE     # place an obstacle
         >>> grid_map.get_neighbors(Node((0, 0)))    # limited within the bounds
-        [Node((0, 1), (0, 0), 0, 0), Node((1, 1), (0, 0), 0, 0)]
+        [Node((0, 1), (0, 0), 0, 0), Node((1, 0), (0, 0), 0, 0), Node((1, 1), (0, 0), 0, 0)]
 
         >>> grid_map.get_neighbors(Node((grid_map.shape[0] - 1, grid_map.shape[1] - 1)), diagonal=False)  # limited within the boundss
-        [Node((59, 80), (60, 80), 0, 0), Node((60, 79), (60, 80), 0, 0)]
+        [Node((100, 61), (101, 61), 0, 0), Node((101, 60), (101, 61), 0, 0)]
 
         >>> grid_map.line_of_sight((1, 2), (3, 6))
         [(1, 2), (1, 3), (2, 4), (2, 5), (3, 6)]
@@ -174,6 +172,7 @@ class Grid(BaseMap):
         False
 
         >>> grid_map.type_map[1, 3] = TYPES.OBSTACLE
+        >>> grid_map.update_esdf()
         >>> grid_map.in_collision((1, 2), (3, 6))
         True
     """
@@ -364,7 +363,7 @@ class Grid(BaseMap):
         
         return filtered_neighbors
 
-    def line_of_sight(self, p1: Tuple[int, ...], p2: Tuple[int, ...]) -> list:
+    def line_of_sight(self, p1: Tuple[int, ...], p2: Tuple[int, ...]) -> List[Tuple[int, ...]]:
         """
         N-dimensional line of sight (Bresenham's line algorithm)
         
@@ -396,7 +395,7 @@ class Grid(BaseMap):
         
         # Allocate the result array
         result = []
-        result.append(tuple(current))
+        result.append(tuple(int(x) for x in current))
         
         for i in range(1, steps + 1):
             current[primary_axis] += primary_step
@@ -411,7 +410,7 @@ class Grid(BaseMap):
                     current[d] += 1 if delta[d] > 0 else -1
                     error[d] -= delta2[primary_axis]
             
-            result.append(tuple(current))
+            result.append(tuple(int(x) for x in current))
 
         return result
 
@@ -452,10 +451,6 @@ class Grid(BaseMap):
         steps = abs_delta[primary_axis]
         current = p1
         
-        # # Check the start point
-        # if not self.is_expandable(tuple(current)):
-        #     return True
-        
         for _ in range(steps):
             last_point = current.copy()
             current[primary_axis] += primary_step
@@ -469,7 +464,7 @@ class Grid(BaseMap):
                 if error[d] > abs_delta[primary_axis]:
                     current[d] += 1 if delta[d] > 0 else -1
                     error[d] -= delta2[primary_axis]
-            
+
             # Check the current point
             if not self.is_expandable(tuple(current), tuple(last_point)):
                 return True

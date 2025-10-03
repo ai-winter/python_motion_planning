@@ -1,8 +1,7 @@
 """
 @file: map.py
-@breif: Map for Path Planning
 @author: Wu Maojia
-@update: 2025.9.5
+@update: 2025.10.3
 """
 from typing import Iterable, Union
 from abc import ABC, abstractmethod

@@ -1,14 +1,13 @@
 """
 @file: theta_star.py
-@breif: Theta* motion planning
-@author: Yang Haodong, Wu Maojia
-@update: 2024.6.23
+@author: Wu Maojia, Yang Haodong
+@update: 2025.10.3
 """
 from typing import Union
 import heapq
 
 from python_motion_planning.common import BaseMap, Grid, Node, TYPES
-from .a_star import AStar
+from python_motion_planning.path_planner.graph_search.a_star import AStar
 
 
 class ThetaStar(AStar):
@@ -22,6 +21,16 @@ class ThetaStar(AStar):
     References:
         [1] Theta*: Any-Angle Path Planning on Grids
         [2] Any-angle path planning on non-uniform costmaps
+
+    Examples:
+        >>> map_ = Grid(bounds=[[0, 15], [0, 15]])
+        >>> planner = ThetaStar(map_=map_, start=(5, 5), goal=(10, 10))
+        >>> planner.plan()
+        ([(5, 5), (8, 8), (9, 9), (10, 10)], {'success': True, 'start': (5, 5), 'goal': (10, 10), 'length': 7.0710678118654755, 'cost': 7.0710678118654755, 'expand': {(5, 5): Node((5, 5), None, 0, 7.0710678118654755), (6, 6): Node((6, 6), (5, 5), 1.4142135623730951, 5.656854249492381), (7, 7): Node((7, 7), (5, 5), 2.8284271247461903, 4.242640687119285), (8, 8): Node((8, 8), (5, 5), 4.242640687119285, 2.8284271247461903), (9, 9): Node((9, 9), (8, 8), 5.65685424949238, 1.4142135623730951), (10, 10): Node((10, 10), (9, 9), 7.071067811865475, 0.0)}})
+
+        >>> planner.map_.type_map[3:10, 6] = TYPES.OBSTACLE
+        >>> planner.plan()
+        ([(5, 5), (8, 8), (9, 9), (10, 10)], {'success': True, 'start': (5, 5), 'goal': (10, 10), 'length': 7.0710678118654755, 'cost': 7.0710678118654755, 'expand': {(5, 5): Node((5, 5), None, 0, 7.0710678118654755), (6, 6): Node((6, 6), (5, 5), 1.4142135623730951, 5.656854249492381), (7, 7): Node((7, 7), (5, 5), 2.8284271247461903, 4.242640687119285), (8, 8): Node((8, 8), (5, 5), 4.242640687119285, 2.8284271247461903), (9, 9): Node((9, 9), (8, 8), 5.65685424949238, 1.4142135623730951), (10, 10): Node((10, 10), (9, 9), 7.071067811865475, 0.0)}})
     """
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)

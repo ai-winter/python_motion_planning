@@ -1,3 +1,8 @@
+"""
+@file: apf.py
+@author: Wu Maojia, Yang Haodong 
+@update: 2025.10.3
+"""
 from typing import List, Tuple
 import math
 

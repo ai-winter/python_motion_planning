@@ -1,3 +1,8 @@
+"""
+@file: diff_drive_robot.py
+@author: Wu Maojia
+@update: 2025.10.3
+"""
 from typing import List, Dict, Tuple, Optional
 
 import numpy as np

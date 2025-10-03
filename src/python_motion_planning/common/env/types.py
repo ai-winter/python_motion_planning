@@ -1,8 +1,7 @@
 """
 @file: types.py
-@breif: macro definition of types of plots in maps
-@author: Yang Haodong, Wu Maojia
-@update: 2025.3.29
+@author: Wu Maojia, Yang Haodong
+@update: 2025.10.3
 """
 # from enum import IntEnum
 

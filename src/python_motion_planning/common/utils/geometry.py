@@ -1,8 +1,7 @@
 """
-@file: a_star.py
-@breif: A* planner
+@file: geometry.py
 @author: Wu Maojia
-@update: 2025.9.6
+@update: 2025.10.3
 """
 from typing import List, Tuple
 import math

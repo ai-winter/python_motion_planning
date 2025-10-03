@@ -1,3 +1,8 @@
+"""
+@file: frame_transformer.py
+@author: Wu Maojia
+@update: 2025.10.3
+"""
 from typing import List, Tuple
 
 import numpy as np
@@ -111,15 +116,15 @@ class FrameTransformer:
         if dim != 2:
             raise NotImplementedError("Only 2D pos transform is implemented.")
             
-        # 机器人在世界坐标系中的位置和姿态
+        # pose in world frame
         rx, ry, theta = robot_pose
         c, s = np.cos(theta), np.sin(theta)
         
-        # 平移到原点
+        # translate to the origin
         tx = pos_world[0] - rx
         ty = pos_world[1] - ry
         
-        # 旋转（使用逆旋转矩阵）
+        # rotate (use inverse rotation matrix)
         pos_robot = np.array([
             c * tx + s * ty,
             -s * tx + c * ty
@@ -143,14 +148,13 @@ class FrameTransformer:
         if dim != 2:
             raise NotImplementedError("Only 2D pose transform is implemented.")
             
-        # 转换位置
+        # transform position
         position_robot = FrameTransformer.pos_world_to_robot(
             dim, pose_world[:2], robot_pose
         )
         
-        # 转换姿态（角度差）
+        # transform orientation
         orientation_robot = pose_world[2] - robot_pose[2]
-        # 归一化角度到[-π, π]
         orientation_robot = Geometry.regularize_orient(orientation_robot)
         
         return np.concatenate([position_robot, [orientation_robot]])
@@ -171,15 +175,15 @@ class FrameTransformer:
         if dim != 2:
             raise NotImplementedError("Only 2D pos transform is implemented.")
             
-        # 机器人在世界坐标系中的位置和姿态
+        # pose in world frame
         rx, ry, theta = robot_pose
         c, s = np.cos(theta), np.sin(theta)
         
-        # 旋转
+        # rotate to the origin
         tx = c * pos_robot[0] - s * pos_robot[1]
         ty = s * pos_robot[0] + c * pos_robot[1]
         
-        # 平移
+        # translate
         pos_world = np.array([
             tx + rx,
             ty + ry
@@ -202,14 +206,13 @@ class FrameTransformer:
         if dim != 2:
             raise NotImplementedError("Only 2D pose transform is implemented.")
             
-        # 转换位置
+        # transform position
         position_world = FrameTransformer.pos_robot_to_world(
             dim, pose_robot[:2], robot_pose
         )
         
-        # 转换姿态（角度和）
+        # transform orientation
         orientation_world = pose_robot[2] + robot_pose[2]
-        # 归一化角度到[-π, π]
         orientation_world = Geometry.regularize_orient(orientation_world)
         
         return np.concatenate([position_world, [orientation_world]])

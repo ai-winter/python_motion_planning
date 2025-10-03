@@ -1,8 +1,7 @@
 """
-@file: visualization.py
-@breif: visualization
-@author: Yang Haodong, Wu Maojia
-@update: 2025.9.20
+@file: visualizer.py
+@author: Wu Maojia, Yang Haodong 
+@update: 2025.10.3
 """
 from typing import Union, Dict, List, Tuple, Any
 from collections import namedtuple
@@ -20,6 +19,13 @@ from python_motion_planning.common.env import TYPES, ToySimulator, Grid, Circula
 from python_motion_planning.common.utils import Geometry
 
 class Visualizer:
+    """
+    Simple visualizer for motion planning using matplotlib.
+
+    Args:
+        figname: Figure name (window title).
+        figsize: Figure size (width, height).
+    """
     def __init__(self, figname: str = "", figsize: tuple = (10, 8)):
         self.fig = plt.figure(figname, figsize=figsize)
         self.ax = self.fig.add_subplot()
@@ -247,6 +253,13 @@ class Visualizer:
             self.ax.legend()
 
     def plot_circular_robot(self, robot: CircularRobot, axis_equal: bool = True) -> None:
+        """
+        Plot a circular robot.
+
+        Args:
+            robot: CircularRobot object.
+            axis_equal: Whether to set equal aspect ratio for x and y axes.
+        """
         patch = plt.Circle(tuple(robot.pos), robot.radius, 
             color=robot.color, alpha=robot.alpha, fill=robot.fill, 
             linewidth=robot.linewidth, linestyle=robot.linestyle,
@@ -276,6 +289,21 @@ class Visualizer:
             show_traj: bool = True, traj_kwargs: dict = {"linestyle": '-', "alpha": 0.7, "linewidth": 1.5},
             show_env_info: bool = False, rtf_limit: float = 1.0, grid_kwargs: dict = {},
             show_pred_traj: bool = True) -> None:
+        """
+        Render the toy simulator.
+
+        Args:
+            env: ToySimulator object.
+            controllers: Controllers for each robot.
+            steps: Number of steps to render.
+            interval: Interval between frames in milliseconds.
+            show_traj: Whether to show trajectories.
+            traj_kwargs: Keyword arguments for trajectories.
+            show_env_info: Whether to show environment information.
+            rtf_limit: Maximum real-time factor.
+            grid_kwargs: Keyword arguments for grid map.
+            show_pred_traj: Whether to show predicted trajectories (for DWA etc.).
+        """
 
         if interval is None:
             interval = int(1000 * env.dt)
@@ -384,6 +412,15 @@ class Visualizer:
         )
 
     def get_traj_info(self, rid: int, goal_pose: np.ndarray, goal_dist_tol: float, goal_orient_tol: float) -> Dict[str, Any]:
+        """
+        Get trajectory information.
+
+        Args:
+            rid: Robot ID.
+            goal_pose: Goal pose.
+            goal_dist_tol: Distance tolerance for goal.
+            goal_orient_tol: Orientation tolerance for goal.
+        """
         traj = self.trajs[rid]
 
         info = {
@@ -443,22 +480,50 @@ class Visualizer:
 
 
     def set_title(self, title: str) -> None:
+        """
+        Set title.
+
+        Args:
+            title: Title.
+        """
         plt.title(title)
 
     def connect(self, name: str, func) -> None:
+        """
+        Connect event.
+
+        Args:
+            name: Event name.
+            func: Event function.
+        """
         self.fig.canvas.mpl_connect(name, func)
 
     def clean(self):
+        """
+        Clean plot.
+        """
         plt.cla()
 
     def update(self):
+        """
+        Update plot.
+        """
         self.fig.canvas.draw_idle()
     
     def show(self):
+        """
+        Show plot.
+        """
         plt.show()
 
     def legend(self):
+        """
+        Add legend.
+        """
         plt.legend()
     
     def close(self):
+        """
+        Close plot.
+        """
         plt.close()

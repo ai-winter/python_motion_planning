@@ -1,3 +1,8 @@
+"""
+@file: pure_pursuit.py
+@author: Wu Maojia
+@update: 2025.10.3
+"""
 from typing import List, Tuple
 import math
 

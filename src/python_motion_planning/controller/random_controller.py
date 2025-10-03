@@ -1,3 +1,8 @@
+"""
+@file: random_controller.py
+@author: Wu Maojia
+@update: 2025.10.3
+"""
 from typing import Tuple
 
 import numpy as np

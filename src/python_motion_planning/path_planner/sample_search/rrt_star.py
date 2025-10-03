@@ -1,9 +1,14 @@
+"""
+@file: rrt_star.py
+@author: Wu Maojia, Yang Haodong
+@update: 2025.10.3
+"""
 import math
 import random
 from typing import Union, Dict, List, Tuple
 
-from python_motion_planning.common import BaseMap, Node
-from .rrt import RRT
+from python_motion_planning.common import BaseMap, Node, Grid, TYPES
+from python_motion_planning.path_planner.sample_search.rrt import RRT
 
 class RRTStar(RRT):
     """
@@ -19,6 +24,18 @@ class RRTStar(RRT):
 
     References:
         [1] Sampling-based algorithms for optimal motion planning
+
+    Examples:
+        >>> map_ = Grid(bounds=[[0, 15], [0, 15]])
+        >>> planner = RRTStar(map_=map_, start=(5, 5), goal=(10, 10))
+        >>> path, path_info = planner.plan()
+        >>> print(path_info['success'])
+        True
+        
+        >>> planner.map_.type_map[3:10, 6] = TYPES.OBSTACLE
+        >>> path, path_info = planner.plan()
+        >>> print(path_info['success'])
+        True
     """
     def __init__(self, *args, 
                  radius: float = 10.0,** kwargs) -> None:
