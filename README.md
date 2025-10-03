@@ -51,36 +51,8 @@ pip install python-motion-planning==2.0.dev1
 ```
 
 ## Run
-Below are some simple examples.
 
-1. Run planning and animation separately
-```python
-import python_motion_planning as pmp
-planner = pmp.AStar(start=(5, 5), goal=(45, 25), env=pmp.Grid(51, 31))
-cost, path, expand = planner.plan()
-planner.plot.animation(path, str(planner), cost, expand)  # animation
-```
-
-2. Run planning and animation in one step
-```python
-import python_motion_planning as pmp
-planner = pmp.AStar(start=(5, 5), goal=(45, 25), env=pmp.Grid(51, 31))
-planner.run()       # run both planning and animation
-```
-
-3. Create planner in factory mode
-```python
-import python_motion_planning as pmp
-search_factory = pmp.SearchFactory()
-planner = search_factory("a_star", start=(5, 5), goal=(45, 25), env=pmp.Grid(51, 31))
-planner.run()       # run both planning and animation
-```
-
-More examples can be found in the folder `examples` in the repository.
-
-## Documentation
-
-For more details, you can refer to [online documentation](https://ai-winter.github.io/python_motion_planning/).
+Please refer to the Tutorials part of [online documentation](https://ai-winter.github.io/python_motion_planning/).
 
 # Demos
 ## Path Planner
@@ -111,6 +83,8 @@ For more details, you can refer to [online documentation](https://ai-winter.gith
 ## Controller
 
 We provide a toy simulator with simple physical simulation to test controllers (path-trakcers). The toy simulator supports multi-agents/multi-robots. The available robots include `CircularRobot` (Omnidirectional) and `DiffDriveRobot` (Only support moving forward and backward). Currently only 2D simulator is provided. 3D simulator has not been implemented.
+
+In the following demos, the blue robot 1 is the `CircularRobot`, and the orange robot 2 is the `DiffDriveRobot`.
 
 |Planner|2D|3D
 |-------|-------|-------

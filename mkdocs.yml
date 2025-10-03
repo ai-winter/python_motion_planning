@@ -95,11 +95,22 @@ copyright: Copyright @ 2023-2025, Wu Maojia, Yang Haodong.
 repo_url: https://github.com/ai-winter/python_motion_planning/
 nav:
 - Home: index.md
+- Tutorials:
+  - 1 - 2D:
+    - 1.1 - Map:
+      - 1.1.1 - Grid: tutorials/2d/map/grid.md
+    - 1.2 - Path Planner:
+      - 1.2.1 - Graph Search: tutorials/2d/path_planner/graph_search.md
+      - 1.2.2 - Sample Search: tutorials/2d/path_planner/sample_search.md
+    - 1.3 - Controller:
+      - 1.3.1 - Path Tracker: tutorials/2d/controller/path_tracker.md
+  - 2 - 3D:
+    - 2.1 - Map:
+      - 2.1.1 - Grid: tutorials/3d/map/grid.md
+    - 2.2 - Path Planner:
+      - 2.2.1 - Graph Search: tutorials/3d/path_planner/graph_search.md
+      - 2.2.2 - Sample Search: tutorials/3d/path_planner/sample_search.md
 - API Reference:
-  - .:
-    - mkdocs_tmp:
-      - Parent: api\mkdocs_tmp\Parent.md
-      - Child: api\mkdocs_tmp\Child.md
   - common:
     - env:
       - map:
@@ -111,8 +122,6 @@ nav:
       - node:
         - Node: api\common\env\node\Node.md
       - robot:
-        - ball_robot:
-          - BallRobot: api\common\env\robot\ball_robot\BallRobot.md
         - base_robot:
           - BaseRobot: api\common\env\robot\base_robot\BaseRobot.md
         - circular_robot:
@@ -143,103 +152,51 @@ nav:
   - controller:
     - base_controller:
       - BaseController: api\controller\base_controller\BaseController.md
-    - dwa:
-      - DWA: api\controller\dwa\DWA.md
     - path_tracker:
-      - PathTracker: api\controller\path_tracker\PathTracker.md
-    - pid:
-      - PID: api\controller\pid\PID.md
-    - pure_pursuit:
-      - PurePursuit: api\controller\pure_pursuit\PurePursuit.md
+      - apf:
+        - APF: api\controller\path_tracker\apf\APF.md
+      - dwa:
+        - DWA: api\controller\path_tracker\dwa\DWA.md
+      - path_tracker:
+        - PathTracker: api\controller\path_tracker\path_tracker\PathTracker.md
+      - pid:
+        - PID: api\controller\path_tracker\pid\PID.md
+      - pure_pursuit:
+        - PurePursuit: api\controller\path_tracker\pure_pursuit\PurePursuit.md
     - random_controller:
       - RandomController: api\controller\random_controller\RandomController.md
-  - curve_generation:
+  - curve_generator:
     - bezier_curve:
-      - Bezier: api\curve_generation\bezier_curve\Bezier.md
+      - Bezier: api\curve_generator\bezier_curve\Bezier.md
     - bspline_curve:
-      - BSpline: api\curve_generation\bspline_curve\BSpline.md
+      - BSpline: api\curve_generator\bspline_curve\BSpline.md
     - cubic_spline:
-      - CubicSpline: api\curve_generation\cubic_spline\CubicSpline.md
+      - CubicSpline: api\curve_generator\cubic_spline\CubicSpline.md
     - curve:
-      - Curve: api\curve_generation\curve\Curve.md
+      - Curve: api\curve_generator\curve\Curve.md
     - dubins_curve:
-      - Dubins: api\curve_generation\dubins_curve\Dubins.md
+      - Dubins: api\curve_generator\dubins_curve\Dubins.md
     - fem_pos_smooth:
-      - FemPosSmoother: api\curve_generation\fem_pos_smooth\FemPosSmoother.md
+      - FemPosSmoother: api\curve_generator\fem_pos_smooth\FemPosSmoother.md
     - polynomial_curve:
-      - Polynomial: api\curve_generation\polynomial_curve\Polynomial.md
+      - Polynomial: api\curve_generator\polynomial_curve\Polynomial.md
     - reeds_shepp:
-      - ReedsShepp: api\curve_generation\reeds_shepp\ReedsShepp.md
-  - global_planner:
-    - evolutionary_search:
-      - aco:
-        - ACO: api\global_planner\evolutionary_search\aco\ACO.md
-      - evolutionary_search:
-        - EvolutionarySearcher: api\global_planner\evolutionary_search\evolutionary_search\EvolutionarySearcher.md
-      - pso:
-        - PSO: api\global_planner\evolutionary_search\pso\PSO.md
-    - graph_search:
-      - a_star:
-        - AStar: api\global_planner\graph_search\a_star\AStar.md
-      - d_star:
-        - DNode: api\global_planner\graph_search\d_star\DNode.md
-        - DStar: api\global_planner\graph_search\d_star\DStar.md
-      - d_star_lite:
-        - DStarLite: api\global_planner\graph_search\d_star_lite\DStarLite.md
-      - dijkstra:
-        - Dijkstra: api\global_planner\graph_search\dijkstra\Dijkstra.md
-      - gbfs:
-        - GBFS: api\global_planner\graph_search\gbfs\GBFS.md
-      - graph_search:
-        - GraphSearcher: api\global_planner\graph_search\graph_search\GraphSearcher.md
-      - jps:
-        - JPS: api\global_planner\graph_search\jps\JPS.md
-      - lazy_theta_star:
-        - LazyThetaStar: api\global_planner\graph_search\lazy_theta_star\LazyThetaStar.md
-      - lpa_star:
-        - LNode: api\global_planner\graph_search\lpa_star\LNode.md
-        - LPAStar: api\global_planner\graph_search\lpa_star\LPAStar.md
-      - s_theta_star:
-        - SThetaStar: api\global_planner\graph_search\s_theta_star\SThetaStar.md
-      - theta_star:
-        - ThetaStar: api\global_planner\graph_search\theta_star\ThetaStar.md
-      - voronoi:
-        - VoronoiPlanner: api\global_planner\graph_search\voronoi\VoronoiPlanner.md
-    - sample_search:
-      - informed_rrt:
-        - Ellipse: api\global_planner\sample_search\informed_rrt\Ellipse.md
-        - InformedRRT: api\global_planner\sample_search\informed_rrt\InformedRRT.md
-      - rrt:
-        - RRT: api\global_planner\sample_search\rrt\RRT.md
-      - rrt_connect:
-        - RRTConnect: api\global_planner\sample_search\rrt_connect\RRTConnect.md
-      - rrt_star:
-        - RRTStar: api\global_planner\sample_search\rrt_star\RRTStar.md
-      - sample_search:
-        - SampleSearcher: api\global_planner\sample_search\sample_search\SampleSearcher.md
-  - local_planner:
-    - apf:
-      - APF: api\local_planner\apf\APF.md
-    - dwa:
-      - DWA: api\local_planner\dwa\DWA.md
-    - local_planner:
-      - LocalPlanner: api\local_planner\local_planner\LocalPlanner.md
-    - lqr:
-      - LQR: api\local_planner\lqr\LQR.md
-    - mpc:
-      - MPC: api\local_planner\mpc\MPC.md
-    - pid:
-      - PID: api\local_planner\pid\PID.md
-    - rpp:
-      - RPP: api\local_planner\rpp\RPP.md
+      - ReedsShepp: api\curve_generator\reeds_shepp\ReedsShepp.md
   - path_planner:
     - base_path_planner:
       - BasePathPlanner: api\path_planner\base_path_planner\BasePathPlanner.md
     - graph_search:
       - a_star:
         - AStar: api\path_planner\graph_search\a_star\AStar.md
+      - dijkstra:
+        - Dijkstra: api\path_planner\graph_search\dijkstra\Dijkstra.md
       - theta_star:
         - ThetaStar: api\path_planner\graph_search\theta_star\ThetaStar.md
+    - sample_search:
+      - rrt:
+        - RRT: api\path_planner\sample_search\rrt\RRT.md
+      - rrt_star:
+        - RRTStar: api\path_planner\sample_search\rrt_star\RRTStar.md
 plugins:
 - search
 - autorefs
@@ -253,9 +210,6 @@ plugins:
         paths:
         - pykit_tools
         options:
-          # extensions:
-          # - griffe_inherited_docstrings
-          # - docstring_inheritance.griffe
           heading_level: 2
           show_root_heading: true
           show_symbol_type: true

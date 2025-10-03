@@ -17,10 +17,8 @@ dependencies = [
     "numpy",
     "scipy",
     "matplotlib",
-    "cvxopt",
     "osqp",
-    "tqdm",
-    "tensorboard==2.12.0"
+    "gymnasium"
 ]
 classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
