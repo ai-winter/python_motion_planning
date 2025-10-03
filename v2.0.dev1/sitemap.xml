@@ -33,26 +33,6 @@
          <lastmod>2025-10-03</lastmod>
     </url>
     <url>
-         <loc>http://localhost:8000/v2.0.dev1/api/common/env/robot/tmp/BaseAgent.html</loc>
-         <lastmod>2025-10-03</lastmod>
-    </url>
-    <url>
-         <loc>http://localhost:8000/v2.0.dev1/api/common/env/robot/tmp/BaseController.html</loc>
-         <lastmod>2025-10-03</lastmod>
-    </url>
-    <url>
-         <loc>http://localhost:8000/v2.0.dev1/api/common/env/robot/tmp/MultiAgentNavEnv.html</loc>
-         <lastmod>2025-10-03</lastmod>
-    </url>
-    <url>
-         <loc>http://localhost:8000/v2.0.dev1/api/common/env/robot/tmp/RandomController.html</loc>
-         <lastmod>2025-10-03</lastmod>
-    </url>
-    <url>
-         <loc>http://localhost:8000/v2.0.dev1/api/common/env/robot/tmp/SimpleAgent.html</loc>
-         <lastmod>2025-10-03</lastmod>
-    </url>
-    <url>
          <loc>http://localhost:8000/v2.0.dev1/api/common/env/types/TYPES.html</loc>
          <lastmod>2025-10-03</lastmod>
     </url>
