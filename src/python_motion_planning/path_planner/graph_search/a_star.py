@@ -74,7 +74,7 @@ class AStar(Dijkstra):
                     "expand": CLOSED
                 }
 
-            for node_n in self.map_.get_neighbors(node): 
+            for node_n in self.map_.get_neighbors(node, diagonal=self.diagonal): 
                 # exists in CLOSED list
                 if node_n.current in CLOSED:
                     continue
