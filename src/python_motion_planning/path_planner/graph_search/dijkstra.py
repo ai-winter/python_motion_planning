@@ -1,7 +1,7 @@
 """
 @file: dijkstra.py
 @author: Wu Maojia
-@update: 2025.10.3
+@update: 2025.10.4
 """
 from typing import Union
 import heapq

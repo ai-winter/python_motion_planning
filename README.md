@@ -59,8 +59,8 @@ Please refer to the Tutorials part of [online documentation](https://ai-winter.g
 
 |Planner|2D Grid|3D Grid
 |-------|-------|-------
-**GBFS**|Implemented in [V1.1.1](https://github.com/ai-winter/python_motion_planning/tree/v1.1.1), not migrated|Not implemented
 **Dijkstra**|![dijkstra_2d.svg](assets/dijkstra_2d.svg)|![dijkstra_3d.svg](assets/dijkstra_3d.svg)
+**GBFS**|![gbfs_2d.svg](assets/gbfs_2d.svg)|![gbfs_3d.svg](assets/gbfs_3d.svg)
 **A\***|![a_star_2d.svg](assets/a_star_2d.svg)|![a_star_3d.svg](assets/a_star_3d.svg)
 **JPS**|Implemented in [V1.1.1](https://github.com/ai-winter/python_motion_planning/tree/v1.1.1), not migrated|Not implemented
 **D\***|Implemented in [V1.1.1](https://github.com/ai-winter/python_motion_planning/tree/v1.1.1), not migrated|Not implemented
@@ -68,7 +68,6 @@ Please refer to the Tutorials part of [online documentation](https://ai-winter.g
 **D\* Lite**|Implemented in [V1.1.1](https://github.com/ai-winter/python_motion_planning/tree/v1.1.1), not migrated|Not implemented
 **Theta\***|![theta_star_2d.svg](assets/theta_star_2d.svg)|![theta_star_3d.svg](assets/theta_star_3d.svg)
 **Lazy Theta\***|Implemented in [V1.1.1](https://github.com/ai-winter/python_motion_planning/tree/v1.1.1), not migrated|Not implemented
-**S-Theta\***|Implemented in [V1.1.1](https://github.com/ai-winter/python_motion_planning/tree/v1.1.1), not migrated|Not implemented
 **Anya**|Not implemented|Not implemented
 **Voronoi**|Implemented in [V1.1.1](https://github.com/ai-winter/python_motion_planning/tree/v1.1.1), not migrated|Not implemented
 **RRT**|![rrt_2d.svg](assets/rrt_2d.svg)|![rrt_3d.svg](assets/rrt_3d.svg)
