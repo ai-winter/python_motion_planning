@@ -1,7 +1,7 @@
 """
 @file: dijkstra.py
 @author: Wu Maojia
-@update: 2025.10.4
+@update: 2025.10.5
 """
 from typing import Union
 import heapq
@@ -55,10 +55,6 @@ class Dijkstra(BasePathPlanner):
 
         while OPEN:
             node = heapq.heappop(OPEN)
-
-            # obstacle found
-            if not self.map_.is_expandable(node.current, node.parent):
-                continue
 
             # exists in CLOSED list
             if node.current in CLOSED:

@@ -67,7 +67,7 @@ Please refer to the Tutorials part of [online documentation](https://ai-winter.g
 **LPA\***|Implemented in [V1.1.1](https://github.com/ai-winter/python_motion_planning/tree/v1.1.1), not migrated|Not implemented
 **D\* Lite**|Implemented in [V1.1.1](https://github.com/ai-winter/python_motion_planning/tree/v1.1.1), not migrated|Not implemented
 **Theta\***|![theta_star_2d.svg](assets/theta_star_2d.svg)|![theta_star_3d.svg](assets/theta_star_3d.svg)
-**Lazy Theta\***|Implemented in [V1.1.1](https://github.com/ai-winter/python_motion_planning/tree/v1.1.1), not migrated|Not implemented
+**Lazy Theta\***|![lazy_theta_star_2d.svg](assets/lazy_theta_star_2d.svg)|![lazy_theta_star_3d.svg](assets/lazy_theta_star_3d.svg)
 **Anya**|Not implemented|Not implemented
 **Voronoi**|Implemented in [V1.1.1](https://github.com/ai-winter/python_motion_planning/tree/v1.1.1), not migrated|Not implemented
 **RRT**|![rrt_2d.svg](assets/rrt_2d.svg)|![rrt_3d.svg](assets/rrt_3d.svg)

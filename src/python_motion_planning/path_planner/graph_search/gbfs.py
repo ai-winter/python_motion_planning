@@ -1,3 +1,8 @@
+"""
+@file: gbfs.py
+@author: Wu Maojia
+@update: 2025.10.5
+"""
 from typing import Union
 import heapq
 

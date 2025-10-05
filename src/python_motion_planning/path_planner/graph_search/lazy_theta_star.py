@@ -1,5 +1,5 @@
 """
-@file: theta_star.py
+@file: lazy_theta_star.py
 @author: Wu Maojia, Yang Haodong
 @update: 2025.10.5
 """
@@ -7,24 +7,23 @@ from typing import Union
 import heapq
 
 from python_motion_planning.common import BaseMap, Grid, Node, TYPES
-from python_motion_planning.path_planner.graph_search.a_star import AStar
+from python_motion_planning.path_planner.graph_search.theta_star import ThetaStar
 
 
-class ThetaStar(AStar):
+class LazyThetaStar(ThetaStar):
     """
-    Class for Theta* path planner.
+    Class for Lazy-Theta* path planner.
 
     Args:
         *args: see the parent class.
         **kwargs: see the parent class.
 
     References:
-        [1] Theta*: Any-Angle Path Planning on Grids
-        [2] Any-angle path planning on non-uniform costmaps
+        [1] Lazy Theta*: Any-Angle Path Planning and Path Length Analysis in 3D
 
     Examples:
         >>> map_ = Grid(bounds=[[0, 15], [0, 15]])
-        >>> planner = ThetaStar(map_=map_, start=(5, 5), goal=(10, 10))
+        >>> planner = LazyThetaStar(map_=map_, start=(5, 5), goal=(10, 10))
         >>> planner.plan()
         ([(5, 5), (8, 8), (9, 9), (10, 10)], {'success': True, 'start': (5, 5), 'goal': (10, 10), 'length': 7.0710678118654755, 'cost': 7.0710678118654755, 'expand': {(5, 5): Node((5, 5), None, 0, 7.0710678118654755), (6, 6): Node((6, 6), (5, 5), 1.4142135623730951, 5.656854249492381), (7, 7): Node((7, 7), (5, 5), 2.8284271247461903, 4.242640687119285), (8, 8): Node((8, 8), (5, 5), 4.242640687119285, 2.8284271247461903), (9, 9): Node((9, 9), (8, 8), 5.65685424949238, 1.4142135623730951), (10, 10): Node((10, 10), (9, 9), 7.071067811865475, 0.0)}})
 
@@ -36,7 +35,7 @@ class ThetaStar(AStar):
         super().__init__(*args, **kwargs)
 
     def __str__(self) -> str:
-        return "Theta*"
+        return "Lazy-Theta*"
 
     def plan(self) -> tuple:
         """
@@ -54,6 +53,18 @@ class ThetaStar(AStar):
 
         while OPEN:
             node = heapq.heappop(OPEN)
+
+            # ser vertex: path 1
+            node_p = CLOSED.get(node.parent)
+            if node_p:
+                if self.map_.in_collision(node_p.current, node.current):
+                    node.g = float("inf")
+                    for node_n in self.map_.get_neighbors(node, diagonal=self.diagonal):
+                        if node_n.current in CLOSED:
+                            node_n = CLOSED.get(node_n.current)
+                            if node.g > node_n.g + self.get_cost(node_n.current, node.current):
+                                node.g = node_n.g + self.get_cost(node_n.current, node.current)
+                                node.parent = node_n.current
 
             # exists in CLOSED list
             if node.current in CLOSED:
@@ -81,12 +92,10 @@ class ThetaStar(AStar):
                 node_n.g = node.g + self.get_cost(node.current, node_n.current)
                 node_n.h = self.get_heuristic(node_n.current)
 
-            
                 # path 2: Theta* line of sight update
                 node_p = CLOSED.get(node.parent)
                 if node_p:
-                    if not self.map_.in_collision(node_p.current, node_n.current):
-                        self.updateVertex(node_p, node_n)
+                    self.updateVertex(node_p, node_n)
 
                 # goal found
                 if node_n.current == self.goal:
@@ -100,15 +109,3 @@ class ThetaStar(AStar):
 
         self.failed_info[1]["expand"] = CLOSED
         return self.failed_info
-
-    def updateVertex(self, node_p: Node, node_n: Node) -> None:
-        """
-        Update extend node information with current node's parent node.
-
-        Args:
-            node_p (Node): parent node
-            node_n (Node): next node
-        """
-        if node_p.g + self.get_cost(node_p.current, node_n.current) <= node_n.g:
-            node_n.g = node_p.g + self.get_cost(node_p.current, node_n.current)
-            node_n.parent = node_p.current
