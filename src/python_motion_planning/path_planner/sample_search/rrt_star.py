@@ -1,11 +1,11 @@
 """
 @file: rrt_star.py
 @author: Wu Maojia, Yang Haodong
-@update: 2025.10.3
+@update: 2025.10.6
 """
 import math
 import random
-from typing import Union, Dict, List, Tuple
+from typing import Union, Dict, List, Tuple, Any
 
 from python_motion_planning.common import BaseMap, Node, Grid, TYPES
 from python_motion_planning.path_planner.sample_search.rrt import RRT
@@ -46,7 +46,7 @@ class RRTStar(RRT):
     def __str__(self) -> str:
         return "Rapidly-exploring Random Tree Star (RRT*)"
 
-    def plan(self) -> Union[list, dict]:
+    def plan(self) -> Union[List[Tuple[float, ...]], Dict[str, Any]]:
         """
         RRT* path planning algorithm implementation with optimality properties.
         

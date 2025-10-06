@@ -1,7 +1,7 @@
 """
 @file: grid.py
 @author: Wu Maojia
-@update: 2025.10.3
+@update: 2025.10.6
 """
 from itertools import product
 from typing import Iterable, Union, Tuple, Callable, List, Dict
@@ -334,10 +334,6 @@ class Grid(BaseMap):
         """
         if node.dim != self.dim:
             raise ValueError("Node dimension does not match map dimension.")
-
-        # current_point = node.current.astype(self.dtype)
-        # current_pos = current_point.numpy()
-        # neighbors = []
         
         offsets = self._diagonal_offsets if diagonal else self._orthogonal_offsets
         
@@ -346,20 +342,9 @@ class Grid(BaseMap):
         neighbors = [node + offset for offset in offsets]
         filtered_neighbors = []
 
-        # print(neighbors)
-
-        # Filter out positions outside map bounds
-        # for pos in neighbor_positions:
-        #     point = (pos, dtype=self.dtype)
-        #     if self.within_bounds(point):
-        #         if self.type_map[tuple(point)] != TYPES.OBSTACLE:
-        #             neighbor_node = Node(point, parent=current_point)
-        #             neighbors.append(neighbor_node)
         for neighbor in neighbors:
             if self.is_expandable(neighbor.current, node.current):
                 filtered_neighbors.append(neighbor)
-
-        # print(filtered_neighbors)
         
         return filtered_neighbors
 

@@ -62,7 +62,7 @@ Please refer to the Tutorials part of [online documentation](https://ai-winter.g
 **Dijkstra**|![dijkstra_2d.svg](assets/dijkstra_2d.svg)|![dijkstra_3d.svg](assets/dijkstra_3d.svg)
 **GBFS**|![gbfs_2d.svg](assets/gbfs_2d.svg)|![gbfs_3d.svg](assets/gbfs_3d.svg)
 **A\***|![a_star_2d.svg](assets/a_star_2d.svg)|![a_star_3d.svg](assets/a_star_3d.svg)
-**JPS**|Implemented in [V1.1.1](https://github.com/ai-winter/python_motion_planning/tree/v1.1.1), not migrated|Not implemented
+**JPS**|![jps_2d.svg](assets/jps_2d.svg)|![jps_3d.svg](assets/jps_3d.svg)
 **D\***|Implemented in [V1.1.1](https://github.com/ai-winter/python_motion_planning/tree/v1.1.1), not migrated|Not implemented
 **LPA\***|Implemented in [V1.1.1](https://github.com/ai-winter/python_motion_planning/tree/v1.1.1), not migrated|Not implemented
 **D\* Lite**|Implemented in [V1.1.1](https://github.com/ai-winter/python_motion_planning/tree/v1.1.1), not migrated|Not implemented
@@ -85,7 +85,7 @@ We provide a toy simulator with simple physical simulation to test controllers (
 
 In the following demos, the blue robot 1 is the `CircularRobot`, and the orange robot 2 is the `DiffDriveRobot`.
 
-|Planner|2D|3D
+|Controller|2D|3D
 |-------|-------|-------
 |**Path Trakcer**|![path_tracker_2d.gif](assets/path_tracker_2d.gif)|Not implemented
 | **Pure Pursuit**     |![pure_pursuit_2d.gif](assets/pure_pursuit_2d.gif)|Not implemented
@@ -105,7 +105,7 @@ In the following demos, the blue robot 1 is the `CircularRobot`, and the orange 
 
 The visualization of the curve generators has not been implemented in current version. They can be visualized in [V1.1.1](https://github.com/ai-winter/python_motion_planning/tree/v1.1.1).
 
-| Planner |2D|3D|
+|Generator|2D|3D|
 | ------- | -------------------------------------------------------- | -------------------------------------------------------- 
 | **Polynomia** | ![polynomial_curve_python.gif](assets/polynomial_curve_python.gif)|Not implemented
 | **Bezier** |![bezier_curve_python.png](assets/bezier_curve_python.png)|Not implemented

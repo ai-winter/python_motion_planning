@@ -1,9 +1,9 @@
 """
 @file: dijkstra.py
 @author: Wu Maojia
-@update: 2025.10.5
+@update: 2025.10.6
 """
-from typing import Union
+from typing import Union, List, Tuple, Dict, Any
 import heapq
  
 from python_motion_planning.common import BaseMap, Grid, Node, TYPES
@@ -38,7 +38,7 @@ class Dijkstra(BasePathPlanner):
     def __str__(self) -> str:
         return "Dijkstra"
 
-    def plan(self) -> Union[list, dict]:
+    def plan(self) -> Union[List[Tuple[float, ...]], Dict[str, Any]]:
         """
         Interface for planning.
 

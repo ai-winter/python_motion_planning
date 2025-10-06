@@ -1,9 +1,9 @@
 """
 @file: lazy_theta_star.py
 @author: Wu Maojia, Yang Haodong
-@update: 2025.10.5
+@update: 2025.10.6
 """
-from typing import Union
+from typing import Union, List, Tuple, Dict, Any
 import heapq
 
 from python_motion_planning.common import BaseMap, Grid, Node, TYPES
@@ -37,7 +37,7 @@ class LazyThetaStar(ThetaStar):
     def __str__(self) -> str:
         return "Lazy-Theta*"
 
-    def plan(self) -> tuple:
+    def plan(self) -> Union[List[Tuple[float, ...]], Dict[str, Any]]:
         """
         Interface for planning.
 

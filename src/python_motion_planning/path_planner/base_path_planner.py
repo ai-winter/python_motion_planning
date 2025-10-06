@@ -1,9 +1,9 @@
 """
 @file: planner.py
 @author: Wu Maojia
-@update: 2025.10.3
+@update: 2025.10.6
 """
-from typing import Union
+from typing import Union, List, Tuple, Dict, Any
 from abc import ABC, abstractmethod
  
 from python_motion_planning.common import BaseMap
@@ -25,8 +25,18 @@ class BasePathPlanner(ABC):
         self.goal = goal
         self.failed_info = [], {"success": False, "start": None, "goal": None, "length": 0, "cost": 0, "expand": {}}
 
+    @property
+    def dim(self) -> int:
+        """
+        Get the dimension of the map.
+
+        Returns:
+            dim (int): The dimension of the map.
+        """
+        return self.map_.dim
+
     @abstractmethod
-    def plan(self) -> Union[list, dict]:
+    def plan(self) -> Union[List[Tuple[float, ...]], Dict[str, Any]]:
         """
         Interface for planning.
 
