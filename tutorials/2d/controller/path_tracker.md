@@ -1,4 +1,4 @@
-Transform the planned path from map frame to world frame.
+The path planners plan points on the grid map. However, the controllers use coordinates in world frame. We need to transform the planned path from map frame to world frame.
 
 ```python
 path_world = map_.path_map_to_world(path)
@@ -20,6 +20,8 @@ env = ToySimulator(dim=dim, obstacle_grid=map_, robot_collisions=False)
 
 Add robots.
 
+For 2D robots, poses which is 3D vector $(x, y, \theta)$ comprise of 2D position $(x, y)$ and 1D orientation $(\theta)$ in world frame. The action minimum and maximum are the range of $(a_x, a_y, \omega)$ which comprises 2D linear acceleration and 1D angular acceleration in robot frame respectively. In robot frame, the x-direction is the positive direction of the robot.
+
 ```python
 robots = {
     "1": CircularRobot(dim=dim, radius=1, pose=np.array([5.5, 5.5, 0]), vel=np.zeros(3),
@@ -30,6 +32,8 @@ robots = {
 ```
 
 Add controllers.
+
+The observation space and action space of controllers in 2D are $(x, y, \theta)$ pose of the robot in world frame and $(a_x, a_y, \omega)$ acceleration of the robot in robot frame respectively. The path-tracking controllers need a path planned by path planners to follow. You can also set the `max_lin_speed`,  `max_ang_speed`, `goal_dist_tol`, `goal_orient_tol` or other arguments of the controllers if you need.
 
 ```python
 controllers = {}
@@ -63,7 +67,7 @@ for rid in robots:
 vis.close()
 ```
 
-Print results:
+Print results (`success` means the robot stop at the goal area finally. `oracle_success` means the robot has reached the goal area at some moment. Other similar metrics are literal meanings):
 
 ```
 1 : {'traj_length': 64.05713763788278, 'success': True, 'dist_success': True, 'oracle_success': True, 'oracle_dist_success': True, 'success_time': 23.3, 'dist_success_time': 23.3, 'oracle_success_time': 20.8, 'oracle_dist_success_time': 20.8}
