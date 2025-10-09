@@ -136,7 +136,7 @@ The visualization of the curve generators has not been implemented in current ve
 
 * Provide ROS and ROS2 wrapper.
 
-* Application in mainstream robot simulation environments (e.g. Gazebo, Carla, Airsim, PyBullet, MuJoCo, Issac Sim, etc).
+* Application in mainstream robot simulation environments (e.g. Gazebo, Carla, Airsim, PyBullet, MuJoCo, Issac Sim).
 
 * More mainstream motion planning algorithms.
 
