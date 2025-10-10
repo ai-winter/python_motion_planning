@@ -1,7 +1,7 @@
 """
-@file: planner.py
+@file: base_path_planner.py
 @author: Wu Maojia
-@update: 2025.10.6
+@update: 2025.10.10
 """
 from typing import Union, List, Tuple, Dict, Any
 from abc import ABC, abstractmethod
@@ -73,23 +73,24 @@ class BasePathPlanner(ABC):
         return self.get_cost(point, self.goal)
 
     
-    def extract_path(self, closed_list: dict) -> tuple:
+    def extract_path(self, closed_list: dict) -> Tuple[List[Tuple[float, ...]], float, float]:
         """
         Extract the path based on the CLOSED list.
 
         Args:
-            closed_list (dict): CLOSED list
+            closed_list: CLOSED list
 
         Returns:
-            cost (float): the cost of planned path
-            path (list): the planning path
+            path: A list containing the path waypoints
+            length: Length of the path
+            cost: Cost of the path
         """
         length = 0
         cost = 0
-        node = closed_list[self.goal]
+        node = closed_list.get(self.goal)
         path = [node.current]
         while node.current != self.start:
-            node_parent = closed_list[node.parent]
+            node_parent = closed_list.get(node.parent)
             length += self.map_.get_distance(node.current, node_parent.current)
             cost += self.get_cost(node.current, node_parent.current)
             node = node_parent

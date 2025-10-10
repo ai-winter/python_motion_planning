@@ -182,37 +182,45 @@ class Visualizer:
             map_frame: whether path is in map frame or not (world frame)
         """
         if self.dim == 2:
-            for coord, node in expand_tree.items():
-                current = node.current
-                if map_frame:
-                    current = self.grid_map.map_to_world(current)
+            if not isinstance(expand_tree, list):   # for multiple trees
+                expand_tree = [expand_tree]
 
-                self.ax.scatter(current[0], current[1],
-                                c=node_color, s=node_size, zorder=self.zorder['expand_tree_node'], alpha=node_alpha)
-                if connect_to_parent and node.parent is not None:
-                    parent = node.parent
+            for tree in expand_tree:
+                for coord, node in tree.items():
+                    current = node.current
                     if map_frame:
-                        parent = self.grid_map.map_to_world(parent)
-                    self.ax.plot([parent[0], current[0]],
-                                [parent[1], current[1]],
-                                color=edge_color, linewidth=linewidth, zorder=self.zorder['expand_tree_edge'], alpha=edge_alpha)
+                        current = self.grid_map.map_to_world(current)
+
+                    self.ax.scatter(current[0], current[1],
+                                    c=node_color, s=node_size, zorder=self.zorder['expand_tree_node'], alpha=node_alpha)
+                    if connect_to_parent and node.parent is not None:
+                        parent = node.parent
+                        if map_frame:
+                            parent = self.grid_map.map_to_world(parent)
+                        self.ax.plot([parent[0], current[0]],
+                                    [parent[1], current[1]],
+                                    color=edge_color, linewidth=linewidth, zorder=self.zorder['expand_tree_edge'], alpha=edge_alpha)
 
         elif self.dim == 3:
-            for coord, node in expand_tree.items():
-                current = node.current
-                if map_frame:
-                    current = self.grid_map.map_to_world(current)
+            if not isinstance(expand_tree, list):   # for multiple trees
+                expand_tree = [expand_tree]
 
-                self.ax.scatter(current[0], current[1], current[2],
-                                c=node_color, s=node_size, zorder=self.zorder['expand_tree_node'], alpha=node_alpha)
-                if connect_to_parent and node.parent is not None:
-                    parent = node.parent
+            for tree in expand_tree:
+                for coord, node in tree.items():
+                    current = node.current
                     if map_frame:
-                        parent = self.grid_map.map_to_world(parent)
-                    self.ax.plot([parent[0], current[0]],
-                                [parent[1], current[1]],
-                                [parent[2], current[2]],
-                                color=edge_color, linewidth=linewidth, zorder=self.zorder['expand_tree_edge'], alpha=edge_alpha)
+                        current = self.grid_map.map_to_world(current)
+
+                    self.ax.scatter(current[0], current[1], current[2],
+                                    c=node_color, s=node_size, zorder=self.zorder['expand_tree_node'], alpha=node_alpha)
+                    if connect_to_parent and node.parent is not None:
+                        parent = node.parent
+                        if map_frame:
+                            parent = self.grid_map.map_to_world(parent)
+                        self.ax.plot([parent[0], current[0]],
+                                    [parent[1], current[1]],
+                                    [parent[2], current[2]],
+                                    color=edge_color, linewidth=linewidth, zorder=self.zorder['expand_tree_edge'], alpha=edge_alpha)
 
         else:
             raise ValueError("Dimension must be 2 or 3")
