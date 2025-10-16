@@ -1,7 +1,7 @@
 """
 @file: apf.py
 @author: Wu Maojia, Yang Haodong 
-@update: 2025.10.3
+@update: 2025.10.16
 """
 from typing import List, Tuple
 import math
@@ -18,12 +18,11 @@ from .path_tracker import PathTracker
 
 class APF(PathTracker):
     """
-    Artificial Potential Field (APF) path-tracking controller.
+    Artificial Potential Field (APF) path-tracking controller. `robot_model` and `obstacle_grid` must be provided.
+`
 
     Args:
         *args: see the parent class.
-        robot_model: robot model for kinematic parameters
-        obstacle_grid: occupancy grid map for collision checking
         attr_weight: weight factor for attractive potential
         rep_weight: weight factor for repulsive potential
         rep_range: influence range for repulsive potential
@@ -34,25 +33,25 @@ class APF(PathTracker):
     """
     def __init__(self,
                  *args,
-                 robot_model: BaseRobot,
-                 obstacle_grid: Grid = None,
                  attr_weight: float = 1.0,
                  rep_weight: float = 1.0,
                  rep_range: float = None,
                  **kwargs):
         super().__init__(*args, **kwargs)
-        if robot_model.dim != self.dim:
-            raise ValueError("Dimension of robot model and controller must be the same")
-        self.robot_model = robot_model
 
-        if obstacle_grid and obstacle_grid.dim != self.dim:
-            raise ValueError("Dimension of obstacle grid and controller must be the same")
-        self.obstacle_grid = obstacle_grid
+        if self.robot_model is None:
+            raise ValueError("Robot model is required.")
+        
+        if self.obstacle_grid is None:
+            raise ValueError("Obstacle grid is required.")
 
         # APF parameters
         self.attr_weight = attr_weight  # Attractive potential weight
         self.rep_weight = rep_weight    # Repulsive potential weight
         self.rep_range = rep_range if rep_range is not None else self.robot_model.radius * 2.0  # Repulsive influence range
+
+    def __str__(self) -> str:
+        return "APF"
 
     def get_action(self, obs: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """
@@ -128,21 +127,18 @@ class APF(PathTracker):
         if self.obstacle_grid is None:
             return np.zeros(self.dim)
 
-        # Convert world position to grid coordinates
-        grid_pt = self.obstacle_grid.world_to_map(tuple(current_pos[:2]))
-        grid_x, grid_y = grid_pt
-
-        # Check if position is out of bounds or in an obstacle
-        if not self.obstacle_grid.within_bounds(grid_pt) or self.obstacle_grid.type_map[grid_pt] == TYPES.OBSTACLE:
-            # Large repulsive force if in collision
-            return np.full(self.dim, self.rep_weight * self.rep_range)
-
-        # Get distance to nearest obstacle from ESDF (in world units)
-        dist_to_obstacle = self.obstacle_grid.esdf[grid_pt] * self.obstacle_grid.resolution
+        dist_to_obstacle = self._get_dist_to_nearest_obstacle(current_pos[:self.dim])
 
         # No repulsive force if outside influence range
         if dist_to_obstacle >= self.rep_range:
             return np.zeros(self.dim)
+
+        # avoid division by zero
+        dist_to_obstacle = max(dist_to_obstacle, self.eps)
+        
+        # Convert world position to grid coordinates
+        grid_pt = self.obstacle_grid.world_to_map(tuple(current_pos[:2]))
+        grid_x, grid_y = grid_pt
 
         # Calculate gradient of repulsive potential using numpy's gradient function
         # Extract a small window around current grid point to compute gradient

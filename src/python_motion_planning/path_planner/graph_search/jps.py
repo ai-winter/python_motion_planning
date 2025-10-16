@@ -1,7 +1,7 @@
 """
 @file: jps.py
 @author: Wu Maojia, Yang Haodong
-@update: 2025.10.6
+@update: 2025.10.16
 """
 from typing import Union, List, Tuple, Dict, Any
 import heapq
@@ -39,7 +39,7 @@ class JPS(AStar):
         self.directions = self.map_._diagonal_offsets if self.diagonal else self.map_._orthogonal_offsets
 
     def __str__(self) -> str:
-        return "Jump Point Search (JPS)"
+        return "JPS"
 
     def plan(self) -> Union[List[Tuple[float, ...]], Dict[str, Any]]:
         """

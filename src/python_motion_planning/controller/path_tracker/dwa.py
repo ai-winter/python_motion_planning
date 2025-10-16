@@ -1,7 +1,7 @@
 """
 @file: dwa.py
 @author: Wu Maojia
-@update: 2025.10.3
+@update: 2025.10.16
 """
 from typing import List, Tuple, Optional
 import math
@@ -18,12 +18,10 @@ from .path_tracker import PathTracker
 
 class DWA(PathTracker):
     """
-    Dynamic Window Approach (DWA) path-tracking controller.
+    Dynamic Window Approach (DWA) path-tracking controller. `robot_model` and `obstacle_grid` must be provided.
 
     Args:
         *args: see the parent class.
-        robot_model: robot model for kinematic simulation
-        obstacle_grid: occupancy grid map for collision checking
         vel_reso: resolution of velocity sampling
         predict_time: forward simulation time horizon
         heading_weight: weight for heading term
@@ -36,8 +34,6 @@ class DWA(PathTracker):
     """
     def __init__(self,
                  *args,
-                 robot_model: BaseRobot,
-                 obstacle_grid: Grid = None,
                  vel_reso: float = np.array([0.2, 0.2, np.deg2rad(15)]),
                  predict_time: float = None,
                  heading_weight: float = 0.5,
@@ -45,19 +41,21 @@ class DWA(PathTracker):
                  clearance_weight: float = 0.3,
                  **kwargs):
         super().__init__(*args, **kwargs)
-        if robot_model.dim != self.dim:
-            raise ValueError("Dimension of robot model and controller must be the same")
-        self.robot_model = robot_model
 
-        if obstacle_grid.dim != self.dim:
-            raise ValueError("Dimension of obstacle grid and controller must be the same")
-        self.obstacle_grid = obstacle_grid
+        if self.robot_model is None:
+            raise ValueError("Robot model is required.")
+        
+        if self.obstacle_grid is None:
+            raise ValueError("Obstacle grid is required.")
 
         self.vel_reso = vel_reso
         self.predict_time = predict_time if predict_time is not None else self.lookahead_distance / self.max_lin_speed
         self.heading_weight = heading_weight
         self.velocity_weight = velocity_weight
         self.clearance_weight = clearance_weight
+
+    def __str__(self) -> str:
+        return "DWA"
 
     def get_action(self, obs: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """
@@ -241,11 +239,7 @@ class DWA(PathTracker):
 
         min_dist = float("inf") 
         for p in traj:
-            grid_pt = self.obstacle_grid.world_to_map(tuple(p[:2]))
-            if not self.obstacle_grid.within_bounds(grid_pt) or self.obstacle_grid.type_map[grid_pt] == TYPES.OBSTACLE:
-                return -float("inf")     # collision
-            # update min distance (Euclidean to occupied cells could be added here)
-            dist = self.obstacle_grid.esdf[grid_pt] * self.obstacle_grid.resolution # using ESDF to compute distance to nearest obstacle
+            dist = self._get_dist_to_nearest_obstacle(p[:self.dim])
             min_dist = min(min_dist, dist)
             
         normalized_min_dist = min_dist / self.robot_model.radius

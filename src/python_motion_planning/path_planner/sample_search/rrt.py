@@ -1,7 +1,7 @@
 """
 @file: rrt.py
 @author: Wu Maojia, Yang Haodong
-@update: 2025.10.6
+@update: 2025.10.16
 """
 import math
 import random
@@ -52,7 +52,7 @@ class RRT(BasePathPlanner):
         self.bounds = self.map_.bounds
 
     def __str__(self) -> str:
-        return "Rapidly-exploring Random Tree (RRT)"
+        return "RRT"
 
     def plan(self) -> Union[List[Tuple[float, ...]], Dict[str, Any]]:
         """

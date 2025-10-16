@@ -1,7 +1,7 @@
 """
 @file: rrt_connect.py
 @author: Wu Maojia
-@update: 2025.10.10
+@update: 2025.10.16
 """
 from typing import Union, Dict, List, Tuple, Any
 
@@ -29,7 +29,7 @@ class RRTConnect(RRT):
         self.tree_b = None  # Tree originating from goal point
 
     def __str__(self) -> str:
-        return "Rapidly-exploring Random Tree Connect (RRT-Connect)"
+        return "RRT-Connect"
 
     def plan(self) -> Union[List[Tuple[float, ...]], Dict[str, Any]]:
         """

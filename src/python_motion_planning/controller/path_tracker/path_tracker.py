@@ -1,7 +1,7 @@
 """
 @file: path_tracker.py
 @author: Wu Maojia
-@update: 2025.10.3
+@update: 2025.10.16
 """
 from typing import List, Tuple
 import math
@@ -34,6 +34,9 @@ class PathTracker(BaseController):
         self.k_theta = k_theta
         self.pose_interp = pose_interp
         self.current_target_index = 0
+
+    def __str__(self) -> str:
+        return "Path Tracker"
 
     def reset(self):
         """

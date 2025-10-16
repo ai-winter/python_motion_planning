@@ -1,7 +1,7 @@
 """
 @file: grid.py
 @author: Wu Maojia
-@update: 2025.10.6
+@update: 2025.10.16
 """
 from itertools import product
 from typing import Iterable, Union, Tuple, Callable, List, Dict

@@ -1,7 +1,7 @@
 """
 @file: pid.py
 @author: Wu Maojia
-@update: 2025.10.3
+@update: 2025.10.16
 """
 from typing import List, Tuple
 import math
@@ -40,6 +40,9 @@ class PID(PathTracker):
         # integral and previous error for PID
         self.integral_error = np.zeros(self.action_space.shape[0])
         self.prev_error = np.zeros(self.action_space.shape[0])
+
+    def __str__(self) -> str:
+        return "PID"
 
     def reset(self):
         """

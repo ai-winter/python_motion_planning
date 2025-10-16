@@ -1,7 +1,7 @@
 """
 @file: base_path_planner.py
 @author: Wu Maojia
-@update: 2025.10.10
+@update: 2025.10.16
 """
 from typing import Union, List, Tuple, Dict, Any
 from abc import ABC, abstractmethod
@@ -24,6 +24,9 @@ class BasePathPlanner(ABC):
         self.start = start
         self.goal = goal
         self.failed_info = [], {"success": False, "start": None, "goal": None, "length": 0, "cost": 0, "expand": {}}
+
+    def __str__(self) -> str:
+        return "Base Path Planner"
 
     @property
     def dim(self) -> int:

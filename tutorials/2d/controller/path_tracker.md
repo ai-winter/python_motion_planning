@@ -35,11 +35,13 @@ Add controllers.
 
 The observation space and action space of controllers in 2D are $(x, y, \theta)$ pose of the robot in world frame and $(a_x, a_y, \omega)$ acceleration of the robot in robot frame respectively. The path-tracking controllers need a path planned by path planners to follow. You can also set the `max_lin_speed`,  `max_ang_speed`, `goal_dist_tol`, `goal_orient_tol` or other arguments of the controllers if you need.
 
+For some controllers (e.g. APF, DWA), more arguments like `obstacle_grid` and `robot_model` are required. In PurePursuit and PID, these two arguments can be set to `None`. But for ease of use, we have passed in these two arguments. Please refer to the API Reference part for more details.
+
 ```python
 controllers = {}
 for rid, robot in robots.items():
     obs_space, act_space = env.build_robot_spaces(robot)
-    controllers[rid] = PurePursuit(obs_space, act_space, env.dt, path_world, max_lin_speed=3, max_ang_speed=3.14)
+    controllers[rid] = PurePursuit(obs_space, act_space, env.dt, path_world, robot_model=robot, obstacle_grid=map_, max_lin_speed=3, max_ang_speed=3.14)
     env.add_robot(rid, robot)
 ```
 
@@ -67,11 +69,11 @@ for rid in robots:
 vis.close()
 ```
 
-Print results (`success` means the robot stop at the goal area finally. `oracle_success` means the robot has reached the goal area at some moment. Other similar metrics are literal meanings):
+Print results (`navigation_error` means distance between final position and goal position. For `DTW` and `nDTW`, refer to [General Evaluation for Instruction Conditioned Navigation using Dynamic Time Warping](https://arxiv.org/abs/1907.05446). `success` means the robot stop at the goal area finally. `oracle_success` means the robot has reached the goal area at some moment. Other similar metrics are literal meanings):
 
 ```
-1 : {'traj_length': 64.05713763788278, 'success': True, 'dist_success': True, 'oracle_success': True, 'oracle_dist_success': True, 'success_time': 23.3, 'dist_success_time': 23.3, 'oracle_success_time': 20.8, 'oracle_dist_success_time': 20.8}
-2 : {'traj_length': 61.7926006243001, 'success': True, 'dist_success': True, 'oracle_success': True, 'oracle_dist_success': True, 'success_time': 22.0, 'dist_success_time': 22.0, 'oracle_success_time': 20.400000000000002, 'oracle_dist_success_time': 20.400000000000002}
+1 : {'traj_length': 64.05713763788278, 'navigation_error': 0.473638728677913, 'DTW': 154.19064862854037, 'nDTW': 0.6021756607338876, 'success': True, 'dist_success': True, 'oracle_success': True, 'oracle_dist_success': True, 'success_time': 23.3, 'dist_success_time': 23.3, 'oracle_success_time': 20.8, 'oracle_dist_success_time': 20.8}
+2 : {'traj_length': 61.7926006243001, 'navigation_error': 0.10272721999078314, 'DTW': 106.21020400009954, 'nDTW': 0.7051281842674489, 'success': True, 'dist_success': True, 'oracle_success': True, 'oracle_dist_success': True, 'success_time': 22.0, 'dist_success_time': 22.0, 'oracle_success_time': 20.400000000000002, 'oracle_dist_success_time': 20.400000000000002}
 ```
 
 Runnable complete code:
@@ -125,7 +127,7 @@ robots = {
 controllers = {}
 for rid, robot in robots.items():
     obs_space, act_space = env.build_robot_spaces(robot)
-    controllers[rid] = PurePursuit(obs_space, act_space, env.dt, path_world, max_lin_speed=3, max_ang_speed=3.14)
+    controllers[rid] = PurePursuit(obs_space, act_space, env.dt, path_world, robot_model=robot, obstacle_grid=map_, max_lin_speed=3, max_ang_speed=3.14)
     env.add_robot(rid, robot)
 
 obs, _ = env.reset()
