@@ -433,6 +433,7 @@ class Visualizer:
 
         info = {
             "traj_length": 0.0,
+            "navigation_error": None,
             "success": False,
             "dist_success": False, 
             "oracle_success": False,
@@ -443,14 +444,15 @@ class Visualizer:
             "oracle_dist_success_time": None,
         }
 
+        goal_pos = goal_pose[:self.dim]
+        goal_orient = goal_pose[self.dim:]
+
         for i in range(len(traj["poses"])):
             pose = traj["poses"][i]
             time = traj["time"][i]
             
             pos = pose[:self.dim]
             orient = pose[self.dim:]
-            goal_pos = goal_pose[:self.dim]
-            goal_orient = goal_pose[self.dim:]
 
             if i > 0:
                 info["traj_length"] += np.linalg.norm(pos - traj["poses"][i-1][:self.dim])
@@ -483,6 +485,7 @@ class Visualizer:
                 info["dist_success"] = False
                 info["dist_success_time"] = None
 
+        info["navigation_error"] = float(np.linalg.norm(traj["poses"][-1][:self.dim] - goal_pos))
         info["traj_length"] = float(info["traj_length"])
         return info
 
