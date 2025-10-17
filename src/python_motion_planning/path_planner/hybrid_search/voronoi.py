@@ -1,5 +1,5 @@
 """
-@file: theta_star.py
+@file: voronoi.py
 @author: Wu Maojia
 @update: 2025.10.17
 """
