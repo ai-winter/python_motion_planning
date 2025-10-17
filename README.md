@@ -35,7 +35,7 @@ python_motion_planning
 ├─path_planner
 |   ├─graph_search
 |   └─sample_search
-└─curve_generation
+└─curve_generator
 ```
 
 ## Install

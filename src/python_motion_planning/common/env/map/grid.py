@@ -1,7 +1,7 @@
 """
 @file: grid.py
 @author: Wu Maojia
-@update: 2025.10.16
+@update: 2025.10.17
 """
 from itertools import product
 from typing import Iterable, Union, Tuple, Callable, List, Dict
@@ -313,7 +313,7 @@ class Grid(BaseMap):
         if not self.within_bounds(point):
             return False
         if src_point is not None:
-            if self._esdf[point] >= self._esdf[src_point]:
+            if self.type_map[src_point] == TYPES.INFLATION and self._esdf[point] >= self._esdf[src_point]:
                 return True
                 
         return not self.type_map[point] == TYPES.OBSTACLE and not self.type_map[point] == TYPES.INFLATION

@@ -42,7 +42,7 @@ class GBFS(Dijkstra):
 
         Returns:
             path: A list containing the path waypoints
-            path_info: A dictionary containing the path information (success, length, cost, expand)
+            path_info: A dictionary containing the path information
         """
         # OPEN list (priority queue) and CLOSED list (hash table)
         OPEN = []
