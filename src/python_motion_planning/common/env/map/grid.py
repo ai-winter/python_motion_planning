@@ -1,7 +1,7 @@
 """
 @file: grid.py
 @author: Wu Maojia
-@update: 2025.10.17
+@update: 2025.11.25
 """
 from itertools import product
 from typing import Iterable, Union, Tuple, Callable, List, Dict
@@ -26,13 +26,13 @@ class GridTypeMap:
         >>> type_map = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]], dtype=np.int8)
         >>> grid_type_map = GridTypeMap(type_map)
         >>> grid_type_map
-        GridTypeMap(array(
+        GridTypeMap(data=
         [[0 0 0]
          [0 1 0]
          [0 0 0]]
-        ), shape=(3, 3), dtype=int8)
+        , shape=(3, 3), dtype=int8)
 
-        >>> grid_type_map.array
+        >>> grid_type_map.data
         array([[0, 0, 0],
                [0, 1, 0],
                [0, 0, 0]], dtype=int8)
@@ -42,42 +42,31 @@ class GridTypeMap:
 
         >>> grid_type_map.dtype
         dtype('int8')
-
-        >>> new_array = np.array([[1, 1, 1], [0, 0, 0], [0, 0, 0]], dtype=np.int8)
-
-        >>> grid_type_map.update(new_array)
-
-        >>> grid_type_map
-        GridTypeMap(array(
-        [[1 1 1]
-         [0 0 0]
-         [0 0 0]]
-        ), shape=(3, 3), dtype=int8)
     """
     def __init__(self, type_map: np.ndarray):
-        self._array = np.asarray(type_map)
-        self._shape = self._array.shape
-        self._dtype = self._array.dtype
+        self._data = np.asarray(type_map)
+        self._shape = self._data.shape
+        self._dtype = self._data.dtype
         
         self._dtype_options = [np.int8, np.int16, np.int32, np.int64]
         if self._dtype not in self._dtype_options:
-            raise ValueError("Dtype must be one of {} instead of {}".format(self._dtype_options, self._dtype))
+            raise ValueError("Dtype must be one of {} instead of {}. If you are not sure, set it to `np.int8`.".format(self._dtype_options, self._dtype))
 
     def __str__(self) -> str:
-        return "GridTypeMap(array(\n{}\n), shape={}, dtype={})".format(self._array, self._shape, self._dtype)
+        return "GridTypeMap(data=\n{}\n, shape={}, dtype={})".format(self._data, self._shape, self._dtype)
 
     def __repr__(self) -> str:
         return self.__str__()
 
     def __getitem__(self, idx):
-        return self._array[idx]
+        return self._data[idx]
 
     def __setitem__(self, idx, value):
-        self._array[idx] = value
+        self._data[idx] = value
 
     @property
-    def array(self) -> np.ndarray:
-        return self._array.view()
+    def data(self) -> np.ndarray:
+        return self._data.view()
 
     @property
     def shape(self) -> Tuple:
@@ -86,14 +75,6 @@ class GridTypeMap:
     @property
     def dtype(self) -> np.dtype:
         return self._dtype
-
-    def update(self, new_array):
-        new_array = np.asarray(new_array)
-        if new_array.shape != self._shape:
-            raise ValueError(f"Shape must be {self._shape}")
-        if new_array.dtype != self.dtype:
-            raise ValueError(f"New values dtype must be {self.dtype}")
-        np.copyto(self._array, new_array)
 
 
 class Grid(BaseMap):
@@ -107,7 +88,6 @@ class Grid(BaseMap):
         bounds: The size of map in the world (shape: (n, 2) (n>=2)). bounds[i, 0] means the lower bound of the world in the i-th dimension. bounds[i, 1] means the upper bound of the world in the i-th dimension.
         resolution: resolution of the grid map
         type_map: initial type map of the grid map (its shape must be the same as the converted grid map shape, and its dtype must be int)
-        dtype: data type of coordinates (must be int)
         inflation_radius: radius of the inflation
 
     Examples:
@@ -130,10 +110,10 @@ class Grid(BaseMap):
         (102, 62)
 
         >>> grid_map.dtype
-        <class 'numpy.int32'>
+        dtype('int8')
 
         >>> grid_map.type_map
-        GridTypeMap(array(
+        GridTypeMap(data=
         [[0 0 0 ... 0 0 0]
          [0 0 0 ... 0 0 0]
          [0 0 0 ... 0 0 0]
@@ -141,7 +121,7 @@ class Grid(BaseMap):
          [0 0 0 ... 0 0 0]
          [0 0 0 ... 0 0 0]
          [0 0 0 ... 0 0 0]]
-        ), shape=(102, 62), dtype=int8)
+        , shape=(102, 62), dtype=int8)
 
         >>> grid_map.map_to_world((1, 2))
         (0.75, 1.25)
@@ -155,9 +135,9 @@ class Grid(BaseMap):
         >>> grid_map.get_neighbors(Node((1, 2)), diagonal=False)
         [Node((2, 2), (1, 2), 0, 0), Node((0, 2), (1, 2), 0, 0), Node((1, 3), (1, 2), 0, 0), Node((1, 1), (1, 2), 0, 0)]
 
-        >>> grid_map.type_map[1, 0] = TYPES.OBSTACLE     # place an obstacle
+        >>> grid_map[1, 0] = TYPES.OBSTACLE     # place an obstacle
         >>> grid_map.get_neighbors(Node((0, 0)))    # limited within the bounds
-        [Node((0, 1), (0, 0), 0, 0), Node((1, 0), (0, 0), 0, 0), Node((1, 1), (0, 0), 0, 0)]
+        [Node((0, 1), (0, 0), 0, 0), Node((1, 1), (0, 0), 0, 0)]
 
         >>> grid_map.get_neighbors(Node((grid_map.shape[0] - 1, grid_map.shape[1] - 1)), diagonal=False)  # limited within the boundss
         [Node((100, 61), (101, 61), 0, 0), Node((101, 60), (101, 61), 0, 0)]
@@ -171,7 +151,7 @@ class Grid(BaseMap):
         >>> grid_map.in_collision((1, 2), (3, 6))
         False
 
-        >>> grid_map.type_map[1, 3] = TYPES.OBSTACLE
+        >>> grid_map[1, 3] = TYPES.OBSTACLE
         >>> grid_map.update_esdf()
         >>> grid_map.in_collision((1, 2), (3, 6))
         True
@@ -179,26 +159,19 @@ class Grid(BaseMap):
     def __init__(self, 
                 bounds: Iterable = [[0, 30], [0, 40]], 
                 resolution: float = 1.0, 
-                type_map: Union[GridTypeMap, np.ndarray] = None, 
-                dtype: np.dtype = np.int32,
+                type_map: Union[GridTypeMap, np.ndarray] = None,
                 inflation_radius: float = 0.0,
                 ) -> None:
-        super().__init__(bounds, dtype)
-
-        self._dtype_options = [np.int8, np.int16, np.int32, np.int64]
-        if self._dtype not in self._dtype_options:
-            raise ValueError("Dtype must be one of {} instead of {}".format(self._dtype_options, self._dtype))
+        super().__init__(bounds)
 
         self._resolution = resolution
-        self._shape = tuple([int((self.bounds[i, 1] - self.bounds[i, 0]) / self.resolution) for i in range(self.dim)])
+        shape = tuple([int((self.bounds[i, 1] - self.bounds[i, 0]) / self.resolution) for i in range(self.dim)])
 
         if type_map is None:
-            self.type_map = GridTypeMap(np.zeros(self._shape, dtype=np.int8))
+            self.type_map = GridTypeMap(np.zeros(shape, dtype=np.int8))
         else:
-            if type_map.shape != self._shape:
-                raise ValueError("Shape must be {} instead of {}".format(self._shape, type_map.shape))
-            if type_map.dtype not in self._dtype_options:
-                raise ValueError("Dtype must be one of {} instead of {}".format(self._dtype_options, type_map.dtype))
+            if type_map.shape != shape:
+                raise ValueError("Shape must be {} instead of {} with given bounds={} and resolution={}".format(shape, type_map.shape, self.bounds, self.resolution))
 
             if isinstance(type_map, GridTypeMap):
                 self.type_map = type_map
@@ -209,7 +182,7 @@ class Grid(BaseMap):
 
         self._precompute_offsets()
         
-        self._esdf = np.zeros(self._shape, dtype=np.float32)
+        self._esdf = np.zeros(self.shape, dtype=np.float32)
         # self.update_esdf()    # updated in self.inflate_obstacles()
 
         self.inflation_radius = inflation_radius
@@ -228,12 +201,22 @@ class Grid(BaseMap):
     
     @property
     def shape(self) -> tuple:
-        return self._shape
+        return self.type_map.shape
+    
+    @property
+    def dtype(self) -> np.dtype:
+        return self.type_map.dtype
     
     @property
     def esdf(self) -> np.ndarray:
         return self._esdf
     
+    def __getitem__(self, idx):
+        return self.type_map[idx]
+
+    def __setitem__(self, idx, value):
+        self.type_map[idx] = value
+
     def map_to_world(self, point: Tuple[int, ...]) -> tuple:
         """
         Convert map coordinates to world coordinates.
@@ -480,7 +463,7 @@ class Grid(BaseMap):
             radius: Radius of the inflation.
         """
         self.update_esdf()
-        mask = (self.esdf <= radius) & (self.type_map.array == TYPES.FREE)
+        mask = (self.esdf <= radius) & (self.type_map.data == TYPES.FREE)
         self.type_map[mask] = TYPES.INFLATION
         self.inflation_radius = radius
 
@@ -500,9 +483,9 @@ class Grid(BaseMap):
         """
         Update the ESDF (signed Euclidean Distance Field) based on the obstacles in the map.
         - Obstacle grid ESDF = 0
-        - Free grid ESDF > 0. The value is the distance to the nearest obstacle
+        - Free grid ESDF > 0. The value is the di/stance to the nearest obstacle
         """
-        obstacle_mask = (self.type_map.array == TYPES.OBSTACLE)
+        obstacle_mask = (self.type_map.data == TYPES.OBSTACLE)
         free_mask = ~obstacle_mask
 
         # distance to obstacles
