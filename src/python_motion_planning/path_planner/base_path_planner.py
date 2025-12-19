@@ -1,9 +1,9 @@
 """
 @file: base_path_planner.py
 @author: Wu Maojia
-@update: 2025.10.16
+@update: 2025.12.19
 """
-from typing import Union, List, Tuple, Dict, Any
+from typing import Union, List, Tuple, Dict, Any, Iterable
 from abc import ABC, abstractmethod
  
 from python_motion_planning.common import BaseMap
@@ -37,6 +37,16 @@ class BasePathPlanner(ABC):
             dim (int): The dimension of the map.
         """
         return self.map_.dim
+
+    @property
+    def bounds(self) -> Iterable:
+        """
+        Get the bounds of the map.
+
+        Returns:
+            bounds (Iterable): The bounds of the map.
+        """
+        return self.map_.bounds
 
     @abstractmethod
     def plan(self) -> Union[List[Tuple[float, ...]], Dict[str, Any]]:
@@ -76,12 +86,14 @@ class BasePathPlanner(ABC):
         return self.get_cost(point, self.goal)
 
     
-    def extract_path(self, closed_list: dict) -> Tuple[List[Tuple[float, ...]], float, float]:
+    def extract_path(self, closed_list: dict, start: tuple = None, goal: tuple = None) -> Tuple[List[Tuple[float, ...]], float, float]:
         """
         Extract the path based on the CLOSED list.
 
         Args:
             closed_list: CLOSED list
+            start: Start point. (default: self.start)
+            goal: Goal point. (default: self.goal)
 
         Returns:
             path: A list containing the path waypoints
@@ -90,13 +102,21 @@ class BasePathPlanner(ABC):
         """
         length = 0
         cost = 0
-        node = closed_list.get(self.goal)
+
+        if start is None:
+            start = self.start
+        if goal is None:
+            goal = self.goal
+
+        node = closed_list.get(goal)
         path = [node.current]
-        while node.current != self.start:
+
+        while node.current != start:
             node_parent = closed_list.get(node.parent)
             length += self.map_.get_distance(node.current, node_parent.current)
             cost += self.get_cost(node.current, node_parent.current)
             node = node_parent
             path.append(node.current)
         path = path[::-1]   # make the order: start -> goal
+        
         return path, length, cost

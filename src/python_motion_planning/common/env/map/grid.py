@@ -217,7 +217,7 @@ class Grid(BaseMap):
     def __setitem__(self, idx, value):
         self.type_map[idx] = value
 
-    def map_to_world(self, point: Tuple[int, ...]) -> tuple:
+    def map_to_world(self, point: tuple) -> Tuple[float, ...]:
         """
         Convert map coordinates to world coordinates.
         
@@ -232,12 +232,13 @@ class Grid(BaseMap):
 
         return tuple((x + 0.5) * self.resolution + float(self.bounds[i, 0]) for i, x in enumerate(point))
 
-    def world_to_map(self, point: Tuple[float, ...]) -> tuple:
+    def world_to_map(self, point: Tuple[float, ...], discrete: bool = True) -> tuple:
         """
         Convert world coordinates to map coordinates.
         
         Args:
             point: Point in world coordinates.
+            discrete: Whether to round the coordinates to the nearest integer.
         
         Returns:
             point: Point in map coordinates.
@@ -245,7 +246,9 @@ class Grid(BaseMap):
         if len(point) != self.dim:
             raise ValueError("Point dimension does not match map dimension.")
         
-        return tuple(round((x - float(self.bounds[i, 0])) * (1.0 / self.resolution) - 0.5) for i, x in enumerate(point))
+        if discrete:
+            return tuple(self.point_float_to_int((x - float(self.bounds[i, 0])) * (1.0 / self.resolution) - 0.5) for i, x in enumerate(point))
+        return tuple((x - float(self.bounds[i, 0])) * (1.0 / self.resolution) - 0.5 for i, x in enumerate(point))
 
     def get_distance(self, p1: Tuple[int, int], p2: Tuple[int, int]) -> float:
         """
@@ -467,7 +470,7 @@ class Grid(BaseMap):
         self.type_map[mask] = TYPES.INFLATION
         self.inflation_radius = radius
 
-    def fill_expands(self, expands: Dict[Tuple[int, int], Node]) -> None:
+    def fill_expands(self, expands: Dict[Tuple[int, ...], Node]) -> None:
         """
         Fill the expands in the map.
         
@@ -496,7 +499,7 @@ class Grid(BaseMap):
         self._esdf = dist_outside.astype(np.float32)
         self._esdf[obstacle_mask] = -dist_inside[obstacle_mask]
 
-    def path_map_to_world(self, path: List[Tuple[int, int]]) -> List[Tuple[float, float]]:
+    def path_map_to_world(self, path: List[tuple]) -> List[Tuple[float, ...]]:
         """
         Convert path from map coordinates to world coordinates
 
@@ -508,17 +511,34 @@ class Grid(BaseMap):
         """
         return [self.map_to_world(p) for p in path]
 
-    def path_world_to_map(self, path: List[Tuple[float, float]]) -> List[Tuple[int, int]]:
+    def path_world_to_map(self, path: List[Tuple[float, ...]], discrete: bool = True) -> List[tuple]:
         """
         Convert path from world coordinates to map coordinates
 
         Args:
             path: a list of world coordinates
+            discrete: whether to round the coordinates to the nearest integer
         
         Returns:
             path: a list of map coordinates
         """
-        return [self.world_to_map(p) for p in path]
+        return [self.world_to_map(p, discrete) for p in path]
+
+    def point_float_to_int(self, point: Tuple[float, ...]) -> Tuple[int, ...]:
+        """
+        Convert a point from float to integer coordinates.
+
+        Args:
+            point: a point in float coordinates
+        
+        Returns:
+            point: a point in integer coordinates
+        """
+        point_int = []
+        for d in range(self.dim):
+            point_int.append(max(0, min(self.shape[d] - 1, int(round(point[d])))))
+        point_int = tuple(point_int)
+        return point_int
 
     def _precompute_offsets(self):
         # Generate all possible offsets (-1, 0, +1) in each dimension
