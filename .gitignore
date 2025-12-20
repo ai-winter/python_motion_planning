@@ -43,3 +43,4 @@ logs/
 # temporary files
 tmp/
 tmp*
+stats.txt
