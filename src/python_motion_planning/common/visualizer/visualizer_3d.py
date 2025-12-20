@@ -110,24 +110,18 @@ class Visualizer3D(BaseVisualizer):
             self.pv_actors[f"voxels_{key}"] = actor
 
     def plot_expand_tree(self, expand_tree: Dict[Union[Tuple[int, ...], Tuple[float, ...]], Node], 
-                        node_color: str = "#8c564b", 
                         edge_color: str = "#e377c2", 
-                        node_size: float = 5, 
                         linewidth: float = 1.0, 
                         node_alpha: float = 1.0,
                         edge_alpha: float = 1.0,
-                        connect_to_parent: bool = True,
                         map_frame: bool = True) -> None:
         """
         Visualize an expand tree (e.g. RRT).
         
         Args:
             expand_tree: Dict mapping coordinate tuple -> Node (world frame).
-            node_color: Color of the nodes.
             edge_color: Color of the edges (parent -> child).
-            node_size: Size of node markers.
             linewidth: Line width of edges.
-            connect_to_parent: Whether to draw parent-child connections.
             map_frame: whether path is in map frame or not (world frame)
         """
         if not isinstance(expand_tree, list):
@@ -175,7 +169,7 @@ class Visualizer3D(BaseVisualizer):
 
     def plot_path(self, path: List[Union[Tuple[int, ...], Tuple[float, ...]]], 
                     color: str = "#13ae00", 
-                    linewidth: float = 3, map_frame: bool = True) -> None:
+                    linewidth: float = 5, map_frame: bool = True) -> None:
         '''
         Plot path-like information.
         The meaning of parameters are similar to pyvista.Plotter.add_mesh (https://docs.pyvista.org/api/plotting/_autosummary/pyvista.plotter.add_mesh#pyvista.Plotter.add_mesh).

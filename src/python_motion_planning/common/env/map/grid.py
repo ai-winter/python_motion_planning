@@ -211,6 +211,10 @@ class Grid(BaseMap):
     def esdf(self) -> np.ndarray:
         return self._esdf
     
+    @property
+    def data(self) -> np.ndarray:
+        return self.type_map.data
+    
     def __getitem__(self, idx):
         return self.type_map[idx]
 
@@ -357,7 +361,7 @@ class Grid(BaseMap):
         primary_step = 1 if delta[primary_axis] > 0 else -1
         
         # Initialize the error variable
-        error = np.zeros(dim, dtype=self.dtype)
+        error = np.zeros(dim, dtype=int)
         delta2 = 2 * abs_delta
         
         # Calculate the number of steps and initialize the current point

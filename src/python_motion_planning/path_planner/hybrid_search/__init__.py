@@ -1,1 +1,1 @@
-from .voronoi import *
+from .voronoi_planner import *
