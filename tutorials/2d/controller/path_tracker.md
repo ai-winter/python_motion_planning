@@ -65,7 +65,7 @@ Print trajectory summary information.
 ```python
 for rid in robots:
     ctrl = controllers[rid]
-    print(rid, ":", vis.get_traj_info(rid, ctrl.goal, ctrl.goal_dist_tol, ctrl.goal_orient_tol))
+    print(rid, ":", vis.get_traj_info(rid, path_world, ctrl.goal, ctrl.goal_dist_tol, ctrl.goal_orient_tol))
 vis.close()
 ```
 
@@ -107,8 +107,6 @@ map_.type_map[goal] = TYPES.GOAL
 
 planner = AStar(map_=map_, start=start, goal=goal)
 path, path_info = planner.plan()
-print(path)
-print(path_info)
 map_.fill_expands(path_info["expand"])  # for visualizing the expanded nodes
 
 path_world = map_.path_map_to_world(path)
@@ -139,6 +137,6 @@ vis.show()
 
 for rid in robots:
     ctrl = controllers[rid]
-    print(rid, ":", vis.get_traj_info(rid, ctrl.goal, ctrl.goal_dist_tol, ctrl.goal_orient_tol))
+    print(rid, ":", vis.get_traj_info(rid, path_world, ctrl.goal, ctrl.goal_dist_tol, ctrl.goal_orient_tol))
 vis.close()
 ```
