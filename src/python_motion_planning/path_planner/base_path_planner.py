@@ -1,9 +1,9 @@
 """
-@file: planner.py
+@file: base_path_planner.py
 @author: Wu Maojia
-@update: 2025.10.3
+@update: 2025.12.19
 """
-from typing import Union
+from typing import Union, List, Tuple, Dict, Any, Iterable
 from abc import ABC, abstractmethod
  
 from python_motion_planning.common import BaseMap
@@ -25,8 +25,31 @@ class BasePathPlanner(ABC):
         self.goal = goal
         self.failed_info = [], {"success": False, "start": None, "goal": None, "length": 0, "cost": 0, "expand": {}}
 
+    def __str__(self) -> str:
+        return "Base Path Planner"
+
+    @property
+    def dim(self) -> int:
+        """
+        Get the dimension of the map.
+
+        Returns:
+            dim (int): The dimension of the map.
+        """
+        return self.map_.dim
+
+    @property
+    def bounds(self) -> Iterable:
+        """
+        Get the bounds of the map.
+
+        Returns:
+            bounds (Iterable): The bounds of the map.
+        """
+        return self.map_.bounds
+
     @abstractmethod
-    def plan(self) -> Union[list, dict]:
+    def plan(self) -> Union[List[Tuple[float, ...]], Dict[str, Any]]:
         """
         Interface for planning.
 
@@ -63,26 +86,37 @@ class BasePathPlanner(ABC):
         return self.get_cost(point, self.goal)
 
     
-    def extract_path(self, closed_list: dict) -> tuple:
+    def extract_path(self, closed_list: dict, start: tuple = None, goal: tuple = None) -> Tuple[List[Tuple[float, ...]], float, float]:
         """
         Extract the path based on the CLOSED list.
 
         Args:
-            closed_list (dict): CLOSED list
+            closed_list: CLOSED list
+            start: Start point. (default: self.start)
+            goal: Goal point. (default: self.goal)
 
         Returns:
-            cost (float): the cost of planned path
-            path (list): the planning path
+            path: A list containing the path waypoints
+            length: Length of the path
+            cost: Cost of the path
         """
         length = 0
         cost = 0
-        node = closed_list[self.goal]
+
+        if start is None:
+            start = self.start
+        if goal is None:
+            goal = self.goal
+
+        node = closed_list.get(goal)
         path = [node.current]
-        while node.current != self.start:
-            node_parent = closed_list[node.parent]
+
+        while node.current != start:
+            node_parent = closed_list.get(node.parent)
             length += self.map_.get_distance(node.current, node_parent.current)
             cost += self.get_cost(node.current, node_parent.current)
             node = node_parent
             path.append(node.current)
         path = path[::-1]   # make the order: start -> goal
+        
         return path, length, cost

@@ -72,7 +72,7 @@ print(path)
 print(path_info)
 map_.fill_expands(path_info["expand"])  # for visualizing the expanded nodes
 
-vis = Visualizer("Path Visualizer")
+vis = Visualizer2D()
 vis.plot_grid_map(map_)
 vis.plot_path(path, style="--", color="C4")
 vis.show()

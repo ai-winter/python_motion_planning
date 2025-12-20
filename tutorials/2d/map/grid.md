@@ -30,7 +30,7 @@ map_.type_map[40, :16] = TYPES.OBSTACLE
 Visualize to check the map.
 
 ```python
-vis = Visualizer("Path Visualizer")
+vis = Visualizer2D()
 vis.plot_grid_map(map_)
 vis.show()
 ```
@@ -46,7 +46,7 @@ map_.inflate_obstacles(radius=3)
 Visualize to check the map.
 
 ```python
-vis = Visualizer("Path Visualizer")
+vis = Visualizer2D()
 vis.plot_grid_map(map_)
 vis.show()
 vis.close()
@@ -77,7 +77,7 @@ map_.type_map[40, :16] = TYPES.OBSTACLE
 
 map_.inflate_obstacles(radius=3)
 
-vis = Visualizer("Path Visualizer")
+vis = Visualizer2D()
 vis.plot_grid_map(map_)
 vis.show()
 vis.close()

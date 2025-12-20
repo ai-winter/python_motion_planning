@@ -1,4 +1,4 @@
-Transform the planned path from map frame to world frame.
+The path planners plan points on the grid map. However, the controllers use coordinates in world frame. We need to transform the planned path from map frame to world frame.
 
 ```python
 path_world = map_.path_map_to_world(path)
@@ -20,6 +20,8 @@ env = ToySimulator(dim=dim, obstacle_grid=map_, robot_collisions=False)
 
 Add robots.
 
+For 2D robots, poses which is 3D vector $(x, y, \theta)$ comprise of 2D position $(x, y)$ and 1D orientation $(\theta)$ in world frame. The action minimum and maximum are the range of $(a_x, a_y, \omega)$ which comprises 2D linear acceleration and 1D angular acceleration in robot frame respectively. In robot frame, the x-direction is the positive direction of the robot.
+
 ```python
 robots = {
     "1": CircularRobot(dim=dim, radius=1, pose=np.array([5.5, 5.5, 0]), vel=np.zeros(3),
@@ -31,11 +33,15 @@ robots = {
 
 Add controllers.
 
+The observation space and action space of controllers in 2D are $(x, y, \theta)$ pose of the robot in world frame and $(a_x, a_y, \omega)$ acceleration of the robot in robot frame respectively. The path-tracking controllers need a path planned by path planners to follow. You can also set the `max_lin_speed`,  `max_ang_speed`, `goal_dist_tol`, `goal_orient_tol` or other arguments of the controllers if you need.
+
+For some controllers (e.g. APF, DWA), more arguments like `obstacle_grid` and `robot_model` are required. In PurePursuit and PID, these two arguments can be set to `None`. But for ease of use, we have passed in these two arguments. Please refer to the API Reference part for more details.
+
 ```python
 controllers = {}
 for rid, robot in robots.items():
     obs_space, act_space = env.build_robot_spaces(robot)
-    controllers[rid] = PurePursuit(obs_space, act_space, env.dt, path_world, max_lin_speed=3, max_ang_speed=3.14)
+    controllers[rid] = PurePursuit(obs_space, act_space, env.dt, path_world, robot_model=robot, obstacle_grid=map_, max_lin_speed=3, max_ang_speed=3.14)
     env.add_robot(rid, robot)
 ```
 
@@ -46,7 +52,7 @@ The visualizer has many customizable parameters. You can set them as you want. F
 ```python
 obs, _ = env.reset()
 
-vis = Visualizer("Path Visualizer")
+vis = Visualizer2D()
 vis.render_toy_simulator(env, controllers, steps=300, show_traj=True, show_env_info=True, grid_kwargs={"show_esdf": False})
 vis.plot_path(path, style="--", color="C4")
 vis.show()
@@ -59,15 +65,15 @@ Print trajectory summary information.
 ```python
 for rid in robots:
     ctrl = controllers[rid]
-    print(rid, ":", vis.get_traj_info(rid, ctrl.goal, ctrl.goal_dist_tol, ctrl.goal_orient_tol))
+    print(rid, ":", vis.get_traj_info(rid, path_world, ctrl.goal, ctrl.goal_dist_tol, ctrl.goal_orient_tol))
 vis.close()
 ```
 
-Print results:
+Print results (`navigation_error` means distance between final position and goal position. For `DTW` and `nDTW`, refer to [General Evaluation for Instruction Conditioned Navigation using Dynamic Time Warping](https://arxiv.org/abs/1907.05446). `success` means the robot stop at the goal area finally. `oracle_success` means the robot has reached the goal area at some moment. Other similar metrics are literal meanings):
 
 ```
-1 : {'traj_length': 64.05713763788278, 'success': True, 'dist_success': True, 'oracle_success': True, 'oracle_dist_success': True, 'success_time': 23.3, 'dist_success_time': 23.3, 'oracle_success_time': 20.8, 'oracle_dist_success_time': 20.8}
-2 : {'traj_length': 61.7926006243001, 'success': True, 'dist_success': True, 'oracle_success': True, 'oracle_dist_success': True, 'success_time': 22.0, 'dist_success_time': 22.0, 'oracle_success_time': 20.400000000000002, 'oracle_dist_success_time': 20.400000000000002}
+1 : {'traj_length': 64.05713763788278, 'navigation_error': 0.473638728677913, 'DTW': 154.19064862854037, 'nDTW': 0.6021756607338876, 'success': True, 'dist_success': True, 'oracle_success': True, 'oracle_dist_success': True, 'success_time': 23.3, 'dist_success_time': 23.3, 'oracle_success_time': 20.8, 'oracle_dist_success_time': 20.8}
+2 : {'traj_length': 61.7926006243001, 'navigation_error': 0.10272721999078314, 'DTW': 106.21020400009954, 'nDTW': 0.7051281842674489, 'success': True, 'dist_success': True, 'oracle_success': True, 'oracle_dist_success': True, 'success_time': 22.0, 'dist_success_time': 22.0, 'oracle_success_time': 20.400000000000002, 'oracle_dist_success_time': 20.400000000000002}
 ```
 
 Runnable complete code:
@@ -101,8 +107,6 @@ map_.type_map[goal] = TYPES.GOAL
 
 planner = AStar(map_=map_, start=start, goal=goal)
 path, path_info = planner.plan()
-print(path)
-print(path_info)
 map_.fill_expands(path_info["expand"])  # for visualizing the expanded nodes
 
 path_world = map_.path_map_to_world(path)
@@ -121,18 +125,18 @@ robots = {
 controllers = {}
 for rid, robot in robots.items():
     obs_space, act_space = env.build_robot_spaces(robot)
-    controllers[rid] = PurePursuit(obs_space, act_space, env.dt, path_world, max_lin_speed=3, max_ang_speed=3.14)
+    controllers[rid] = PurePursuit(obs_space, act_space, env.dt, path_world, robot_model=robot, obstacle_grid=map_, max_lin_speed=3, max_ang_speed=3.14)
     env.add_robot(rid, robot)
 
 obs, _ = env.reset()
 
-vis = Visualizer("Path Visualizer")
+vis = Visualizer2D()
 vis.render_toy_simulator(env, controllers, steps=300, show_traj=True, show_env_info=True, grid_kwargs={"show_esdf": False})
 vis.plot_path(path, style="--", color="C4")
 vis.show()
 
 for rid in robots:
     ctrl = controllers[rid]
-    print(rid, ":", vis.get_traj_info(rid, ctrl.goal, ctrl.goal_dist_tol, ctrl.goal_orient_tol))
+    print(rid, ":", vis.get_traj_info(rid, path_world, ctrl.goal, ctrl.goal_dist_tol, ctrl.goal_orient_tol))
 vis.close()
 ```

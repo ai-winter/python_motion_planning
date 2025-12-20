@@ -1,7 +1,7 @@
 """
 @file: map.py
 @author: Wu Maojia
-@update: 2025.10.3
+@update: 2025.11.25
 """
 from typing import Iterable, Union
 from abc import ABC, abstractmethod
@@ -17,12 +17,10 @@ class BaseMap(ABC):
 
     Args:
         bounds: The size of map in the world (shape: (n, 2) (n>=2)). bounds[i, 0] means the lower bound of the world in the i-th dimension. bounds[i, 1] means the upper bound of the world in the i-th dimension.  
-        dtype: data type of coordinates
     """
-    def __init__(self, bounds: Iterable, dtype: np.dtype) -> None:
+    def __init__(self, bounds: Iterable) -> None:
         super().__init__()
         self._bounds = np.asarray(bounds, dtype=float)
-        self._dtype = dtype
 
         if len(self._bounds.shape) != 2 or self._bounds.shape[0] <= 1 or self._bounds.shape[1] != 2:
             raise ValueError(f"The shape of bounds must be (n, 2) (n>=2) instead of {self._bounds.shape}")
@@ -38,10 +36,6 @@ class BaseMap(ABC):
     @property
     def dim(self) -> int:
         return self._bounds.shape[0]
-
-    @property
-    def dtype(self) -> np.dtype:
-        return self._dtype
 
     @abstractmethod
     def map_to_world(self, point: tuple) -> tuple:

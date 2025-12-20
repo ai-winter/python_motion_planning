@@ -1,7 +1,7 @@
 """
 @file: pure_pursuit.py
 @author: Wu Maojia
-@update: 2025.10.3
+@update: 2025.10.16
 """
 from typing import List, Tuple
 import math
@@ -19,11 +19,17 @@ class PurePursuit(PathTracker):
     Args:
         *args: see the parent class.
         **kwargs: see the parent class.
+
+    References:
+        [1] Implementation of the Pure Pursuit Path Tracking Algorithm.
     """
     def __init__(self,
                  *args,
                  **kwargs):
         super().__init__(*args, **kwargs)
+
+    def __str__(self) -> str:
+        return "Pure Pursuit"
 
     def _get_desired_vel(self, target_pose: np.ndarray, cur_pose: np.ndarray) -> np.ndarray:
         """
