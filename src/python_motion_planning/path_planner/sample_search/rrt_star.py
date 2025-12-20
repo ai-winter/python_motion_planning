@@ -10,7 +10,7 @@ from typing import Union, Dict, List, Tuple, Any
 import numpy as np
 import faiss
 
-from python_motion_planning.common import Node
+from python_motion_planning.common import Node, Grid, TYPES
 from python_motion_planning.path_planner.sample_search import RRT
 from python_motion_planning.common.utils.child_tree import ChildTree
 
@@ -193,7 +193,6 @@ class RRTStar(RRT):
 
         n = len(self._tree) + 1
         radius = self.gamma * ((math.log(n) / n) ** (1 / self.dim))
-        print(radius)
 
         # Planning stopped
         self.best_results[1]["expand"] = self._tree

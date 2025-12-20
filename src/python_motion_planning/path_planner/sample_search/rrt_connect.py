@@ -7,7 +7,7 @@ from typing import Union, Dict, List, Tuple, Any
 
 import faiss
 
-from python_motion_planning.common import Node
+from python_motion_planning.common import Node, Grid, TYPES
 from python_motion_planning.path_planner.sample_search.rrt import RRT
 
 class RRTConnect(RRT):

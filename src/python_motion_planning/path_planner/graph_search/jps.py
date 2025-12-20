@@ -31,7 +31,14 @@ class JPS(AStar):
     Examples:
         >>> map_ = Grid(bounds=[[0, 15], [0, 15]])
         >>> planner = JPS(map_=map_, start=(5, 5), goal=(10, 10))
-        >>> planner.plan()
+        >>> path, path_info = planner.plan()
+        >>> print(path_info['success'])
+        True
+        
+        >>> planner.map_.type_map[3:10, 6] = TYPES.OBSTACLE
+        >>> path, path_info = planner.plan()
+        >>> print(path_info['success'])
+        True
     """
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)

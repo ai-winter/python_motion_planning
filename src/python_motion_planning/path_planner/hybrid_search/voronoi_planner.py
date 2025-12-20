@@ -28,6 +28,18 @@ class VoronoiPlanner(BasePathPlanner):
         base_planner_kwargs: keyword arguments for the base planner.
         cover_inflation: determine whether the voronoi candidates cover the inflation region.
         *kwargs: see the parent class.
+
+    Examples:
+        >>> map_ = Grid(bounds=[[0, 15], [0, 15]])
+        >>> planner = VoronoiPlanner(map_=map_, start=(5, 5), goal=(10, 10))
+        >>> path, path_info = planner.plan()
+        >>> print(path_info['success'])
+        True
+        
+        >>> planner.map_.type_map[3:10, 6] = TYPES.OBSTACLE
+        >>> path, path_info = planner.plan()
+        >>> print(path_info['success'])
+        True
     """
     def __init__(self, 
             *args, 
