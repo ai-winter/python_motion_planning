@@ -91,7 +91,7 @@ site_description: Motion planning algorithms for Python.
 site_author: Wu Maojia, Yang Haodong
 site_url: http://localhost:8000
 use_directory_urls: false
-copyright: Copyright @ 2023-2025, Wu Maojia, Yang Haodong.
+copyright: Copyright @ 2023-2026, Wu Maojia, Yang Haodong.
 repo_url: https://github.com/ai-winter/python_motion_planning/
 nav:
 - Home: index.md
@@ -102,6 +102,7 @@ nav:
     - 1.2 - Path Planner:
       - 1.2.1 - Graph Search: tutorials/2d/path_planner/graph_search.md
       - 1.2.2 - Sample Search: tutorials/2d/path_planner/sample_search.md
+      - 1.2.3 - Hybrid Search: tutorials/2d/path_planner/hybrid_search.md
     - 1.3 - Controller:
       - 1.3.1 - Path Tracker: tutorials/2d/controller/path_tracker.md
   - 2 - 3D:
@@ -110,6 +111,7 @@ nav:
     - 2.2 - Path Planner:
       - 2.2.1 - Graph Search: tutorials/3d/path_planner/graph_search.md
       - 2.2.2 - Sample Search: tutorials/3d/path_planner/sample_search.md
+      - 2.2.3 - Hybrid Search: tutorials/3d/path_planner/hybrid_search.md
 - API Reference:
   - common:
     - env:
@@ -128,12 +130,6 @@ nav:
           - CircularRobot: api\common\env\robot\circular_robot\CircularRobot.md
         - diff_drive_robot:
           - DiffDriveRobot: api\common\env\robot\diff_drive_robot\DiffDriveRobot.md
-        - tmp:
-          - BaseAgent: api\common\env\robot\tmp\BaseAgent.md
-          - SimpleAgent: api\common\env\robot\tmp\SimpleAgent.md
-          - BaseController: api\common\env\robot\tmp\BaseController.md
-          - RandomController: api\common\env\robot\tmp\RandomController.md
-          - MultiAgentNavEnv: api\common\env\robot\tmp\MultiAgentNavEnv.md
       - types:
         - TYPES: api\common\env\types\TYPES.md
       - world:
@@ -142,13 +138,19 @@ nav:
         - toy_simulator:
           - ToySimulator: api\common\env\world\toy_simulator\ToySimulator.md
     - utils:
+      - child_tree:
+        - ChildTree: api\common\utils\child_tree\ChildTree.md
       - frame_transformer:
         - FrameTransformer: api\common\utils\frame_transformer\FrameTransformer.md
       - geometry:
         - Geometry: api\common\utils\geometry\Geometry.md
     - visualizer:
-      - visualizer:
-        - Visualizer: api\common\visualizer\visualizer\Visualizer.md
+      - base_visualizer:
+        - BaseVisualizer: api\common\visualizer\base_visualizer\BaseVisualizer.md
+      - visualizer_2d:
+        - Visualizer2D: api\common\visualizer\visualizer_2d\Visualizer2D.md
+      - visualizer_3d:
+        - Visualizer3D: api\common\visualizer\visualizer_3d\Visualizer3D.md
   - controller:
     - base_controller:
       - BaseController: api\controller\base_controller\BaseController.md
@@ -163,6 +165,8 @@ nav:
         - PID: api\controller\path_tracker\pid\PID.md
       - pure_pursuit:
         - PurePursuit: api\controller\path_tracker\pure_pursuit\PurePursuit.md
+      - rpp:
+        - RPP: api\controller\path_tracker\rpp\RPP.md
     - random_controller:
       - RandomController: api\controller\random_controller\RandomController.md
   - curve_generator:
@@ -190,11 +194,22 @@ nav:
         - AStar: api\path_planner\graph_search\a_star\AStar.md
       - dijkstra:
         - Dijkstra: api\path_planner\graph_search\dijkstra\Dijkstra.md
+      - gbfs:
+        - GBFS: api\path_planner\graph_search\gbfs\GBFS.md
+      - jps:
+        - JPS: api\path_planner\graph_search\jps\JPS.md
+      - lazy_theta_star:
+        - LazyThetaStar: api\path_planner\graph_search\lazy_theta_star\LazyThetaStar.md
       - theta_star:
         - ThetaStar: api\path_planner\graph_search\theta_star\ThetaStar.md
+    - hybrid_search:
+      - voronoi_planner:
+        - VoronoiPlanner: api\path_planner\hybrid_search\voronoi_planner\VoronoiPlanner.md
     - sample_search:
       - rrt:
         - RRT: api\path_planner\sample_search\rrt\RRT.md
+      - rrt_connect:
+        - RRTConnect: api\path_planner\sample_search\rrt_connect\RRTConnect.md
       - rrt_star:
         - RRTStar: api\path_planner\sample_search\rrt_star\RRTStar.md
 plugins:

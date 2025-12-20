@@ -61,6 +61,19 @@ vis.plot_expand_tree(path_info["expand"])
 vis.show()
 vis.close()
 ```
+Sample search planners plan in continuous space by default. If you want to plan in discrete grid map, just set argument `discrete` to `True`. For example:
+
+```python
+planner = RRT(map_=map_, start=start, goal=goal, discrete=True)
+```
+
+Print results:
+```
+[(25, 5, 5), (24, 10, 7), (25, 11, 12), (27, 14, 15), (27, 18, 19), (26, 21, 22), (21, 22, 23), (16, 23, 24), (11, 23, 26), (6, 21, 27), (5, 25, 25)]
+{'success': True, 'start': (25, 5, 5), 'goal': (5, 25, 25), 'length': 51.21681787317005, 'cost': 51.21681787317005, 'expand': {(25, 5, 5): Node((25, 5, 5), None, 0, 0), ...}}
+```
+
+![rrt_3d_discrete.png](../../../assets/rrt_3d_discrete.png)
 
 For asymptoticaly optimal sample search planners like **RRT\***, you can set argument `stop_until_sample_num` to `True` and configure `sample_num` to wait for a better result. For example:
 

@@ -34,7 +34,8 @@ python_motion_planning
 |   └─path_tracker
 ├─path_planner
 |   ├─graph_search
-|   └─sample_search
+|   ├─sample_search
+|   └─hybrid_search
 └─curve_generator
 ```
 

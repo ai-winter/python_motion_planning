@@ -61,3 +61,13 @@ vis.plot_grid_map(map_)
 vis.show()
 vis.close()
 ```
+
+3D visualization is based on PyVista. If you want to save the figure, you need to set argument `off_screen` to `True` and comment `vis.show()`. Below is an example to save a figure:
+
+```python
+vis = Visualizer3D(show_axes=False, off_screen=True)
+vis.plot_grid_map(map_)
+# vis.show()
+vis.savefig("../assets/rrt_3d_discrete.png")
+vis.close()
+```
