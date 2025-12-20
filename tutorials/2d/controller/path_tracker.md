@@ -52,7 +52,7 @@ The visualizer has many customizable parameters. You can set them as you want. F
 ```python
 obs, _ = env.reset()
 
-vis = Visualizer("Path Visualizer")
+vis = Visualizer2D()
 vis.render_toy_simulator(env, controllers, steps=300, show_traj=True, show_env_info=True, grid_kwargs={"show_esdf": False})
 vis.plot_path(path, style="--", color="C4")
 vis.show()
@@ -132,7 +132,7 @@ for rid, robot in robots.items():
 
 obs, _ = env.reset()
 
-vis = Visualizer("Path Visualizer")
+vis = Visualizer2D()
 vis.render_toy_simulator(env, controllers, steps=300, show_traj=True, show_env_info=True, grid_kwargs={"show_esdf": False})
 vis.plot_path(path, style="--", color="C4")
 vis.show()

@@ -10,7 +10,7 @@ import numpy as np
 
 from python_motion_planning.common.utils import Geometry
 
-class BaseVisualizer:
+class BaseVisualizer(ABC):
     """
     Base visualizer for motion planning.
     """

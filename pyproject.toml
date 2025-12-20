@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "python-motion-planning"
-version = "2.0.dev1"
+version = "2.0.dev2"
 description = "Motion planning algorithms for Python"
 maintainers = [
     {name = "Wu Maojia", email = "omige@mail.nwpu.edu.cn"},
@@ -19,7 +19,9 @@ dependencies = [
     "matplotlib",
     "osqp",
     "gymnasium",
-    "faiss-cpu"
+    "faiss-cpu",
+    "pyvista",
+    "pyvistaqt"
 ]
 classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",

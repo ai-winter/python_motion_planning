@@ -49,7 +49,7 @@ conda activate pmp
 To install the repository, please run the following command in shell.
 
 ```shell
-pip install python-motion-planning==2.0.dev1
+pip install python-motion-planning==2.0.dev2
 ```
 
 ## Run
@@ -61,13 +61,12 @@ Please refer to the Tutorials part of [online documentation](https://ai-winter.g
 ### Graph Search
 |Planner|2D Grid|3D Grid
 |-------|-------|-------
-**Dijkstra**|![dijkstra_2d.svg](assets/dijkstra_2d.svg)|![dijkstra_3d.svg](assets/dijkstra_3d.svg)
-**GBFS**|![gbfs_2d.svg](assets/gbfs_2d.svg)|![gbfs_3d.svg](assets/gbfs_3d.svg)
-**A\***|![a_star_2d.svg](assets/a_star_2d.svg)|![a_star_3d.svg](assets/a_star_3d.svg)
-**JPS**|![jps_2d.svg](assets/jps_2d.svg)|![jps_3d.svg](assets/jps_3d.svg)
-**Theta\***|![theta_star_2d.svg](assets/theta_star_2d.svg)|![theta_star_3d.svg](assets/theta_star_3d.svg)
-**Lazy Theta\***|![lazy_theta_star_2d.svg](assets/lazy_theta_star_2d.svg)|![lazy_theta_star_3d.svg](assets/lazy_theta_star_3d.svg)
-**Voronoi**|Implemented in [V1.1.1](https://github.com/ai-winter/python_motion_planning/tree/v1.1.1), not migrated|Not implemented
+**Dijkstra**|![dijkstra_2d.svg](assets/dijkstra_2d.svg)|![dijkstra_3d.png](assets/dijkstra_3d.png)
+**GBFS**|![gbfs_2d.svg](assets/gbfs_2d.svg)|![gbfs_3d.png](assets/gbfs_3d.png)
+**A\***|![a_star_2d.svg](assets/a_star_2d.svg)|![a_star_3d.png](assets/a_star_3d.png)
+**JPS**|![jps_2d.svg](assets/jps_2d.svg)|![jps_3d.png](assets/jps_3d.png)
+**Theta\***|![theta_star_2d.svg](assets/theta_star_2d.svg)|![theta_star_3d.png](assets/theta_star_3d.png)
+**Lazy Theta\***|![lazy_theta_star_2d.svg](assets/lazy_theta_star_2d.svg)|![lazy_theta_star_3d.png](assets/lazy_theta_star_3d.png)
 **D\***|Implemented in [V1.1.1](https://github.com/ai-winter/python_motion_planning/tree/v1.1.1), not migrated|Not implemented
 **LPA\***|Implemented in [V1.1.1](https://github.com/ai-winter/python_motion_planning/tree/v1.1.1), not migrated|Not implemented
 **D\* Lite**|Implemented in [V1.1.1](https://github.com/ai-winter/python_motion_planning/tree/v1.1.1), not migrated|Not implemented
@@ -76,9 +75,9 @@ Please refer to the Tutorials part of [online documentation](https://ai-winter.g
 ### Sample Search
 |Planner|2D Grid|3D Grid
 |-------|-------|-------
-**RRT**|![rrt_2d.svg](assets/rrt_2d.svg)|![rrt_3d.svg](assets/rrt_3d.svg)
-**RRT\***|![rrt_star_2d.svg](assets/rrt_star_2d.svg)|![rrt_star_3d.svg](assets/rrt_star_3d.svg)
-**RRT-Connect**|![rrt_connect_2d.svg](assets/rrt_connect_2d.svg)|![rrt_connect_3d.svg](assets/rrt_connect_3d.svg)
+**RRT**|![rrt_2d.svg](assets/rrt_2d.svg)|![rrt_3d.png](assets/rrt_3d.png)
+**RRT\***|![rrt_star_2d.svg](assets/rrt_star_2d.svg)|![rrt_star_3d.png](assets/rrt_star_3d.png)
+**RRT-Connect**|![rrt_connect_2d.svg](assets/rrt_connect_2d.svg)|![rrt_connect_3d.png](assets/rrt_connect_3d.png)
 **Informed RRT**|Implemented in [V1.1.1](https://github.com/ai-winter/python_motion_planning/tree/v1.1.1), not migrated|Not implemented
 **PRM**|Not implemented|Not implemented
 
@@ -89,6 +88,10 @@ Please refer to the Tutorials part of [online documentation](https://ai-winter.g
 | **GA**  |Implemented in [V1.1.1](https://github.com/ai-winter/python_motion_planning/tree/v1.1.1), not migrated|Not implemented
 | **PSO**  |Implemented in [V1.1.1](https://github.com/ai-winter/python_motion_planning/tree/v1.1.1), not migrated|Not implemented
 
+### Hybrid Search
+|Planner|2D Grid|3D Grid
+|-------|-------|-------
+**Voronoi Planner**|![voronoi_planner_2d.svg](assets/voronoi_planner_2d.svg)|![voronoi_planner_3d.png](assets/voronoi_planner_3d.png)
 
 ## Controller
 
@@ -130,11 +133,11 @@ The visualization of the curve generators has not been implemented in current ve
 
 * N-D controllers (path-trackers).
 
-* Path planning in configuration space for arm robots.
+* Path planning for robotic arms.
 
 * Path planning on topological map.
 
-* Provide ROS and ROS2 wrapper.
+* Application on ROS2.
 
 * Application in mainstream robot simulation environments (e.g. Gazebo, Carla, Airsim, PyBullet, MuJoCo, Issac Sim).
 

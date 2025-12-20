@@ -1,7 +1,7 @@
 """
 @file: grid.py
 @author: Wu Maojia
-@update: 2025.11.25
+@update: 2025.12.20
 """
 from itertools import product
 from typing import Iterable, Union, Tuple, Callable, List, Dict
@@ -250,9 +250,10 @@ class Grid(BaseMap):
         if len(point) != self.dim:
             raise ValueError("Point dimension does not match map dimension.")
         
+        point_map = tuple((x - float(self.bounds[i, 0])) * (1.0 / self.resolution) - 0.5 for i, x in enumerate(point))
         if discrete:
-            return tuple(self.point_float_to_int((x - float(self.bounds[i, 0])) * (1.0 / self.resolution) - 0.5) for i, x in enumerate(point))
-        return tuple((x - float(self.bounds[i, 0])) * (1.0 / self.resolution) - 0.5 for i, x in enumerate(point))
+            point_map = self.point_float_to_int(point_map)
+        return point_map
 
     def get_distance(self, p1: Tuple[int, int], p2: Tuple[int, int]) -> float:
         """
