@@ -140,3 +140,74 @@ for rid in robots:
     print(rid, ":", vis.get_traj_info(rid, path_world, ctrl.goal, ctrl.goal_dist_tol, ctrl.goal_orient_tol))
 vis.close()
 ```
+
+Below is another example of DWA, which uses ESDF (Euclidean Signed Distance Field) to calculate the distance to obstacles. You can visualize the ESDF by setting argument `show_esdf` to `True`.
+
+![dwa_2d.gif](../../../assets/dwa_2d.gif)
+
+```python
+import random
+random.seed(0)
+
+import numpy as np
+np.random.seed(0)
+
+from python_motion_planning.common import *
+from python_motion_planning.path_planner import *
+from python_motion_planning.controller import *
+
+map_ = Grid(bounds=[[0, 51], [0, 31]])
+
+map_.fill_boundary_with_obstacles()
+map_.type_map[10:21, 15] = TYPES.OBSTACLE
+map_.type_map[20, :15] = TYPES.OBSTACLE
+map_.type_map[30, 15:] = TYPES.OBSTACLE
+map_.type_map[40, :16] = TYPES.OBSTACLE
+
+map_.inflate_obstacles(radius=3)
+
+start = (5, 5)
+goal = (45, 25)
+
+map_.type_map[start] = TYPES.START
+map_.type_map[goal] = TYPES.GOAL
+
+planner = AStar(map_=map_, start=start, goal=goal)
+path, path_info = planner.plan()
+print(path)
+print(path_info)
+map_.fill_expands(path_info["expand"])  # for visualizing the expanded nodes
+
+path_world = map_.path_map_to_world(path)
+print(path_world)
+
+dim = 2
+env = ToySimulator(dim=dim, obstacle_grid=map_, robot_collisions=False)
+
+robots = {
+    "1": CircularRobot(dim=dim, radius=1, pose=np.array([5.5, 5.5, 0]), vel=np.zeros(3),
+                action_min=np.array([-2, -2, -3.14]), action_max=np.array([2, 2, 3.14]), color="C0", text="1"),
+    "2": DiffDriveRobot(dim=dim, radius=1, pose=np.array([5.5, 5.5, 0]), vel=np.zeros(3),
+                action_min=np.array([-2.82, 0, -6.28]), action_max=np.array([2.82, 0, 6.28]), color="C1", text="2")
+}
+
+controllers = {}
+for rid, robot in robots.items():
+    obs_space, act_space = env.build_robot_spaces(robot)
+    controllers[rid] = DWA(obs_space, act_space, env.dt, path_world, robot_model=robot, obstacle_grid=map_, max_lin_speed=3, max_ang_speed=3.14)
+    env.add_robot(rid, robot)
+
+obs, _ = env.reset()
+
+vis = Visualizer2D()
+vis.render_toy_simulator(env, controllers, steps=300, show_traj=True, show_env_info=True, grid_kwargs={"show_esdf": True})
+vis.plot_path(path, style="--", color="C4")
+vis.show()
+
+for rid in robots:
+    ctrl = controllers[rid]
+    print(rid, ":", vis.get_traj_info(rid, path_world, ctrl.goal, ctrl.goal_dist_tol, ctrl.goal_orient_tol))
+vis.close()
+```
+
+For more path-trackers and their arguments, please refer to API Reference.

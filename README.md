@@ -107,7 +107,7 @@ In the following demos, the blue robot 1 is the `CircularRobot`, and the orange 
 | **PID**     |![pid_2d.gif](assets/pid_2d.gif)|Not implemented
 | **APF**     |![apf_2d.gif](assets/apf_2d.gif)|Not implemented
 | **DWA**     |![dwa_2d.gif](assets/dwa_2d.gif)|Not implemented
-| **RPP**     |Implemented in [V1.1.1](https://github.com/ai-winter/python_motion_planning/tree/v1.1.1), not migrated|Not implemented
+| **RPP**     |![rpp_2d.gif](assets/rpp_2d.gif)|Not implemented
 | **LQR**     |Implemented in [V1.1.1](https://github.com/ai-winter/python_motion_planning/tree/v1.1.1), not migrated|Not implemented
 | **MPC**     |Implemented in [V1.1.1](https://github.com/ai-winter/python_motion_planning/tree/v1.1.1), not migrated|Not implemented
 | **MPPI**    |Not implemented|Not implemented
