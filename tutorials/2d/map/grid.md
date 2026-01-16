@@ -18,6 +18,12 @@ from python_motion_planning.controller import *
 
 Define the grid map and add obstacles.
 
+Grid map is the most commonly used map format in the field of path planning. The world frame is a global coordinate system representing the robot and environment in the real world, while the grid map frame is a local or discrete coordinate system used for grid-based maps, typically tied to map resolution and cell indices.
+
+The bounds argument defines the range of the grid map in world frame. Then the size of the discrete grid map is then automatically calculated with the resolution argument. The default resolution of the Grid class is 1, so the calculated discrete size of the grid map is 51*31.
+
+After creating the grid map, we add some obstacles to it for testing the path planners.
+
 ```python
 map_ = Grid(bounds=[[0, 51], [0, 31]])
 map_.fill_boundary_with_obstacles()
@@ -37,7 +43,7 @@ vis.show()
 
 ![grid_map_2d_1.svg](../../../assets/grid_map_2d_1.svg)
 
-Inflate the obstacles to prevent path planners from planning paths too close to the obstacles.
+Inflate the obstacles to prevent path planners from planning paths too close to the obstacles. The inflation radius here is set to 3 cells, and the argument is adjustable.
 
 ```python
 map_.inflate_obstacles(radius=3)
