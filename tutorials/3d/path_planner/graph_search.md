@@ -1,17 +1,18 @@
-Define start and goal points.
+Define start and goal points. Our library directly represents coordinate points using tuples. In discrete grid map frame, the values in the tuple are integers. If it is in world frame, they are floating-point numbers.
 
 ```python
 start = (25, 5, 5)
 goal = (5, 25, 25)
 ```
 
-Add the start and goal points to the map.
+Add the start and goal points to the map. This is to help the visualization of the start and goal points, and to clear obstacles at corresponding points to prevent planning failures.
 ```python
 map_.type_map[start] = TYPES.START
 map_.type_map[goal] = TYPES.GOAL
 ```
 
-Create the path-planner and plan the path.
+Create the path-planner and plan the path. Here, the A\* algorithm is taken as an example. The planning function returns the path in map frame along with detailed planning information, including whether it was successful, the length of the path, the cost of the path, expanded nodes, and so on.
+
 ```python
 planner = AStar(map_=map_, start=start, goal=goal)
 path, path_info = planner.plan()

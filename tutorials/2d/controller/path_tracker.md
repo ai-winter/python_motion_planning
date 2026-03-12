@@ -1,4 +1,4 @@
-The path planners plan points on the grid map. However, the controllers use coordinates in world frame. We need to transform the planned path from map frame to world frame.
+Before using the local path tracking controller, a reference path needs to be planned using a global path planner. The path planner calculates a sequence of points on the grid map. However, the controllers use floating-point coordinates in world frame. We need to transform the planned path from map frame to world frame.
 
 ```python
 path_world = map_.path_map_to_world(path)
@@ -11,7 +11,7 @@ Print results:
 [(5.5, 5.5), (5.5, 6.5), (5.5, 7.5), (5.5, 8.5), (5.5, 9.5), (5.5, 10.5), (5.5, 11.5), (5.5, 12.5), (6.5, 13.5), (6.5, 14.5), (6.5, 15.5), (7.5, 16.5), (7.5, 17.5), (8.5, 18.5), (9.5, 18.5), (10.5, 19.5), (11.5, 19.5), (12.5, 19.5), (13.5, 19.5), (14.5, 19.5), (15.5, 19.5), (16.5, 19.5), (17.5, 19.5), (18.5, 19.5), (19.5, 19.5), (20.5, 19.5), (21.5, 19.5), (22.5, 18.5), (23.5, 17.5), (24.5, 16.5), (25.5, 15.5), (26.5, 14.5), (27.5, 13.5), (28.5, 12.5), (29.5, 11.5), (30.5, 11.5), (31.5, 12.5), (32.5, 12.5), (33.5, 13.5), (34.5, 14.5), (35.5, 15.5), (36.5, 16.5), (37.5, 17.5), (38.5, 18.5), (39.5, 19.5), (40.5, 20.5), (41.5, 21.5), (42.5, 22.5), (43.5, 23.5), (44.5, 24.5), (45.5, 25.5)]
 ```
 
-Create the toy simulator.
+Create the toy simulator in the library for rapid verification.
 
 ```python
 dim = 2

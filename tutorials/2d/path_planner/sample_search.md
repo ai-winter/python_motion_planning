@@ -1,4 +1,5 @@
-Create the path-planner and plan the path.
+Create the path-planner and plan the path. Here, the RRT algorithm is taken as an example. The planning function returns the path in map frame along with detailed planning information, including whether it was successful, the length of the path, the cost of the path, expanded nodes, and so on.
+
 ```python
 planner = RRT(map_=map_, start=start, goal=goal)
 path, path_info = planner.plan()
