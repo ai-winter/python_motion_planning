@@ -35,36 +35,6 @@ class Geometry:
         else:
             raise ValueError("Invalid distance type")
 
-    # @staticmethod
-    # def angle(v1: tuple, v2: tuple) -> float:
-    #     """
-    #     Calculate the angle between two vectors
-
-    #     Args:
-    #         v1: First vector
-    #         v2: Second vector
-
-    #     Returns:
-    #         angle_rad: Angle in rad between the two vectors
-    #     """
-    #     if len(v1) != len(v2):
-    #         raise ValueError("Dimension mismatch")
-        
-    #     dot_product = sum(a * b for a, b in zip(v1, v2))
-    #     v1_norm = math.sqrt(sum(a**2 for a in v1))
-    #     v2_norm = math.sqrt(sum(b**2 for b in v2))
-        
-    #     if  v1_norm == 0 or v2_norm == 0:
-    #         raise ValueError("Zero vector cannot calculate angle")
-
-    #     cos_theta = dot_product / (v1_norm * v2_norm)
-
-    #     cos_theta = min(1.0, max(-1.0, cos_theta))
-
-    #     angle_rad = math.acos(cos_theta)
-        
-    #     return angle_rad
-
     @staticmethod
     def regularize_orient(orient: np.ndarray) -> np.ndarray:
         """
