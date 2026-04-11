@@ -1,7 +1,7 @@
 """
 @file: rrt_star.py
 @author: Wu Maojia
-@update: 2025.12.19
+@update: 2026.4.12
 """
 import math
 import random
