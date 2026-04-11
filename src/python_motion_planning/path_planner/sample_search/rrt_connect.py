@@ -73,7 +73,7 @@ class RRTConnect(RRT):
             self._faiss_add_node(self.tree_b[self.goal], self.index_b, self.nodes_b)
 
         # Main planning loop
-        for _ in range(self.sample_num):
+        for _ in range(self.max_sample_step):
             # Generate random sample node
             node_rand = self._generate_random_node()
             

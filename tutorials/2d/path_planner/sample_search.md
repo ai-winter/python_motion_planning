@@ -81,11 +81,13 @@ Print results:
 
 ![rrt_2d_discrete.svg](../../../assets/rrt_2d_discrete.svg)
 
-For asymptoticaly optimal sample search planners like **RRT\***, you can set argument `stop_until_sample_num` to `True` and configure `sample_num` to wait for a better result. For example:
+For asymptoticaly optimal sample search planners like **RRT\***, you can pass a callable function to argument `stop_func` to determine when to stop sampling. For example:
 
 ```python
-RRTStar(map_=map_, start=start, goal=goal, sample_num=1000, stop_until_sample_num=True)
+RRTStar(map_=map_, start=start, goal=goal, stop_func=lambda cur, fss, mss: (cur >= fss * 10 if fss is not None else False) or (cur >= mss))
 ```
+
+For the arguments of `stop_func`, `cur` means the **cur**rent step iteration, `fss` means the **f**irst **s**uccessful **s**tep to find the feasible path, and `mss` means the **m**aximum **s**ampling **s**tep number determined by `max_sample_step` argument. This lambda function means to stop sampling when the number of sampling steps reaches 10 times the number of steps successfully found a feasible path for the first time.
 
 ![rrt_star_2d.svg](../../../assets/rrt_star_2d.svg)
 

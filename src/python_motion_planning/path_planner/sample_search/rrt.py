@@ -20,7 +20,7 @@ class RRT(BasePathPlanner):
     Args:
         *args: see the parent class.
         max_dist: Maximum expansion distance for each step.
-        sample_num: Maximum number of samples to generate.
+        max_sample_step: Maximum number of steps of samples to generate.
         goal_sample_rate: Probability of sampling the goal directly.
         discrete: Whether to use discrete or continuous space.
         faiss: Whether to use Faiss to accelerate the search.
@@ -42,14 +42,14 @@ class RRT(BasePathPlanner):
         True
     """
     def __init__(self, *args, 
-                 max_dist: float = 5.0, sample_num: int = 100000, 
+                 max_dist: float = 5.0, max_sample_step: int = 100000, 
                  goal_sample_rate: float = 0.05,
                  discrete: bool = False,
                  use_faiss: bool = True,
                  **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.max_dist = max_dist
-        self.sample_num = sample_num
+        self.max_sample_step = max_sample_step
         self.goal_sample_rate = goal_sample_rate
         self.discrete = discrete
         self.use_faiss = use_faiss
@@ -77,7 +77,7 @@ class RRT(BasePathPlanner):
             self._faiss_add_node(start_node, faiss_index, faiss_nodes)
 
         # Main sampling loop
-        for _ in range(self.sample_num):
+        for _ in range(self.max_sample_step):
             # Generate random sample node
             node_rand = self._generate_random_node()
             

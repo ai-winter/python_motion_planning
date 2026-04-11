@@ -27,7 +27,12 @@ class RRTStar(RRT):
         *args: see parent class.
         rewire_radius: Neighborhood radius for rewiring (If None, adaptively calculated with gamma factor).
         gamma: A factor for calculating rewire_radius. For details, see [1]. (Disabled when rewire_radius is not None)
-        stop_until_sample_num: Stop until sample number limitation is reached, otherwise stop when goal is found.
+        stop_func: A callable(cur_step, first_success_step, max_sample_step) -> bool that controls when to stop sampling. Called at the beginning of each iteration.
+            Arguments:
+                - cur_step (int): Number of sampling iterations completed so far (starts from 0, incremented before each sampling, so the first completed sample has cur_step=1).
+                - first_success_step (int or None): The cur_step value at which a feasible path was first found, or None if no path has been found yet.
+                - max_sample_step (int): The planner's max_sample_step attribute, provided for convenience.
+            Returns True to stop, False to continue.
         propagate_cost_to_children: Whether to propagate cost to children. This is a fix for ensuring the correctness of g-value of each node. But it may slow the algorithm a little.
         *kwargs: see parent class.
 
@@ -41,7 +46,7 @@ class RRTStar(RRT):
         >>> print(path_info['success'])
         True
         
-        >>> planner = RRTStar(map_=map_, start=(5, 5), goal=(10, 10), sample_num=1000, stop_until_sample_num=True)
+        >>> planner = RRTStar(map_=map_, start=(5, 5), goal=(10, 10), max_sample_step=100000, stop_func=lambda cur, fss, mss: (cur >= fss * 10 if fss is not None else False) or (cur >= mss))
         >>> path, path_info = planner.plan()
         >>> print(path_info['success'])
         True
@@ -50,13 +55,18 @@ class RRTStar(RRT):
     def __init__(self, *args,
                  rewire_radius: float = None,
                  gamma: float = 50.0,
-                 stop_until_sample_num: int = False,
+                 stop_func: callable = lambda cur, fs, sn: (fs is not None) or (cur >= sn),
                  propagate_cost_to_children: bool = True,
                  **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.rewire_radius = rewire_radius
         self.gamma = gamma
-        self.stop_until_sample_num = stop_until_sample_num
+        self.stop_func = stop_func
+
+        self.failed_info[1]["first_success_step"] = None
+        self.failed_info[1]["best_step"] = None
+        self.failed_info[1]["total_step"] = None
+
         self.best_results = self.failed_info
         self.propagate_cost_to_children = propagate_cost_to_children
 
@@ -86,7 +96,14 @@ class RRTStar(RRT):
             faiss_nodes = []
             self._faiss_add_node(start_node, faiss_index, faiss_nodes)
 
-        for i in range(self.sample_num):
+        i = 0
+        first_success_i = None
+        while True:
+            if self.stop_func(i, first_success_i, self.max_sample_step):
+                break
+                
+            i += 1
+
             # Generate random sample
             node_rand = self._generate_random_node()
 
@@ -179,22 +196,25 @@ class RRTStar(RRT):
                                 0
                             )
                         path, length, cost = self.extract_path(self._tree)
+                        
+                        if first_success_i is None:
+                            first_success_i = i
+
                         self.best_results = path, {
                             "success": True,
                             "start": self.start,
                             "goal": self.goal,
                             "length": length,
                             "cost": cost,
+                            "first_success_step": first_success_i,
+                            "best_step": i,
+                            "total_step": i,
                             "expand": self._tree,
                         }
 
-                        if not self.stop_until_sample_num:
-                            return self.best_results
-
-        n = len(self._tree) + 1
-        radius = self.gamma * ((math.log(n) / n) ** (1 / self.dim))
 
         # Planning stopped
+        self.best_results[1]["total_step"] = i
         self.best_results[1]["expand"] = self._tree
         return self.best_results
 
