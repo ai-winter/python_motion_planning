@@ -44,3 +44,5 @@ logs/
 tmp/
 tmp*
 stats.txt
+
+.claude

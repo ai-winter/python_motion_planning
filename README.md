@@ -118,17 +118,14 @@ In the following demos, the blue robot 1 is the `CircularRobot`, and the orange 
 
 ## Curve Generator
 
-The visualization of the curve generators has not been implemented in current version. They can be visualized in [V1.1.1](https://github.com/ai-winter/python_motion_planning/tree/v1.1.1).
-
 |Generator|2D|3D|
 | ------- | -------------------------------------------------------- | -------------------------------------------------------- 
-| **Polynomia** | ![polynomial_curve_python.gif](assets/polynomial_curve_python.gif)|Not implemented
-| **Bezier** |![bezier_curve_python.png](assets/bezier_curve_python.png)|Not implemented
-| **Cubic Spline** |![cubic_spline_python.png](assets/cubic_spline_python.png)|Not implemented
-| **BSpline** |![bspline_curve_python.png](assets/bspline_curve_python.png)|Not implemented
-| **Dubins** |![dubins_curve_python.png](assets/dubins_curve_python.png)|Not implemented
-| **Reeds-Shepp** |![reeds_shepp_python.png](assets/reeds_shepp_python.gif)|Not implemented
-| **Fem-Pos Smoother** |![fem_pos_smoother_python.png](assets/fem_pos_smoother_python.png)|Not implemented
+| **Polynomia** | ![polynomial_2d.svg](assets/polynomial_2d.svg)|Not implemented
+| **Bezier** |![bezier_2d.svg](assets/bezier_2d.svg)|Not implemented
+| **Cubic Spline** |![cubic_spline_2d.svg](assets/cubic_spline_2d.svg)|Not implemented
+| **BSpline** |![bspline_2d.svg](assets/bspline_2d.svg)|Not implemented
+| **Dubins** |![dubins_2d.svg](assets/dubins_2d.svg)|Not implemented
+| **Reeds-Shepp** |![reeds_shepp_2d.svg](assets/reeds_shepp_2d.svg)|Not implemented
 
 # Future Works
 
