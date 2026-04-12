@@ -78,7 +78,7 @@ Print results:
 For asymptoticaly optimal sample search planners like **RRT\***, you can pass a callable function to argument `stop_func` to determine when to stop sampling. For example:
 
 ```python
-RRTStar(map_=map_, start=start, goal=goal, stop_func=lambda cur, fss, mss: (cur >= fss * 10 if fss is not None else False) or (cur >= mss))
+planner = RRTStar(map_=map_, start=start, goal=goal, stop_func=lambda cur, fss, mss: (cur >= fss * 10 if fss is not None else False) or (cur >= mss))
 ```
 
 For the arguments of `stop_func`, `cur` means the **cur**rent step iteration, `fss` means the **f**irst **s**uccessful **s**tep to find the feasible path, and `mss` means the **m**aximum **s**ampling **s**tep number determined by `max_sample_step` argument. This lambda function means to stop sampling when the number of sampling steps reaches 10 times the number of steps successfully found a feasible path for the first time.
