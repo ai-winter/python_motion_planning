@@ -135,6 +135,8 @@ In the following demos, the blue robot 1 is the `CircularRobot`, and the orange 
 
 * Path planning on topological map.
 
+* Sample search with Dubins or Reeds-Shepp curves.
+
 * Application on ROS2.
 
 * Application in mainstream robot simulation environments (e.g. Gazebo, Carla, Airsim, PyBullet, MuJoCo, Issac Sim).
