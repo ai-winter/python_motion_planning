@@ -1,7 +1,7 @@
 
 # Introduction
 
-`Python Motion Planning` repository provides the implementations of common `Motion planning` algorithms, including path planners on N-D grid, controllers for path-tracking, curve generators, a visualizer based on matplotlib and a toy physical simulator to test controllers.
+`Python Motion Planning` repository provides the implementations of common `Motion planning` algorithms, including path planners on N-D grid, controllers for path-tracking, trajectory optimizers, a visualizer based on matplotlib and a toy physical simulator to test controllers.
 
 `Motion planning` plans the state sequence of the robot without conflict between the start and goal. 
 
