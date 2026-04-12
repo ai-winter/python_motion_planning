@@ -51,7 +51,7 @@ vis.show()
 vis.close()
 ```
 
-![bspline_curve_2d.svg](../../../assets/bspline_curve_2d.svg)
+![bspline_2d.svg](../../../assets/bspline_2d.svg)
 
 Runnable complete code:
 
