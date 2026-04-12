@@ -37,7 +37,7 @@ python_motion_planning
 |   ├─sample_search
 |   └─hybrid_search
 └─traj_optimizer
-|   └─curve_generator
+    └─curve_generator
 ```
 
 ## Install
