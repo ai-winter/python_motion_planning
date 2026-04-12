@@ -36,11 +36,30 @@ class Geometry:
             raise ValueError("Invalid distance type")
 
     @staticmethod
+    def mod_to_2pi(orient: np.ndarray) -> np.ndarray:
+        """
+        Regularize orientation to be within [0, 2*pi)
+
+        Args:
+            orient: the orientation angle
+
+        Returns:
+            new_orient: modded orientation
+        """
+        return np.mod(orient, 2 * np.pi)
+
+    @staticmethod
     def regularize_orient(orient: np.ndarray) -> np.ndarray:
         """
         Regularize orientation to be within (-pi, pi]
+
+        Args:
+            orient: the orientation angle
+
+        Returns:
+            new_orient: regularized orientation
         """
-        return np.mod(orient + np.pi, 2 * np.pi) - np.pi
+        return -np.mod(-orient + np.pi, 2 * np.pi) + np.pi
         
     @staticmethod
     def add_orient_to_2d_path(path: List[Tuple[float, float]]) -> List[Tuple[float, float, float]]:
