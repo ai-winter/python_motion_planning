@@ -12,13 +12,13 @@
         <meta name="author" content="Wu Maojia, Yang Haodong">
       
       
-        <link rel="canonical" href="http://localhost:8000/v2.0/api/controller/random_controller/RandomController.html">
+        <link rel="canonical" href="http://localhost:8000/v2.0/tutorials/3d/path_planner/graph_search.html">
       
       
-        <link rel="prev" href="../path_tracker/rpp/RPP.html">
+        <link rel="prev" href="../map/grid.html">
       
       
-        <link rel="next" href="../../path_planner/base_path_planner/BasePathPlanner.html">
+        <link rel="next" href="sample_search.html">
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
@@ -26,7 +26,7 @@
     
     
       
-        <title>RandomController - Python-Motion-Planning</title>
+        <title>2.2.1 - Graph Search - Python-Motion-Planning</title>
       
     
     
@@ -79,11 +79,6 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
-        
-        <a href="#randomcontroller" class="md-skip">
-          Skip to content
-        </a>
-      
     </div>
     <div data-md-component="announce">
       
@@ -118,7 +113,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              RandomController
+              2.2.1 - Graph Search
             
           </span>
         </div>
@@ -247,60 +242,6 @@
         
   
   
-  
-    
-    
-      
-  
-  
-  
-    
-    
-      
-  
-  
-  
-    
-    
-      <li class="md-tabs__item">
-        <a href="../../../tutorials/2d/map/grid.html" class="md-tabs__link">
-          
-  
-    
-  
-  Tutorials
-
-        </a>
-      </li>
-    
-  
-
-    
-  
-
-    
-  
-
-      
-        
-  
-  
-    
-  
-  
-    
-    
-      
-  
-  
-    
-  
-  
-    
-    
-      
-  
-  
     
   
   
@@ -323,7 +264,57 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="../../common/env/map/base_map/BaseMap.html" class="md-tabs__link">
+        <a href="../../2d/map/grid.html" class="md-tabs__link">
+          
+  
+    
+  
+  Tutorials
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      
+  
+  
+  
+    
+    
+      
+  
+  
+  
+    
+    
+      
+  
+  
+  
+    
+    
+      
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../api/common/env/map/base_map/BaseMap.html" class="md-tabs__link">
           
   
     
@@ -417,76 +408,12 @@
       
   
   
-  
-  
-    
-    
-      
-        
-      
-        
-      
-    
-    
-      
-      
-        
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-    
-  
-  
-    
-  
-  
-    <a href="../../../tutorials/2d/map/grid.html" class="md-nav__link">
-      
-  
-  <span class="md-ellipsis">
-    Tutorials
-  </span>
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-  
-
-  
-
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
     
   
   
   
     
     
-      
-        
-      
-        
       
         
       
@@ -509,24 +436,24 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
             
   
   <span class="md-ellipsis">
-    API Reference
+    Tutorials
   </span>
   
 
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
-            API Reference
+            Tutorials
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -538,6 +465,8 @@
   
     
     
+      
+        
       
         
       
@@ -564,24 +493,24 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_1" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_1" >
         
           
-          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="">
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="">
             
   
   <span class="md-ellipsis">
-    common
+    1 - 2D
   </span>
   
 
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_1">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
             <span class="md-nav__icon md-icon"></span>
-            common
+            1 - 2D
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -596,14 +525,6 @@
       
         
       
-        
-      
-        
-      
-        
-      
-        
-      
     
     
       
@@ -622,17 +543,11 @@
         
   
   
-    
-  
-  
-    
-  
-  
-    <a href="../../common/env/map/base_map/BaseMap.html" class="md-nav__link">
+    <a href="../../2d/map/grid.html" class="md-nav__link">
       
   
   <span class="md-ellipsis">
-    env
+    1.1 - Map
   </span>
   
 
@@ -640,10 +555,6 @@
         <span class="md-nav__icon md-icon"></span>
       
     </a>
-  
-
-  
-
   
 
       
@@ -685,14 +596,11 @@
         
   
   
-    
-  
-  
-    <a href="../../common/utils/child_tree/ChildTree.html" class="md-nav__link">
+    <a href="../../2d/path_planner/graph_search.html" class="md-nav__link">
       
   
   <span class="md-ellipsis">
-    utils
+    1.2 - Path Planner
   </span>
   
 
@@ -700,8 +608,6 @@
         <span class="md-nav__icon md-icon"></span>
       
     </a>
-  
-
   
 
       
@@ -718,10 +624,6 @@
   
     
     
-      
-        
-      
-        
       
         
       
@@ -743,14 +645,11 @@
         
   
   
-    
-  
-  
-    <a href="../../common/visualizer/base_visualizer/BaseVisualizer.html" class="md-nav__link">
+    <a href="../../2d/controller/path_tracker.html" class="md-nav__link">
       
   
   <span class="md-ellipsis">
-    visualizer
+    1.3 - Controller
   </span>
   
 
@@ -760,6 +659,53 @@
     </a>
   
 
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+    <a href="../../2d/traj_optimizer/curve_generator.html" class="md-nav__link">
+      
+  
+  <span class="md-ellipsis">
+    1.4 - Trajectory Optimizer
+  </span>
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
   
 
       
@@ -791,8 +737,6 @@
       
         
       
-        
-      
     
     
       
@@ -810,24 +754,24 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" checked>
         
           
-          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="">
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="">
             
   
   <span class="md-ellipsis">
-    controller
+    2 - 3D
   </span>
   
 
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3_2">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_2">
             <span class="md-nav__icon md-icon"></span>
-            controller
+            2 - 3D
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -860,11 +804,11 @@
         
   
   
-    <a href="../base_controller/BaseController.html" class="md-nav__link">
+    <a href="../map/grid.html" class="md-nav__link">
       
   
   <span class="md-ellipsis">
-    base_controller
+    2.1 - Map
   </span>
   
 
@@ -884,6 +828,8 @@
                 
   
   
+    
+  
   
   
     
@@ -892,68 +838,6 @@
         
       
         
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-      
-      
-        
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-    
-  
-  
-    <a href="../path_tracker/apf/APF.html" class="md-nav__link">
-      
-  
-  <span class="md-ellipsis">
-    path_tracker
-  </span>
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-    
-  
-  
-  
-    
-    
       
         
       
@@ -971,24 +855,24 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2_2" checked>
         
           
-          <label class="md-nav__link" for="__nav_3_2_3" id="__nav_3_2_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_2_2" id="__nav_2_2_2_label" tabindex="0">
             
   
   <span class="md-ellipsis">
-    random_controller
+    2.2 - Path Planner
   </span>
   
 
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_2_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3_2_3">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_2_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_2_2">
             <span class="md-nav__icon md-icon"></span>
-            random_controller
+            2.2 - Path Planner
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -1005,73 +889,59 @@
       <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
       
       
-        
       
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    RandomController
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="RandomController.html" class="md-nav__link md-nav__link--active">
+      <a href="graph_search.html" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
-    RandomController
+    2.2.1 - Graph Search
   </span>
   
 
       </a>
       
-        
+    </li>
+  
 
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+              
+            
+              
+                
   
   
   
-    
   
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#src.python_motion_planning.controller.random_controller.RandomController" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;RandomController
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label=" RandomController">
-      <ul class="md-nav__list">
+    <li class="md-nav__item">
+      <a href="sample_search.html" class="md-nav__link">
         
-          <li class="md-nav__item">
-  <a href="#src.python_motion_planning.controller.random_controller.RandomController.get_action" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;get_action
-    </span>
-  </a>
   
-</li>
+  <span class="md-ellipsis">
+    2.2.2 - Sample Search
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hybrid_search.html" class="md-nav__link">
         
-      </ul>
-    </nav>
   
-</li>
-      
-    </ul>
+  <span class="md-ellipsis">
+    2.2.3 - Hybrid Search
+  </span>
   
-</nav>
-      
+
+      </a>
     </li>
   
 
@@ -1093,298 +963,15 @@
 
               
             
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-      
-      
-        
-          
-          
-        
-      
-    
-    
-      
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
-      
-        
-        
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_3" >
-        
-          
-          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="">
-            
-  
-  <span class="md-ellipsis">
-    path_planner
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_3">
-            <span class="md-nav__icon md-icon"></span>
-            path_planner
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-      
-    
-    
-      
-      
-        
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-    <a href="../../path_planner/base_path_planner/BasePathPlanner.html" class="md-nav__link">
-      
-  
-  <span class="md-ellipsis">
-    base_path_planner
-  </span>
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-      
-      
-        
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-    
-  
-  
-    <a href="../../path_planner/graph_search/a_star/AStar.html" class="md-nav__link">
-      
-  
-  <span class="md-ellipsis">
-    graph_search
-  </span>
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-      
-    
-    
-      
-      
-        
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-    
-  
-  
-    <a href="../../path_planner/hybrid_search/voronoi_planner/VoronoiPlanner.html" class="md-nav__link">
-      
-  
-  <span class="md-ellipsis">
-    hybrid_search
-  </span>
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-      
-        
-      
-        
-      
-    
-    
-      
-      
-        
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-    
-  
-  
-    <a href="../../path_planner/sample_search/rrt/RRT.html" class="md-nav__link">
-      
-  
-  <span class="md-ellipsis">
-    sample_search
-  </span>
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-  
-
-      
-    </li>
-  
-
-              
-            
           </ul>
         </nav>
       
     </li>
   
 
-              
-            
-              
-                
+    
+      
+      
   
   
   
@@ -1395,104 +982,6 @@
         
       
         
-      
-    
-    
-      
-      
-        
-          
-          
-        
-      
-    
-    
-      
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
-      
-        
-        
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_4" >
-        
-          
-          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="">
-            
-  
-  <span class="md-ellipsis">
-    traj_optimizer
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_4">
-            <span class="md-nav__icon md-icon"></span>
-            traj_optimizer
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-      
-    
-    
-      
-      
-        
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-    <a href="../../traj_optimizer/base_curve_generator/BaseCurveGenerator.html" class="md-nav__link">
-      
-  
-  <span class="md-ellipsis">
-    base_curve_generator
-  </span>
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
       
         
       
@@ -1522,11 +1011,17 @@
     
   
   
-    <a href="../../traj_optimizer/curve_generator/point_based/bspline/BSpline.html" class="md-nav__link">
+    
+  
+  
+    
+  
+  
+    <a href="../../../api/common/env/map/base_map/BaseMap.html" class="md-nav__link">
       
   
   <span class="md-ellipsis">
-    curve_generator
+    API Reference
   </span>
   
 
@@ -1540,22 +1035,10 @@
 
   
 
-      
-    </li>
   
 
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
   
 
-              
-            
-          </ul>
-        </nav>
       
     </li>
   
@@ -1578,40 +1061,6 @@
   
   
   
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#src.python_motion_planning.controller.random_controller.RandomController" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;RandomController
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label=" RandomController">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#src.python_motion_planning.controller.random_controller.RandomController.get_action" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;get_action
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
   
 </nav>
                   </div>
@@ -1629,169 +1078,71 @@
   
 
 
-<h1 id="randomcontroller">RandomController<a class="headerlink" href="#randomcontroller" title="Permanent link">&para;</a></h1>
+  <h1>2.2.1 - Graph Search</h1>
 
-
-<div class="doc doc-object doc-class">
-
-
-
-<h2 id="src.python_motion_planning.controller.random_controller.RandomController" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <code>src.python_motion_planning.controller.random_controller.RandomController</code>
-
-
-<a href="#src.python_motion_planning.controller.random_controller.RandomController" class="headerlink" title="Permanent link">&para;</a></h2>
-
-
-    <div class="doc doc-contents first">
-            <p class="doc doc-class-bases">
-              Bases: <code><a class="autorefs autorefs-internal" title="src.python_motion_planning.controller.base_controller.BaseController" href="../base_controller/BaseController.html#src.python_motion_planning.controller.base_controller.BaseController">BaseController</a></code></p>
-
-
-        <p>Random controller</p>
-
-
-
-
-
-
-              <details class="quote">
-                <summary>Source code in <code>src\python_motion_planning\controller\random_controller.py</code></summary>
-                <div class="language-python highlight"><span class="filename">Python</span><pre><span></span><code><a id="__codelineno-0-12" name="__codelineno-0-12"></a><a href="#__codelineno-0-12"><span class="linenos" data-linenos="12 "></span></a><span class="k">class</span> <span class="nc">RandomController</span><span class="p">(</span><span class="n">BaseController</span><span class="p">):</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13"></a><a href="#__codelineno-0-13"><span class="linenos" data-linenos="13 "></span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14"></a><a href="#__codelineno-0-14"><span class="linenos" data-linenos="14 "></span></a><span class="sd">    Random controller</span>
-<a id="__codelineno-0-15" name="__codelineno-0-15"></a><a href="#__codelineno-0-15"><span class="linenos" data-linenos="15 "></span></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16"></a><a href="#__codelineno-0-16"><span class="linenos" data-linenos="16 "></span></a>    <span class="k">def</span> <span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]:</span>
-<a id="__codelineno-0-17" name="__codelineno-0-17"></a><a href="#__codelineno-0-17"><span class="linenos" data-linenos="17 "></span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-18" name="__codelineno-0-18"></a><a href="#__codelineno-0-18"><span class="linenos" data-linenos="18 "></span></a><span class="sd">        Randomly sample action in action space.</span>
-<a id="__codelineno-0-19" name="__codelineno-0-19"></a><a href="#__codelineno-0-19"><span class="linenos" data-linenos="19 "></span></a>
-<a id="__codelineno-0-20" name="__codelineno-0-20"></a><a href="#__codelineno-0-20"><span class="linenos" data-linenos="20 "></span></a><span class="sd">        Parameters:</span>
-<a id="__codelineno-0-21" name="__codelineno-0-21"></a><a href="#__codelineno-0-21"><span class="linenos" data-linenos="21 "></span></a><span class="sd">            obs: observation ([pos, vel, rel_pos_robot1, rel_pos_robot2, ...], each sub-vector length=dim)</span>
-<a id="__codelineno-0-22" name="__codelineno-0-22"></a><a href="#__codelineno-0-22"><span class="linenos" data-linenos="22 "></span></a>
-<a id="__codelineno-0-23" name="__codelineno-0-23"></a><a href="#__codelineno-0-23"><span class="linenos" data-linenos="23 "></span></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-24" name="__codelineno-0-24"></a><a href="#__codelineno-0-24"><span class="linenos" data-linenos="24 "></span></a><span class="sd">            action: action ([acc], length=dim)</span>
-<a id="__codelineno-0-25" name="__codelineno-0-25"></a><a href="#__codelineno-0-25"><span class="linenos" data-linenos="25 "></span></a><span class="sd">            target: lookahead point</span>
-<a id="__codelineno-0-26" name="__codelineno-0-26"></a><a href="#__codelineno-0-26"><span class="linenos" data-linenos="26 "></span></a><span class="sd">        &quot;&quot;&quot;</span>
-<a id="__codelineno-0-27" name="__codelineno-0-27"></a><a href="#__codelineno-0-27"><span class="linenos" data-linenos="27 "></span></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">sample</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">goal</span>
+<p>Define start and goal points. Our library directly represents coordinate points using tuples. In discrete grid map frame, the values in the tuple are integers. If it is in world frame, they are floating-point numbers.</p>
+<div class="language-python highlight"><span class="filename">Python</span><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a><a href="#__codelineno-0-1"><span class="linenos" data-linenos="1 "></span></a><span class="n">start</span> <span class="o">=</span> <span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2"></a><a href="#__codelineno-0-2"><span class="linenos" data-linenos="2 "></span></a><span class="n">goal</span> <span class="o">=</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">25</span><span class="p">)</span>
 </code></pre></div>
-              </details>
-
-
-
-  <div class="doc doc-children">
-
-
-
-
-
-
-
-
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="src.python_motion_planning.controller.random_controller.RandomController.get_action" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <code class="highlight language-python"><span class="n">get_action</span><span class="p">(</span><span class="n">obs</span><span class="p">)</span></code>
-
-<a href="#src.python_motion_planning.controller.random_controller.RandomController.get_action" class="headerlink" title="Permanent link">&para;</a></h3>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Randomly sample action in action space.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>obs</code>
-            </td>
-            <td>
-                  <code><span title="numpy.ndarray">ndarray</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>observation ([pos, vel, rel_pos_robot1, rel_pos_robot2, ...], each sub-vector length=dim)</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-<th>Name</th>          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-<td><code>action</code></td>            <td>
-                  <code><span title="numpy.ndarray">ndarray</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>action ([acc], length=dim)</p>
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-<td><code>target</code></td>            <td>
-                  <code>tuple</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>lookahead point</p>
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-            <details class="quote">
-              <summary>Source code in <code>src\python_motion_planning\controller\random_controller.py</code></summary>
-              <div class="language-python highlight"><span class="filename">Python</span><pre><span></span><code><a id="__codelineno-0-16" name="__codelineno-0-16"></a><a href="#__codelineno-0-16"><span class="linenos" data-linenos="16 "></span></a><span class="k">def</span> <span class="nf">get_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]:</span>
-<a id="__codelineno-0-17" name="__codelineno-0-17"></a><a href="#__codelineno-0-17"><span class="linenos" data-linenos="17 "></span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-18" name="__codelineno-0-18"></a><a href="#__codelineno-0-18"><span class="linenos" data-linenos="18 "></span></a><span class="sd">    Randomly sample action in action space.</span>
-<a id="__codelineno-0-19" name="__codelineno-0-19"></a><a href="#__codelineno-0-19"><span class="linenos" data-linenos="19 "></span></a>
-<a id="__codelineno-0-20" name="__codelineno-0-20"></a><a href="#__codelineno-0-20"><span class="linenos" data-linenos="20 "></span></a><span class="sd">    Parameters:</span>
-<a id="__codelineno-0-21" name="__codelineno-0-21"></a><a href="#__codelineno-0-21"><span class="linenos" data-linenos="21 "></span></a><span class="sd">        obs: observation ([pos, vel, rel_pos_robot1, rel_pos_robot2, ...], each sub-vector length=dim)</span>
-<a id="__codelineno-0-22" name="__codelineno-0-22"></a><a href="#__codelineno-0-22"><span class="linenos" data-linenos="22 "></span></a>
-<a id="__codelineno-0-23" name="__codelineno-0-23"></a><a href="#__codelineno-0-23"><span class="linenos" data-linenos="23 "></span></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-24" name="__codelineno-0-24"></a><a href="#__codelineno-0-24"><span class="linenos" data-linenos="24 "></span></a><span class="sd">        action: action ([acc], length=dim)</span>
-<a id="__codelineno-0-25" name="__codelineno-0-25"></a><a href="#__codelineno-0-25"><span class="linenos" data-linenos="25 "></span></a><span class="sd">        target: lookahead point</span>
-<a id="__codelineno-0-26" name="__codelineno-0-26"></a><a href="#__codelineno-0-26"><span class="linenos" data-linenos="26 "></span></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-27" name="__codelineno-0-27"></a><a href="#__codelineno-0-27"><span class="linenos" data-linenos="27 "></span></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">sample</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">goal</span>
+<p>Add the start and goal points to the map. This is to help the visualization of the start and goal points, and to clear obstacles at corresponding points to prevent planning failures.
+<div class="language-python highlight"><span class="filename">Python</span><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1"></a><a href="#__codelineno-1-1"><span class="linenos" data-linenos="1 "></span></a><span class="n">map_</span><span class="o">.</span><span class="n">type_map</span><span class="p">[</span><span class="n">start</span><span class="p">]</span> <span class="o">=</span> <span class="n">TYPES</span><span class="o">.</span><span class="n">START</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2"></a><a href="#__codelineno-1-2"><span class="linenos" data-linenos="2 "></span></a><span class="n">map_</span><span class="o">.</span><span class="n">type_map</span><span class="p">[</span><span class="n">goal</span><span class="p">]</span> <span class="o">=</span> <span class="n">TYPES</span><span class="o">.</span><span class="n">GOAL</span>
+</code></pre></div></p>
+<p>Create the path-planner and plan the path. Here, the A* algorithm is taken as an example. The planning function returns the path in map frame along with detailed planning information, including whether it was successful, the length of the path, the cost of the path, expanded nodes, and so on.</p>
+<div class="language-python highlight"><span class="filename">Python</span><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1"></a><a href="#__codelineno-2-1"><span class="linenos" data-linenos="1 "></span></a><span class="n">planner</span> <span class="o">=</span> <span class="n">AStar</span><span class="p">(</span><span class="n">map_</span><span class="o">=</span><span class="n">map_</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="n">goal</span><span class="p">)</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2"></a><a href="#__codelineno-2-2"><span class="linenos" data-linenos="2 "></span></a><span class="n">path</span><span class="p">,</span> <span class="n">path_info</span> <span class="o">=</span> <span class="n">planner</span><span class="o">.</span><span class="n">plan</span><span class="p">()</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3"></a><a href="#__codelineno-2-3"><span class="linenos" data-linenos="3 "></span></a><span class="nb">print</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4"></a><a href="#__codelineno-2-4"><span class="linenos" data-linenos="4 "></span></a><span class="nb">print</span><span class="p">(</span><span class="n">path_info</span><span class="p">)</span>
 </code></pre></div>
-            </details>
-    </div>
-
-</div>
-
-
-
-  </div>
-
-    </div>
-
-</div>
+<p>Print results:
+<div class="language-text highlight"><span class="filename">Text Only</span><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1"></a><a href="#__codelineno-3-1"><span class="linenos" data-linenos="1 "></span></a>[(25, 5, 5), (24, 6, 6), (23, 7, 7), (22, 7, 8), (21, 7, 9), (20, 7, 10), (19, 7, 10), (18, 7, 11), (17, 7, 12), (16, 8, 13), (15, 9, 14), (14, 9, 15), (13, 10, 16), (12, 11, 17), (11, 12, 18), (10, 12, 18), (9, 13, 19), (9, 14, 19), (8, 15, 20), (7, 16, 21), (6, 17, 22), (5, 18, 23), (5, 19, 23), (5, 20, 23), (5, 21, 23), (5, 22, 23), (5, 23, 24), (5, 24, 25), (5, 25, 25)]
+<a id="__codelineno-3-2" name="__codelineno-3-2"></a><a href="#__codelineno-3-2"><span class="linenos" data-linenos="2 "></span></a>{&#39;success&#39;: True, &#39;start&#39;: (25, 5, 5), &#39;goal&#39;: (5, 25, 25), &#39;length&#39;: 40.09831818981128, &#39;cost&#39;: 40.09831818981128, &#39;expand&#39;: {(25, 5, 5): Node((25, 5, 5), None, 0, 34.64101615137755), ...}}
+</code></pre></div></p>
+<p>Visualize.
+<div class="language-python highlight"><span class="filename">Python</span><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1"></a><a href="#__codelineno-4-1"><span class="linenos" data-linenos="1 "></span></a><span class="n">map_</span><span class="o">.</span><span class="n">fill_expands</span><span class="p">(</span><span class="n">path_info</span><span class="p">[</span><span class="s2">&quot;expand&quot;</span><span class="p">])</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2"></a><a href="#__codelineno-4-2"><span class="linenos" data-linenos="2 "></span></a><span class="n">vis</span> <span class="o">=</span> <span class="n">Visualizer3D</span><span class="p">()</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3"></a><a href="#__codelineno-4-3"><span class="linenos" data-linenos="3 "></span></a><span class="n">vis</span><span class="o">.</span><span class="n">plot_grid_map</span><span class="p">(</span><span class="n">map_</span><span class="p">)</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4"></a><a href="#__codelineno-4-4"><span class="linenos" data-linenos="4 "></span></a><span class="n">vis</span><span class="o">.</span><span class="n">plot_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5"></a><a href="#__codelineno-4-5"><span class="linenos" data-linenos="5 "></span></a><span class="n">vis</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6"></a><a href="#__codelineno-4-6"><span class="linenos" data-linenos="6 "></span></a><span class="n">vis</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</code></pre></div></p>
+<p><img alt="a_star_3d.png" src="../../../assets/a_star_3d.png" /></p>
+<p>Runnable complete code:</p>
+<div class="language-python highlight"><span class="filename">Python</span><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1"></a><a href="#__codelineno-5-1"><span class="linenos" data-linenos=" 1 "></span></a><span class="kn">import</span> <span class="nn">random</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2"></a><a href="#__codelineno-5-2"><span class="linenos" data-linenos=" 2 "></span></a><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3"></a><a href="#__codelineno-5-3"><span class="linenos" data-linenos=" 3 "></span></a>
+<a id="__codelineno-5-4" name="__codelineno-5-4"></a><a href="#__codelineno-5-4"><span class="linenos" data-linenos=" 4 "></span></a><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5"></a><a href="#__codelineno-5-5"><span class="linenos" data-linenos=" 5 "></span></a><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6"></a><a href="#__codelineno-5-6"><span class="linenos" data-linenos=" 6 "></span></a>
+<a id="__codelineno-5-7" name="__codelineno-5-7"></a><a href="#__codelineno-5-7"><span class="linenos" data-linenos=" 7 "></span></a><span class="kn">from</span> <span class="nn">python_motion_planning.common</span> <span class="kn">import</span> <span class="o">*</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8"></a><a href="#__codelineno-5-8"><span class="linenos" data-linenos=" 8 "></span></a><span class="kn">from</span> <span class="nn">python_motion_planning.path_planner</span> <span class="kn">import</span> <span class="o">*</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9"></a><a href="#__codelineno-5-9"><span class="linenos" data-linenos=" 9 "></span></a><span class="kn">from</span> <span class="nn">python_motion_planning.controller</span> <span class="kn">import</span> <span class="o">*</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10"></a><a href="#__codelineno-5-10"><span class="linenos" data-linenos="10 "></span></a>
+<a id="__codelineno-5-11" name="__codelineno-5-11"></a><a href="#__codelineno-5-11"><span class="linenos" data-linenos="11 "></span></a><span class="n">map_</span> <span class="o">=</span> <span class="n">Grid</span><span class="p">(</span><span class="n">bounds</span><span class="o">=</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">31</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">31</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">31</span><span class="p">]],</span> <span class="n">resolution</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12"></a><a href="#__codelineno-5-12"><span class="linenos" data-linenos="12 "></span></a><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">75</span><span class="p">):</span>
+<a id="__codelineno-5-13" name="__codelineno-5-13"></a><a href="#__codelineno-5-13"><span class="linenos" data-linenos="13 "></span></a>    <span class="n">rd_p</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span>
+<a id="__codelineno-5-14" name="__codelineno-5-14"></a><a href="#__codelineno-5-14"><span class="linenos" data-linenos="14 "></span></a>    <span class="n">map_</span><span class="o">.</span><span class="n">type_map</span><span class="p">[</span><span class="n">rd_p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rd_p</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">:</span><span class="n">rd_p</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> <span class="o">=</span> <span class="n">TYPES</span><span class="o">.</span><span class="n">OBSTACLE</span>
+<a id="__codelineno-5-15" name="__codelineno-5-15"></a><a href="#__codelineno-5-15"><span class="linenos" data-linenos="15 "></span></a><span class="n">map_</span><span class="o">.</span><span class="n">inflate_obstacles</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<a id="__codelineno-5-16" name="__codelineno-5-16"></a><a href="#__codelineno-5-16"><span class="linenos" data-linenos="16 "></span></a>
+<a id="__codelineno-5-17" name="__codelineno-5-17"></a><a href="#__codelineno-5-17"><span class="linenos" data-linenos="17 "></span></a><span class="n">start</span> <span class="o">=</span> <span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<a id="__codelineno-5-18" name="__codelineno-5-18"></a><a href="#__codelineno-5-18"><span class="linenos" data-linenos="18 "></span></a><span class="n">goal</span> <span class="o">=</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">25</span><span class="p">)</span>
+<a id="__codelineno-5-19" name="__codelineno-5-19"></a><a href="#__codelineno-5-19"><span class="linenos" data-linenos="19 "></span></a>
+<a id="__codelineno-5-20" name="__codelineno-5-20"></a><a href="#__codelineno-5-20"><span class="linenos" data-linenos="20 "></span></a><span class="n">map_</span><span class="o">.</span><span class="n">type_map</span><span class="p">[</span><span class="n">start</span><span class="p">]</span> <span class="o">=</span> <span class="n">TYPES</span><span class="o">.</span><span class="n">START</span>
+<a id="__codelineno-5-21" name="__codelineno-5-21"></a><a href="#__codelineno-5-21"><span class="linenos" data-linenos="21 "></span></a><span class="n">map_</span><span class="o">.</span><span class="n">type_map</span><span class="p">[</span><span class="n">goal</span><span class="p">]</span> <span class="o">=</span> <span class="n">TYPES</span><span class="o">.</span><span class="n">GOAL</span>
+<a id="__codelineno-5-22" name="__codelineno-5-22"></a><a href="#__codelineno-5-22"><span class="linenos" data-linenos="22 "></span></a>
+<a id="__codelineno-5-23" name="__codelineno-5-23"></a><a href="#__codelineno-5-23"><span class="linenos" data-linenos="23 "></span></a><span class="n">planner</span> <span class="o">=</span> <span class="n">AStar</span><span class="p">(</span><span class="n">map_</span><span class="o">=</span><span class="n">map_</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="n">goal</span><span class="p">)</span>
+<a id="__codelineno-5-24" name="__codelineno-5-24"></a><a href="#__codelineno-5-24"><span class="linenos" data-linenos="24 "></span></a><span class="n">path</span><span class="p">,</span> <span class="n">path_info</span> <span class="o">=</span> <span class="n">planner</span><span class="o">.</span><span class="n">plan</span><span class="p">()</span>
+<a id="__codelineno-5-25" name="__codelineno-5-25"></a><a href="#__codelineno-5-25"><span class="linenos" data-linenos="25 "></span></a><span class="nb">print</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<a id="__codelineno-5-26" name="__codelineno-5-26"></a><a href="#__codelineno-5-26"><span class="linenos" data-linenos="26 "></span></a><span class="nb">print</span><span class="p">(</span><span class="n">path_info</span><span class="p">)</span>
+<a id="__codelineno-5-27" name="__codelineno-5-27"></a><a href="#__codelineno-5-27"><span class="linenos" data-linenos="27 "></span></a><span class="n">map_</span><span class="o">.</span><span class="n">fill_expands</span><span class="p">(</span><span class="n">path_info</span><span class="p">[</span><span class="s2">&quot;expand&quot;</span><span class="p">])</span>
+<a id="__codelineno-5-28" name="__codelineno-5-28"></a><a href="#__codelineno-5-28"><span class="linenos" data-linenos="28 "></span></a>
+<a id="__codelineno-5-29" name="__codelineno-5-29"></a><a href="#__codelineno-5-29"><span class="linenos" data-linenos="29 "></span></a><span class="n">vis</span> <span class="o">=</span> <span class="n">Visualizer3D</span><span class="p">()</span>
+<a id="__codelineno-5-30" name="__codelineno-5-30"></a><a href="#__codelineno-5-30"><span class="linenos" data-linenos="30 "></span></a><span class="n">vis</span><span class="o">.</span><span class="n">plot_grid_map</span><span class="p">(</span><span class="n">map_</span><span class="p">)</span>
+<a id="__codelineno-5-31" name="__codelineno-5-31"></a><a href="#__codelineno-5-31"><span class="linenos" data-linenos="31 "></span></a><span class="n">vis</span><span class="o">.</span><span class="n">plot_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<a id="__codelineno-5-32" name="__codelineno-5-32"></a><a href="#__codelineno-5-32"><span class="linenos" data-linenos="32 "></span></a><span class="n">vis</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<a id="__codelineno-5-33" name="__codelineno-5-33"></a><a href="#__codelineno-5-33"><span class="linenos" data-linenos="33 "></span></a><span class="n">vis</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</code></pre></div>
+<p>For more graph search planners and their arguments, please refer to API Reference.</p>
 
 
 
@@ -1829,7 +1180,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../path_tracker/rpp/RPP.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: RPP">
+          <a href="../map/grid.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: 2.1.1 - Grid">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1839,20 +1190,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                RPP
+                2.1.1 - Grid
               </div>
             </div>
           </a>
         
         
           
-          <a href="../../path_planner/base_path_planner/BasePathPlanner.html" class="md-footer__link md-footer__link--next" aria-label="Next: BasePathPlanner">
+          <a href="sample_search.html" class="md-footer__link md-footer__link--next" aria-label="Next: 2.2.2 - Sample Search">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                BasePathPlanner
+                2.2.2 - Sample Search
               </div>
             </div>
             <div class="md-footer__button md-icon">

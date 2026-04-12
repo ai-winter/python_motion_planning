@@ -172,4 +172,44 @@
          <loc>http://localhost:8000/v2.0/api/traj_optimizer/curve_generator/pose_based/reeds_shepp/ReedsShepp.html</loc>
          <lastmod>2026-04-12</lastmod>
     </url>
+    <url>
+         <loc>http://localhost:8000/v2.0/tutorials/2d/controller/path_tracker.html</loc>
+         <lastmod>2026-04-12</lastmod>
+    </url>
+    <url>
+         <loc>http://localhost:8000/v2.0/tutorials/2d/map/grid.html</loc>
+         <lastmod>2026-04-12</lastmod>
+    </url>
+    <url>
+         <loc>http://localhost:8000/v2.0/tutorials/2d/path_planner/graph_search.html</loc>
+         <lastmod>2026-04-12</lastmod>
+    </url>
+    <url>
+         <loc>http://localhost:8000/v2.0/tutorials/2d/path_planner/hybrid_search.html</loc>
+         <lastmod>2026-04-12</lastmod>
+    </url>
+    <url>
+         <loc>http://localhost:8000/v2.0/tutorials/2d/path_planner/sample_search.html</loc>
+         <lastmod>2026-04-12</lastmod>
+    </url>
+    <url>
+         <loc>http://localhost:8000/v2.0/tutorials/2d/traj_optimizer/curve_generator.html</loc>
+         <lastmod>2026-04-12</lastmod>
+    </url>
+    <url>
+         <loc>http://localhost:8000/v2.0/tutorials/3d/map/grid.html</loc>
+         <lastmod>2026-04-12</lastmod>
+    </url>
+    <url>
+         <loc>http://localhost:8000/v2.0/tutorials/3d/path_planner/graph_search.html</loc>
+         <lastmod>2026-04-12</lastmod>
+    </url>
+    <url>
+         <loc>http://localhost:8000/v2.0/tutorials/3d/path_planner/hybrid_search.html</loc>
+         <lastmod>2026-04-12</lastmod>
+    </url>
+    <url>
+         <loc>http://localhost:8000/v2.0/tutorials/3d/path_planner/sample_search.html</loc>
+         <lastmod>2026-04-12</lastmod>
+    </url>
 </urlset>
