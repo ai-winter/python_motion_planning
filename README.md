@@ -36,7 +36,8 @@ python_motion_planning
 |   ├─graph_search
 |   ├─sample_search
 |   └─hybrid_search
-└─curve_generator
+└─traj_optimizer
+|   └─curve_generator
 ```
 
 ## Install
@@ -50,7 +51,7 @@ conda activate pmp
 To install the repository, please run the following command in shell.
 
 ```shell
-pip install python-motion-planning==2.0.dev2
+pip install python-motion-planning
 ```
 
 ## Run
