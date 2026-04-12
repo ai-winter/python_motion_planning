@@ -107,6 +107,8 @@ nav:
       - 1.2.3 - Hybrid Search: tutorials/2d/path_planner/hybrid_search.md
     - 1.3 - Controller:
       - 1.3.1 - Path Tracker: tutorials/2d/controller/path_tracker.md
+    - 1.4 - Trajectory Optimizer:
+      - 1.4.1 - Curve Generator: tutorials/2d/traj_optimizer/curve_generator.md
   - 2 - 3D:
     - 2.1 - Map:
       - 2.1.1 - Grid: tutorials/3d/map/grid.md
@@ -171,23 +173,6 @@ nav:
         - RPP: api\controller\path_tracker\rpp\RPP.md
     - random_controller:
       - RandomController: api\controller\random_controller\RandomController.md
-  - curve_generator:
-    - bezier_curve:
-      - Bezier: api\curve_generator\bezier_curve\Bezier.md
-    - bspline_curve:
-      - BSpline: api\curve_generator\bspline_curve\BSpline.md
-    - cubic_spline:
-      - CubicSpline: api\curve_generator\cubic_spline\CubicSpline.md
-    - curve:
-      - Curve: api\curve_generator\curve\Curve.md
-    - dubins_curve:
-      - Dubins: api\curve_generator\dubins_curve\Dubins.md
-    - fem_pos_smooth:
-      - FemPosSmoother: api\curve_generator\fem_pos_smooth\FemPosSmoother.md
-    - polynomial_curve:
-      - Polynomial: api\curve_generator\polynomial_curve\Polynomial.md
-    - reeds_shepp:
-      - ReedsShepp: api\curve_generator\reeds_shepp\ReedsShepp.md
   - path_planner:
     - base_path_planner:
       - BasePathPlanner: api\path_planner\base_path_planner\BasePathPlanner.md
@@ -214,6 +199,24 @@ nav:
         - RRTConnect: api\path_planner\sample_search\rrt_connect\RRTConnect.md
       - rrt_star:
         - RRTStar: api\path_planner\sample_search\rrt_star\RRTStar.md
+  - traj_optimizer:
+    - base_curve_generator:
+      - BaseCurveGenerator: api\traj_optimizer\base_curve_generator\BaseCurveGenerator.md
+    - curve_generator:
+      - point_based:
+        - bspline:
+          - BSpline: api\traj_optimizer\curve_generator\point_based\bspline\BSpline.md
+        - cubic_spline:
+          - CubicSpline: api\traj_optimizer\curve_generator\point_based\cubic_spline\CubicSpline.md
+      - pose_based:
+        - bezier:
+          - Bezier: api\traj_optimizer\curve_generator\pose_based\bezier\Bezier.md
+        - dubins:
+          - Dubins: api\traj_optimizer\curve_generator\pose_based\dubins\Dubins.md
+        - polynomial:
+          - Polynomial: api\traj_optimizer\curve_generator\pose_based\polynomial\Polynomial.md
+        - reeds_shepp:
+          - ReedsShepp: api\traj_optimizer\curve_generator\pose_based\reeds_shepp\ReedsShepp.md
 plugins:
 - search
 - autorefs
