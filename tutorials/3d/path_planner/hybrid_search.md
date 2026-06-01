@@ -15,7 +15,7 @@ Print results:
 Visualize. If you want to visualize the Voronoi candidates, uncomment the first two line code.
 ```python
 # if "voronoi_candidates" in path_info:
-#     map_.type_map[path_info["voronoi_candidates"]] = TYPES.CUSTOM
+#     map_[path_info["voronoi_candidates"]] = TYPES.CUSTOM
 vis = Visualizer3D()
 vis.plot_grid_map(map_)
 vis.plot_path(path)
@@ -41,21 +41,21 @@ from python_motion_planning.controller import *
 map_ = Grid(bounds=[[0, 31], [0, 31], [0, 31]], resolution=1.0)
 for i in range(75):
     rd_p = tuple(np.random.randint(0, 30, size=3))
-    map_.type_map[rd_p[0], rd_p[1], :rd_p[2]] = TYPES.OBSTACLE
+    map_[rd_p[0], rd_p[1], :rd_p[2]] = TYPES.OBSTACLE
 map_.inflate_obstacles(radius=3)
 
 start = (25, 5, 5)
 goal = (5, 25, 25)
 
-map_.type_map[start] = TYPES.START
-map_.type_map[goal] = TYPES.GOAL
+map_[start] = TYPES.START
+map_[goal] = TYPES.GOAL
 
 planner = VoronoiPlanner(map_=map_, start=start, goal=goal, base_planner=AStar)
 path, path_info = planner.plan()
 print(path)
 print(path_info)
 # if "voronoi_candidates" in path_info:
-#     map_.type_map[path_info["voronoi_candidates"]] = TYPES.CUSTOM
+#     map_[path_info["voronoi_candidates"]] = TYPES.CUSTOM
 
 vis = Visualizer3D()
 vis.plot_grid_map(map_)

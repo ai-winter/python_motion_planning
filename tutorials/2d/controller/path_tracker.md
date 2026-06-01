@@ -92,18 +92,18 @@ from python_motion_planning.controller import *
 map_ = Grid(bounds=[[0, 51], [0, 31]])
 
 map_.fill_boundary_with_obstacles()
-map_.type_map[10:21, 15] = TYPES.OBSTACLE
-map_.type_map[20, :15] = TYPES.OBSTACLE
-map_.type_map[30, 15:] = TYPES.OBSTACLE
-map_.type_map[40, :16] = TYPES.OBSTACLE
+map_[10:21, 15] = TYPES.OBSTACLE
+map_[20, :15] = TYPES.OBSTACLE
+map_[30, 15:] = TYPES.OBSTACLE
+map_[40, :16] = TYPES.OBSTACLE
 
 map_.inflate_obstacles(radius=3)
 
 start = (5, 5)
 goal = (45, 25)
 
-map_.type_map[start] = TYPES.START
-map_.type_map[goal] = TYPES.GOAL
+map_[start] = TYPES.START
+map_[goal] = TYPES.GOAL
 
 planner = AStar(map_=map_, start=start, goal=goal)
 path, path_info = planner.plan()
@@ -159,18 +159,18 @@ from python_motion_planning.controller import *
 map_ = Grid(bounds=[[0, 51], [0, 31]])
 
 map_.fill_boundary_with_obstacles()
-map_.type_map[10:21, 15] = TYPES.OBSTACLE
-map_.type_map[20, :15] = TYPES.OBSTACLE
-map_.type_map[30, 15:] = TYPES.OBSTACLE
-map_.type_map[40, :16] = TYPES.OBSTACLE
+map_[10:21, 15] = TYPES.OBSTACLE
+map_[20, :15] = TYPES.OBSTACLE
+map_[30, 15:] = TYPES.OBSTACLE
+map_[40, :16] = TYPES.OBSTACLE
 
 map_.inflate_obstacles(radius=3)
 
 start = (5, 5)
 goal = (45, 25)
 
-map_.type_map[start] = TYPES.START
-map_.type_map[goal] = TYPES.GOAL
+map_[start] = TYPES.START
+map_[goal] = TYPES.GOAL
 
 planner = AStar(map_=map_, start=start, goal=goal)
 path, path_info = planner.plan()

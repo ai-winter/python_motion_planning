@@ -41,18 +41,18 @@ from python_motion_planning.controller import *
 map_ = Grid(bounds=[[0, 51], [0, 31]])
 
 map_.fill_boundary_with_obstacles()
-map_.type_map[10:21, 15] = TYPES.OBSTACLE
-map_.type_map[20, :15] = TYPES.OBSTACLE
-map_.type_map[30, 15:] = TYPES.OBSTACLE
-map_.type_map[40, :16] = TYPES.OBSTACLE
+map_[10:21, 15] = TYPES.OBSTACLE
+map_[20, :15] = TYPES.OBSTACLE
+map_[30, 15:] = TYPES.OBSTACLE
+map_[40, :16] = TYPES.OBSTACLE
 
 map_.inflate_obstacles(radius=3)
 
 start = (5, 5)
 goal = (45, 25)
 
-map_.type_map[start] = TYPES.START
-map_.type_map[goal] = TYPES.GOAL
+map_[start] = TYPES.START
+map_[goal] = TYPES.GOAL
 
 planner = RRT(map_=map_, start=start, goal=goal)
 path, path_info = planner.plan()
@@ -84,10 +84,10 @@ Print results:
 For asymptoticaly optimal sample search planners like **RRT\***, you can pass a callable function to argument `stop_func` to determine when to stop sampling. For example:
 
 ```python
-planner = RRTStar(map_=map_, start=start, goal=goal, stop_func=lambda cur, fss, mss: (cur >= fss * 10 if fss is not None else False) or (cur >= mss))
+planner = RRTStar(map_=map_, start=start, goal=goal, stop_func=lambda current_step, first_success_step, max_step: (current_step >= first_success_step * 10 if first_success_step is not None else False) or (current_step >= max_step))
 ```
 
-For the arguments of `stop_func`, `cur` means the **cur**rent step iteration, `fss` means the **f**irst **s**uccessful **s**tep to find the feasible path, and `mss` means the **m**aximum **s**ampling **s**tep number determined by `max_sample_step` argument. This lambda function means to stop sampling when the number of sampling steps reaches 10 times the number of steps successfully found a feasible path for the first time.
+For the arguments of `stop_func`, `current_step` means the current step iteration, `first_success_step` means the first successful step to find the feasible path, and `max_step` means the maximum sampling step number determined by `max_sample_step` argument. This lambda function means to stop sampling when the number of sampling steps reaches 10 times the number of steps successfully found a feasible path for the first time.
 
 ![rrt_star_2d.svg](../../../assets/rrt_star_2d.svg)
 

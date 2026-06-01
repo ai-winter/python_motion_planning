@@ -7,8 +7,8 @@ goal = (5, 25, 25)
 
 Add the start and goal points to the map. This is to help the visualization of the start and goal points, and to clear obstacles at corresponding points to prevent planning failures.
 ```python
-map_.type_map[start] = TYPES.START
-map_.type_map[goal] = TYPES.GOAL
+map_[start] = TYPES.START
+map_[goal] = TYPES.GOAL
 ```
 
 Create the path-planner and plan the path. Here, the A\* algorithm is taken as an example. The planning function returns the path in map frame along with detailed planning information, including whether it was successful, the length of the path, the cost of the path, expanded nodes, and so on.
@@ -54,14 +54,14 @@ from python_motion_planning.controller import *
 map_ = Grid(bounds=[[0, 31], [0, 31], [0, 31]], resolution=1.0)
 for i in range(75):
     rd_p = tuple(np.random.randint(0, 30, size=3))
-    map_.type_map[rd_p[0], rd_p[1], :rd_p[2]] = TYPES.OBSTACLE
+    map_[rd_p[0], rd_p[1], :rd_p[2]] = TYPES.OBSTACLE
 map_.inflate_obstacles(radius=3)
 
 start = (25, 5, 5)
 goal = (5, 25, 25)
 
-map_.type_map[start] = TYPES.START
-map_.type_map[goal] = TYPES.GOAL
+map_[start] = TYPES.START
+map_[goal] = TYPES.GOAL
 
 planner = AStar(map_=map_, start=start, goal=goal)
 path, path_info = planner.plan()

@@ -40,14 +40,14 @@ from python_motion_planning.controller import *
 map_ = Grid(bounds=[[0, 31], [0, 31], [0, 31]], resolution=1.0)
 for i in range(75):
     rd_p = tuple(np.random.randint(0, 30, size=3))
-    map_.type_map[rd_p[0], rd_p[1], :rd_p[2]] = TYPES.OBSTACLE
+    map_[rd_p[0], rd_p[1], :rd_p[2]] = TYPES.OBSTACLE
 map_.inflate_obstacles(radius=3)
 
 start = (25, 5, 5)
 goal = (5, 25, 25)
 
-map_.type_map[start] = TYPES.START
-map_.type_map[goal] = TYPES.GOAL
+map_[start] = TYPES.START
+map_[goal] = TYPES.GOAL
 
 planner = RRT(map_=map_, start=start, goal=goal)
 path, path_info = planner.plan()
@@ -78,10 +78,10 @@ Print results:
 For asymptoticaly optimal sample search planners like **RRT\***, you can pass a callable function to argument `stop_func` to determine when to stop sampling. For example:
 
 ```python
-planner = RRTStar(map_=map_, start=start, goal=goal, stop_func=lambda cur, fss, mss: (cur >= fss * 10 if fss is not None else False) or (cur >= mss))
+planner = RRTStar(map_=map_, start=start, goal=goal, stop_func=lambda current_step, first_success_step, max_step: (current_step >= first_success_step * 10 if first_success_step is not None else False) or (current_step >= max_step))
 ```
 
-For the arguments of `stop_func`, `cur` means the **cur**rent step iteration, `fss` means the **f**irst **s**uccessful **s**tep to find the feasible path, and `mss` means the **m**aximum **s**ampling **s**tep number determined by `max_sample_step` argument. This lambda function means to stop sampling when the number of sampling steps reaches 10 times the number of steps successfully found a feasible path for the first time.
+For the arguments of `stop_func`, `current_step` means the current step iteration, `first_success_step` means the first successful step to find the feasible path, and `max_step` means the maximum sampling step number determined by `max_sample_step` argument. This lambda function means to stop sampling when the number of sampling steps reaches 10 times the number of steps successfully found a feasible path for the first time.
 
 ![rrt_star_3d.png](../../../assets/rrt_star_3d.png)
 

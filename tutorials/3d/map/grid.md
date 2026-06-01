@@ -28,7 +28,7 @@ After creating the grid map, we add some obstacles to it for testing the path pl
 map_ = Grid(bounds=[[0, 31], [0, 31], [0, 31]], resolution=1.0)
 for i in range(75):     # 75 random obstacles
     rd_p = tuple(np.random.randint(0, 30, size=3))
-    map_.type_map[rd_p[0], rd_p[1], :rd_p[2]] = TYPES.OBSTACLE
+    map_[rd_p[0], rd_p[1], :rd_p[2]] = TYPES.OBSTACLE
 map_.inflate_obstacles(radius=3)
 ```
 
@@ -59,7 +59,7 @@ from python_motion_planning.controller import *
 map_ = Grid(bounds=[[0, 31], [0, 31], [0, 31]], resolution=1.0)
 for i in range(75):
     rd_p = tuple(np.random.randint(0, 30, size=3))
-    map_.type_map[rd_p[0], rd_p[1], :rd_p[2]] = TYPES.OBSTACLE
+    map_[rd_p[0], rd_p[1], :rd_p[2]] = TYPES.OBSTACLE
 map_.inflate_obstacles(radius=3)
 
 vis = Visualizer3D()

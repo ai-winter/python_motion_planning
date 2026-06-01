@@ -46,7 +46,7 @@ class RRTStar(RRT):
         >>> print(path_info['success'])
         True
         
-        >>> planner = RRTStar(map_=map_, start=(5, 5), goal=(10, 10), max_sample_step=100000, stop_func=lambda cur, fss, mss: (cur >= fss * 10 if fss is not None else False) or (cur >= mss))
+        >>> planner = RRTStar(map_=map_, start=(5, 5), goal=(10, 10), max_sample_step=100000, stop_func=lambda current_step, first_success_step, max_step: (first_success_step is not None) or (current_step >= max_step))
         >>> path, path_info = planner.plan()
         >>> print(path_info['success'])
         True
@@ -55,7 +55,7 @@ class RRTStar(RRT):
     def __init__(self, *args,
                  rewire_radius: float = None,
                  gamma: float = 50.0,
-                 stop_func: callable = lambda cur, fs, sn: (fs is not None) or (cur >= sn),
+                 stop_func: callable = lambda current_step, first_success_step, max_step: (first_success_step is not None) or (current_step >= max_step),
                  propagate_cost_to_children: bool = True,
                  **kwargs) -> None:
         super().__init__(*args, **kwargs)
