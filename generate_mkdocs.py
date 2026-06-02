@@ -89,37 +89,38 @@ def generate_api_docs(root_folder: str, output_folder: str, index_file: str, mkd
 
     # Process tutorials folder only if no existing Tutorials nav found
     tutorials_folder = 'tutorials'
-    if existing_tutorials_nav is None and os.path.exists(tutorials_folder):
+    if os.path.exists(tutorials_folder):
         # Copy tutorials folder to docs
         tutorials_output = os.path.join(output_folder, 'tutorials')
         if os.path.exists(tutorials_output):
             shutil.rmtree(tutorials_output)
         shutil.copytree(tutorials_folder, tutorials_output)
-        
-        # Build tutorials navigation structure
-        for root, dirs, files in os.walk(tutorials_folder):
-            relative_root = os.path.relpath(root, tutorials_folder)
-            for file in files:
-                if file.endswith('.md'):
-                    file_path = os.path.join(root, file)
-                    relative_path = os.path.relpath(file_path, tutorials_folder)
-                    output_path = os.path.join('tutorials', relative_path).replace('\\', '/')
-                    
-                    # Build nested structure
-                    current_nav = tutorials_structure
-                    parts = relative_path.split(os.sep)
-                    
-                    # Handle nested directories
-                    for part in parts[:-1]:  # All parts except the filename
-                        if part:
-                            current_nav = current_nav.setdefault(part, {})
-                    
-                    # Add the markdown file
-                    file_name_without_ext = os.path.splitext(parts[-1])[0]
-                    if isinstance(current_nav, dict):
-                        current_nav[file_name_without_ext] = output_path
-                    else:
-                        current_nav = {file_name_without_ext: output_path}
+
+        # Build tutorials navigation structure only if no existing Tutorials nav found
+        if existing_tutorials_nav is None:
+            for root, dirs, files in os.walk(tutorials_folder):
+                relative_root = os.path.relpath(root, tutorials_folder)
+                for file in files:
+                    if file.endswith('.md'):
+                        file_path = os.path.join(root, file)
+                        relative_path = os.path.relpath(file_path, tutorials_folder)
+                        output_path = os.path.join('tutorials', relative_path).replace('\\', '/')
+
+                        # Build nested structure
+                        current_nav = tutorials_structure
+                        parts = relative_path.split(os.sep)
+
+                        # Handle nested directories
+                        for part in parts[:-1]:  # All parts except the filename
+                            if part:
+                                current_nav = current_nav.setdefault(part, {})
+
+                        # Add the markdown file
+                        file_name_without_ext = os.path.splitext(parts[-1])[0]
+                        if isinstance(current_nav, dict):
+                            current_nav[file_name_without_ext] = output_path
+                        else:
+                            current_nav = {file_name_without_ext: output_path}
 
     # Copy assets folder if exists
     if os.path.exists(ex_assets_folder):
