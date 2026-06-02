@@ -1,18 +1,309 @@
 """
 @file: grid.py
 @author: Wu Maojia
-@update: 2025.12.20
+@update: 2026.6.2
 """
 from itertools import product
 from typing import Iterable, Union, Tuple, Callable, List, Dict
+import math
 import time
 
 import numpy as np
 from scipy import ndimage
 
+try:
+    from numba import njit as _numba_njit
+except Exception:  # pragma: no cover - keeps import compatibility without numba.
+    _numba_njit = None
+
 from python_motion_planning.common.env.map.base_map import BaseMap
 from python_motion_planning.common.env import Node, TYPES
 from python_motion_planning.common.utils.geometry import Geometry
+
+
+def _njit(*args, **kwargs):
+    if _numba_njit is None:
+        if args and callable(args[0]):
+            return args[0]
+
+        def decorator(func):
+            return func
+
+        return decorator
+
+    return _numba_njit(*args, **kwargs)
+
+
+@_njit(cache=True)
+def _grid_flat_index(point: np.ndarray, shape: np.ndarray) -> int:
+    idx = 0
+    for d in range(shape.size):
+        idx = idx * shape[d] + point[d]
+    return idx
+
+
+@_njit(cache=True)
+def _grid_within_bounds(point: np.ndarray, shape: np.ndarray) -> bool:
+    for d in range(shape.size):
+        if point[d] < 0 or point[d] >= shape[d]:
+            return False
+    return True
+
+
+@_njit(cache=True)
+def _grid_is_expandable(
+    point: np.ndarray,
+    src_point: np.ndarray,
+    has_src_point: bool,
+    shape: np.ndarray,
+    type_map: np.ndarray,
+    esdf: np.ndarray,
+    obstacle_type: int,
+    inflation_type: int,
+) -> bool:
+    if not _grid_within_bounds(point, shape):
+        return False
+
+    point_idx = _grid_flat_index(point, shape)
+    if has_src_point:
+        src_idx = _grid_flat_index(src_point, shape)
+        if type_map[src_idx] == inflation_type and esdf[point_idx] >= esdf[src_idx]:
+            return True
+
+    point_type = type_map[point_idx]
+    return point_type != obstacle_type and point_type != inflation_type
+
+
+@_njit(cache=True)
+def _grid_distance(p1: np.ndarray, p2: np.ndarray) -> float:
+    dist_square = 0.0
+    for d in range(p1.size):
+        diff = p1[d] - p2[d]
+        dist_square += diff * diff
+    return math.sqrt(dist_square)
+
+
+@_njit(cache=True)
+def _grid_map_to_world(point: np.ndarray, bounds: np.ndarray, resolution: float) -> np.ndarray:
+    point_world = np.empty(point.size, dtype=np.float64)
+    for d in range(point.size):
+        point_world[d] = (point[d] + 0.5) * resolution + bounds[d, 0]
+    return point_world
+
+
+@_njit(cache=True)
+def _grid_point_float_to_int(point: np.ndarray, shape: np.ndarray) -> np.ndarray:
+    point_int = np.empty(shape.size, dtype=np.int64)
+    for d in range(shape.size):
+        value = int(round(point[d]))
+        if value < 0:
+            value = 0
+        elif value >= shape[d]:
+            value = shape[d] - 1
+        point_int[d] = value
+    return point_int
+
+
+@_njit(cache=True)
+def _grid_world_to_map_float(point: np.ndarray, bounds: np.ndarray, resolution: float) -> np.ndarray:
+    point_map = np.empty(point.size, dtype=np.float64)
+    inv_resolution = 1.0 / resolution
+    for d in range(point.size):
+        point_map[d] = (point[d] - bounds[d, 0]) * inv_resolution - 0.5
+    return point_map
+
+
+@_njit(cache=True)
+def _grid_world_to_map_int(
+    point: np.ndarray,
+    bounds: np.ndarray,
+    resolution: float,
+    shape: np.ndarray,
+) -> np.ndarray:
+    point_map = np.empty(shape.size, dtype=np.int64)
+    inv_resolution = 1.0 / resolution
+    for d in range(shape.size):
+        value = int(round((point[d] - bounds[d, 0]) * inv_resolution - 0.5))
+        if value < 0:
+            value = 0
+        elif value >= shape[d]:
+            value = shape[d] - 1
+        point_map[d] = value
+    return point_map
+
+
+@_njit(cache=True)
+def _grid_line_of_sight(p1: np.ndarray, p2: np.ndarray) -> np.ndarray:
+    dim = p1.size
+    delta = np.empty(dim, dtype=np.int64)
+    abs_delta = np.empty(dim, dtype=np.int64)
+    delta2 = np.empty(dim, dtype=np.int64)
+
+    primary_axis = 0
+    max_delta = 0
+    for d in range(dim):
+        delta[d] = p2[d] - p1[d]
+        abs_delta[d] = abs(delta[d])
+        delta2[d] = 2 * abs_delta[d]
+        if abs_delta[d] > max_delta:
+            max_delta = abs_delta[d]
+            primary_axis = d
+
+    primary_step = 1 if delta[primary_axis] > 0 else -1
+    steps = abs_delta[primary_axis]
+    result = np.empty((steps + 1, dim), dtype=np.int64)
+    current = p1.copy()
+
+    for d in range(dim):
+        result[0, d] = current[d]
+
+    error = np.zeros(dim, dtype=np.int64)
+    for i in range(1, steps + 1):
+        current[primary_axis] += primary_step
+
+        for d in range(dim):
+            if d == primary_axis:
+                continue
+
+            error[d] += delta2[d]
+            if error[d] > abs_delta[primary_axis]:
+                current[d] += 1 if delta[d] > 0 else -1
+                error[d] -= delta2[primary_axis]
+
+        for d in range(dim):
+            result[i, d] = current[d]
+
+    return result
+
+
+@_njit(cache=True)
+def _grid_in_collision(
+    p1: np.ndarray,
+    p2: np.ndarray,
+    shape: np.ndarray,
+    type_map: np.ndarray,
+    esdf: np.ndarray,
+    obstacle_type: int,
+    inflation_type: int,
+) -> bool:
+    if not _grid_is_expandable(p1, p1, False, shape, type_map, esdf, obstacle_type, inflation_type):
+        return True
+    if not _grid_is_expandable(p2, p1, True, shape, type_map, esdf, obstacle_type, inflation_type):
+        return True
+
+    dim = p1.size
+    same_point = True
+    for d in range(dim):
+        if p1[d] != p2[d]:
+            same_point = False
+            break
+    if same_point:
+        return False
+
+    delta = np.empty(dim, dtype=np.int64)
+    abs_delta = np.empty(dim, dtype=np.int64)
+    delta2 = np.empty(dim, dtype=np.int64)
+
+    primary_axis = 0
+    max_delta = 0
+    for d in range(dim):
+        delta[d] = p2[d] - p1[d]
+        abs_delta[d] = abs(delta[d])
+        delta2[d] = 2 * abs_delta[d]
+        if abs_delta[d] > max_delta:
+            max_delta = abs_delta[d]
+            primary_axis = d
+
+    primary_step = 1 if delta[primary_axis] > 0 else -1
+    steps = abs_delta[primary_axis]
+    current = p1.copy()
+    last_point = np.empty(dim, dtype=np.int64)
+    error = np.zeros(dim, dtype=np.int64)
+
+    for _ in range(steps):
+        for d in range(dim):
+            last_point[d] = current[d]
+
+        current[primary_axis] += primary_step
+
+        for d in range(dim):
+            if d == primary_axis:
+                continue
+
+            error[d] += delta2[d]
+            if error[d] > abs_delta[primary_axis]:
+                current[d] += 1 if delta[d] > 0 else -1
+                error[d] -= delta2[primary_axis]
+
+        if not _grid_is_expandable(current, last_point, True, shape, type_map, esdf, obstacle_type, inflation_type):
+            return True
+
+    return False
+
+
+@_njit(cache=True)
+def _grid_neighbor_positions_and_mask(
+    current: np.ndarray,
+    offsets: np.ndarray,
+    shape: np.ndarray,
+    type_map: np.ndarray,
+    esdf: np.ndarray,
+    obstacle_type: int,
+    inflation_type: int,
+) -> Tuple[np.ndarray, np.ndarray]:
+    node_num = offsets.shape[0]
+    dim = offsets.shape[1]
+    positions = np.empty((node_num, dim), dtype=np.int64)
+    mask = np.zeros(node_num, dtype=np.bool_)
+    neighbor = np.empty(dim, dtype=np.int64)
+
+    for i in range(node_num):
+        for d in range(dim):
+            neighbor[d] = current[d] + offsets[i, d]
+            positions[i, d] = neighbor[d]
+
+        mask[i] = _grid_is_expandable(neighbor, current, True, shape, type_map, esdf, obstacle_type, inflation_type)
+
+    return positions, mask
+
+
+@_njit(cache=True)
+def _grid_path_map_to_world(points: np.ndarray, bounds: np.ndarray, resolution: float) -> np.ndarray:
+    path_world = np.empty((points.shape[0], points.shape[1]), dtype=np.float64)
+    for i in range(points.shape[0]):
+        for d in range(points.shape[1]):
+            path_world[i, d] = (points[i, d] + 0.5) * resolution + bounds[d, 0]
+    return path_world
+
+
+@_njit(cache=True)
+def _grid_path_world_to_map_float(points: np.ndarray, bounds: np.ndarray, resolution: float) -> np.ndarray:
+    path_map = np.empty((points.shape[0], points.shape[1]), dtype=np.float64)
+    inv_resolution = 1.0 / resolution
+    for i in range(points.shape[0]):
+        for d in range(points.shape[1]):
+            path_map[i, d] = (points[i, d] - bounds[d, 0]) * inv_resolution - 0.5
+    return path_map
+
+
+@_njit(cache=True)
+def _grid_path_world_to_map_int(
+    points: np.ndarray,
+    bounds: np.ndarray,
+    resolution: float,
+    shape: np.ndarray,
+) -> np.ndarray:
+    path_map = np.empty((points.shape[0], shape.size), dtype=np.int64)
+    inv_resolution = 1.0 / resolution
+    for i in range(points.shape[0]):
+        for d in range(shape.size):
+            value = int(round((points[i, d] - bounds[d, 0]) * inv_resolution - 0.5))
+            if value < 0:
+                value = 0
+            elif value >= shape[d]:
+                value = shape[d] - 1
+            path_map[i, d] = value
+    return path_map
 
 
 class GridTypeMap:
@@ -180,6 +471,7 @@ class Grid(BaseMap):
             else:
                 raise ValueError("Type map must be GridTypeMap or numpy.ndarray instead of {}".format(type(type_map)))
 
+        self._shape_array = np.asarray(self.shape, dtype=np.int64)
         self._precompute_offsets()
         
         self._esdf = np.zeros(self.shape, dtype=np.float32)
@@ -221,6 +513,12 @@ class Grid(BaseMap):
     def __setitem__(self, idx, value):
         self.type_map[idx] = value
 
+    def _type_map_flat(self) -> np.ndarray:
+        return np.ravel(self.type_map.data)
+
+    def _esdf_flat(self) -> np.ndarray:
+        return np.ravel(self._esdf)
+
     def map_to_world(self, point: tuple) -> Tuple[float, ...]:
         """
         Convert map coordinates to world coordinates.
@@ -234,7 +532,8 @@ class Grid(BaseMap):
         if len(point) != self.dim:
             raise ValueError("Point dimension does not match map dimension.")
 
-        return tuple((x + 0.5) * self.resolution + float(self.bounds[i, 0]) for i, x in enumerate(point))
+        point_world = _grid_map_to_world(np.asarray(point, dtype=np.float64), self.bounds, self.resolution)
+        return tuple(float(x) for x in point_world)
 
     def world_to_map(self, point: Tuple[float, ...], discrete: bool = True) -> tuple:
         """
@@ -250,10 +549,13 @@ class Grid(BaseMap):
         if len(point) != self.dim:
             raise ValueError("Point dimension does not match map dimension.")
         
-        point_map = tuple((x - float(self.bounds[i, 0])) * (1.0 / self.resolution) - 0.5 for i, x in enumerate(point))
+        point_array = np.asarray(point, dtype=np.float64)
         if discrete:
-            point_map = self.point_float_to_int(point_map)
-        return point_map
+            point_map = _grid_world_to_map_int(point_array, self.bounds, self.resolution, self._shape_array)
+            return tuple(int(x) for x in point_map)
+        else:
+            point_map = _grid_world_to_map_float(point_array, self.bounds, self.resolution)
+            return tuple(float(x) for x in point_map)
 
     def get_distance(self, p1: Tuple[int, int], p2: Tuple[int, int]) -> float:
         """
@@ -266,7 +568,9 @@ class Grid(BaseMap):
         Returns:
             dist: Distance between two points.
         """
-        return Geometry.dist(p1, p2, type='Euclidean')
+        if len(p1) != len(p2):
+            raise ValueError("Dimension mismatch")
+        return _grid_distance(np.asarray(p1, dtype=np.float64), np.asarray(p2, dtype=np.float64))
 
     def within_bounds(self, point: Tuple[int, ...]) -> bool:
         """
@@ -282,13 +586,7 @@ class Grid(BaseMap):
         #     raise ValueError("Point dimension does not match map dimension.")
 
         # return all(0 <= point[i] < self.shape[i] for i in range(self.dim))
-        dim = self.dim
-        shape = self.shape
-        
-        for i in range(dim):
-            if not (0 <= point[i] < shape[i]):
-                return False
-        return True
+        return _grid_within_bounds(np.asarray(point, dtype=np.int64), self._shape_array)
 
     def is_expandable(self, point: Tuple[int, ...], src_point: Tuple[int, ...] = None) -> bool:
         """
@@ -301,13 +599,20 @@ class Grid(BaseMap):
         Returns:
             expandable: True if the point is expandable, False otherwise.
         """
-        if not self.within_bounds(point):
-            return False
-        if src_point is not None:
-            if self.type_map[src_point] == TYPES.INFLATION and self._esdf[point] >= self._esdf[src_point]:
-                return True
-                
-        return not self.type_map[point] == TYPES.OBSTACLE and not self.type_map[point] == TYPES.INFLATION
+        point_array = np.asarray(point, dtype=np.int64)
+        has_src_point = src_point is not None
+        src_array = point_array if src_point is None else np.asarray(src_point, dtype=np.int64)
+
+        return _grid_is_expandable(
+            point_array,
+            src_array,
+            has_src_point,
+            self._shape_array,
+            self._type_map_flat(),
+            self._esdf_flat(),
+            TYPES.OBSTACLE,
+            TYPES.INFLATION,
+        )
 
     def get_neighbors(self, 
                     node: Node, 
@@ -326,18 +631,22 @@ class Grid(BaseMap):
         if node.dim != self.dim:
             raise ValueError("Node dimension does not match map dimension.")
         
-        offsets = self._diagonal_offsets if diagonal else self._orthogonal_offsets
-        
-        # Generate all neighbor positions
-        # neighbor_positions = current_pos + offsets
-        neighbors = [node + offset for offset in offsets]
-        filtered_neighbors = []
+        offsets = self._diagonal_offsets_array if diagonal else self._orthogonal_offsets_array
+        positions, mask = _grid_neighbor_positions_and_mask(
+            np.asarray(node.current, dtype=np.int64),
+            offsets,
+            self._shape_array,
+            self._type_map_flat(),
+            self._esdf_flat(),
+            TYPES.OBSTACLE,
+            TYPES.INFLATION,
+        )
 
-        for neighbor in neighbors:
-            if self.is_expandable(neighbor.current, node.current):
-                filtered_neighbors.append(neighbor)
-        
-        return filtered_neighbors
+        return [
+            Node(tuple(int(x) for x in positions[i]), node.current, node.g, node.h)
+            for i in range(positions.shape[0])
+            if mask[i]
+        ]
 
     def line_of_sight(self, p1: Tuple[int, ...], p2: Tuple[int, ...]) -> List[Tuple[int, ...]]:
         """
@@ -350,45 +659,13 @@ class Grid(BaseMap):
         Returns:
             points: List of point on the line of sight.
         """
-        p1 = np.array(p1)
-        p2 = np.array(p2)
+        p1_array = np.asarray(p1, dtype=np.int64)
+        p2_array = np.asarray(p2, dtype=np.int64)
+        if p1_array.shape != p2_array.shape:
+            p2_array - p1_array
 
-        dim = len(p1)
-        delta = p2 - p1
-        abs_delta = np.abs(delta)
-        
-        # Determine the main direction axis (the dimension with the greatest change)
-        primary_axis = np.argmax(abs_delta)
-        primary_step = 1 if delta[primary_axis] > 0 else -1
-        
-        # Initialize the error variable
-        error = np.zeros(dim, dtype=int)
-        delta2 = 2 * abs_delta
-        
-        # Calculate the number of steps and initialize the current point
-        steps = abs_delta[primary_axis]
-        current = p1
-        
-        # Allocate the result array
-        result = []
-        result.append(tuple(int(x) for x in current))
-        
-        for i in range(1, steps + 1):
-            current[primary_axis] += primary_step
-            
-            # Update the error for the primary dimension
-            for d in range(dim):
-                if d == primary_axis:
-                    continue
-                    
-                error[d] += delta2[d]
-                if error[d] > abs_delta[primary_axis]:
-                    current[d] += 1 if delta[d] > 0 else -1
-                    error[d] -= delta2[primary_axis]
-            
-            result.append(tuple(int(x) for x in current))
-
-        return result
+        points = _grid_line_of_sight(p1_array, p2_array)
+        return [tuple(int(x) for x in points[i]) for i in range(points.shape[0])]
 
     def in_collision(self, p1: Tuple[int, ...], p2: Tuple[int, ...]) -> bool:
         """
@@ -401,51 +678,20 @@ class Grid(BaseMap):
         Returns:
             in_collision: True if the line of sight is in collision, False otherwise.
         """
-        if not self.is_expandable(p1) or not self.is_expandable(p2, p1):
-            return True
+        p1_array = np.asarray(p1, dtype=np.int64)
+        p2_array = np.asarray(p2, dtype=np.int64)
+        if p1_array.shape != p2_array.shape:
+            p2_array - p1_array
 
-        # Corner Case: Start and end points are the same
-        if p1 == p2:
-            return False
-        
-        p1 = np.array(p1)
-        p2 = np.array(p2)
-
-        # Calculate delta and absolute delta
-        delta = p2 - p1
-        abs_delta = np.abs(delta)
-        
-        # Determine the primary axis (the dimension with the greatest change)
-        primary_axis = np.argmax(abs_delta)
-        primary_step = 1 if delta[primary_axis] > 0 else -1
-        
-        # Initialize the error variable
-        error = np.zeros_like(delta, dtype=np.int32)
-        delta2 = 2 * abs_delta
-        
-        # calculate the number of steps and initialize the current point
-        steps = abs_delta[primary_axis]
-        current = p1
-        
-        for _ in range(steps):
-            last_point = current.copy()
-            current[primary_axis] += primary_step
-            
-            # Update the error for the primary dimension
-            for d in range(len(delta)):
-                if d == primary_axis:
-                    continue
-                    
-                error[d] += delta2[d]
-                if error[d] > abs_delta[primary_axis]:
-                    current[d] += 1 if delta[d] > 0 else -1
-                    error[d] -= delta2[primary_axis]
-
-            # Check the current point
-            if not self.is_expandable(tuple(current), tuple(last_point)):
-                return True
-        
-        return False
+        return _grid_in_collision(
+            p1_array,
+            p2_array,
+            self._shape_array,
+            self._type_map_flat(),
+            self._esdf_flat(),
+            TYPES.OBSTACLE,
+            TYPES.INFLATION,
+        )
 
     def fill_boundary_with_obstacles(self) -> None:
         """
@@ -514,7 +760,16 @@ class Grid(BaseMap):
         Returns:
             path: a list of world coordinates
         """
-        return [self.map_to_world(p) for p in path]
+        path = list(path)
+        if not path:
+            return []
+
+        points = np.asarray(path, dtype=np.float64)
+        if points.ndim != 2 or points.shape[1] != self.dim:
+            raise ValueError("Point dimension does not match map dimension.")
+
+        path_world = _grid_path_map_to_world(points, self.bounds, self.resolution)
+        return [tuple(float(x) for x in path_world[i]) for i in range(path_world.shape[0])]
 
     def path_world_to_map(self, path: List[Tuple[float, ...]], discrete: bool = True) -> List[tuple]:
         """
@@ -527,7 +782,20 @@ class Grid(BaseMap):
         Returns:
             path: a list of map coordinates
         """
-        return [self.world_to_map(p, discrete) for p in path]
+        path = list(path)
+        if not path:
+            return []
+
+        points = np.asarray(path, dtype=np.float64)
+        if points.ndim != 2 or points.shape[1] != self.dim:
+            raise ValueError("Point dimension does not match map dimension.")
+
+        if discrete:
+            path_map = _grid_path_world_to_map_int(points, self.bounds, self.resolution, self._shape_array)
+            return [tuple(int(x) for x in path_map[i]) for i in range(path_map.shape[0])]
+        else:
+            path_map = _grid_path_world_to_map_float(points, self.bounds, self.resolution)
+            return [tuple(float(x) for x in path_map[i]) for i in range(path_map.shape[0])]
 
     def point_float_to_int(self, point: Tuple[float, ...]) -> Tuple[int, ...]:
         """
@@ -539,24 +807,21 @@ class Grid(BaseMap):
         Returns:
             point: a point in integer coordinates
         """
-        point_int = []
-        for d in range(self.dim):
-            point_int.append(max(0, min(self.shape[d] - 1, int(round(point[d])))))
-        point_int = tuple(point_int)
-        return point_int
+        point_int = _grid_point_float_to_int(np.asarray(point, dtype=np.float64), self._shape_array)
+        return tuple(int(x) for x in point_int)
 
     def _precompute_offsets(self):
         # Generate all possible offsets (-1, 0, +1) in each dimension
-        self._diagonal_offsets = np.array(np.meshgrid(*[[-1, 0, 1]]*self.dim), dtype=self.dtype).T.reshape(-1, self.dim)
+        self._diagonal_offsets_array = np.array(np.meshgrid(*[[-1, 0, 1]]*self.dim), dtype=np.int64).T.reshape(-1, self.dim)
         # Remove the zero offset (current node itself)
-        self._diagonal_offsets = self._diagonal_offsets[np.any(self._diagonal_offsets != 0, axis=1)]
+        self._diagonal_offsets_array = self._diagonal_offsets_array[np.any(self._diagonal_offsets_array != 0, axis=1)]
         # self._diagonal_offsets = [Node((offset.tolist(), dtype=self.dtype)) for offset in self._diagonal_offsets]
-        self._diagonal_offsets = [Node(tuple(offset.tolist())) for offset in self._diagonal_offsets]
+        self._diagonal_offsets = [Node(tuple(offset.tolist())) for offset in self._diagonal_offsets_array]
 
         # Generate only orthogonal offsets (one dimension changes by ±1)
-        self._orthogonal_offsets = np.zeros((2*self.dim, self.dim), dtype=self.dtype)
+        self._orthogonal_offsets_array = np.zeros((2*self.dim, self.dim), dtype=np.int64)
         for d in range(self.dim):
-            self._orthogonal_offsets[2*d, d] = 1
-            self._orthogonal_offsets[2*d+1, d] = -1
+            self._orthogonal_offsets_array[2*d, d] = 1
+            self._orthogonal_offsets_array[2*d+1, d] = -1
         # self._orthogonal_offsets = [Node((offset.tolist(), dtype=self.dtype)) for offset in self._orthogonal_offsets]
-        self._orthogonal_offsets = [Node(tuple(offset.tolist())) for offset in self._orthogonal_offsets]
+        self._orthogonal_offsets = [Node(tuple(offset.tolist())) for offset in self._orthogonal_offsets_array]
