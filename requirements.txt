@@ -10,9 +10,9 @@ faiss-cpu   # >=1.13.1
 pyvista     # >=0.46.4
 pyvistaqt   # >=0.11.3
 
-torch       # >=2.3.0
-torchvision # >=0.18.0
-tensorboard==2.12.0
+# torch       # >=2.3.0
+# torchvision # >=0.18.0
+# tensorboard==2.12.0
 mkdocs      # >=1.5.3
 mkdocstrings    # >=0.27.0
 mkdocstrings-python==1.12.2
