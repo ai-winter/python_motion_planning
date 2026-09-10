@@ -459,15 +459,15 @@ class Grid(BaseMap):
         shape = tuple([int((self.bounds[i, 1] - self.bounds[i, 0]) / self.resolution) for i in range(self.dim)])
 
         if type_map is None:
-            self.type_map = GridTypeMap(np.zeros(shape, dtype=np.int8))
+            self._type_map = GridTypeMap(np.zeros(shape, dtype=np.int8))
         else:
             if type_map.shape != shape:
                 raise ValueError("Shape must be {} instead of {} with given bounds={} and resolution={}".format(shape, type_map.shape, self.bounds, self.resolution))
 
             if isinstance(type_map, GridTypeMap):
-                self.type_map = type_map
+                self._type_map = type_map
             elif isinstance(type_map, np.ndarray):
-                self.type_map = GridTypeMap(type_map)        
+                self._type_map = GridTypeMap(type_map)
             else:
                 raise ValueError("Type map must be GridTypeMap or numpy.ndarray instead of {}".format(type(type_map)))
 
@@ -490,14 +490,18 @@ class Grid(BaseMap):
     @property
     def resolution(self) -> float:
         return self._resolution
+
+    @property
+    def type_map(self) -> GridTypeMap:
+        return self._type_map
     
     @property
     def shape(self) -> tuple:
-        return self.type_map.shape
+        return self._type_map.shape
     
     @property
     def dtype(self) -> np.dtype:
-        return self.type_map.dtype
+        return self._type_map.dtype
     
     @property
     def esdf(self) -> np.ndarray:
@@ -505,16 +509,16 @@ class Grid(BaseMap):
     
     @property
     def data(self) -> np.ndarray:
-        return self.type_map.data
+        return self._type_map.data
     
     def __getitem__(self, idx):
-        return self.type_map[idx]
+        return self._type_map[idx]
 
     def __setitem__(self, idx, value):
-        self.type_map[idx] = value
+        self._type_map[idx] = value
 
     def _type_map_flat(self) -> np.ndarray:
-        return np.ravel(self.type_map.data)
+        return np.ravel(self._type_map.data)
 
     def _esdf_flat(self) -> np.ndarray:
         return np.ravel(self._esdf)
@@ -702,12 +706,12 @@ class Grid(BaseMap):
             # First boundary (start index)
             slices_start = [slice(None)] * self.dim
             slices_start[d] = 0
-            self.type_map[tuple(slices_start)] = TYPES.OBSTACLE
+            self._type_map[tuple(slices_start)] = TYPES.OBSTACLE
             
             # Last boundary (end index)
             slices_end = [slice(None)] * self.dim
             slices_end[d] = -1
-            self.type_map[tuple(slices_end)] = TYPES.OBSTACLE
+            self._type_map[tuple(slices_end)] = TYPES.OBSTACLE
 
     def inflate_obstacles(self, radius: float = 1.0) -> None:
         """
@@ -717,8 +721,8 @@ class Grid(BaseMap):
             radius: Radius of the inflation.
         """
         self.update_esdf()
-        mask = (self.esdf <= radius) & (self.type_map.data == TYPES.FREE)
-        self.type_map[mask] = TYPES.INFLATION
+        mask = (self.esdf <= radius) & (self._type_map.data == TYPES.FREE)
+        self._type_map[mask] = TYPES.INFLATION
         self.inflation_radius = radius
 
     def fill_expands(self, expands: Dict[Tuple[int, ...], Node]) -> None:
@@ -729,9 +733,9 @@ class Grid(BaseMap):
             expands: List of expands.
         """
         for expand in expands.keys():
-            if self.type_map[expand] != TYPES.FREE:
+            if self._type_map[expand] != TYPES.FREE:
                 continue
-            self.type_map[expand] = TYPES.EXPAND
+            self._type_map[expand] = TYPES.EXPAND
 
     def update_esdf(self) -> None:
         """
@@ -739,7 +743,7 @@ class Grid(BaseMap):
         - Obstacle grid ESDF = 0
         - Free grid ESDF > 0. The value is the di/stance to the nearest obstacle
         """
-        obstacle_mask = (self.type_map.data == TYPES.OBSTACLE)
+        obstacle_mask = (self._type_map.data == TYPES.OBSTACLE)
         free_mask = ~obstacle_mask
 
         # distance to obstacles
