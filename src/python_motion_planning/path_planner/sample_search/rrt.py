@@ -23,7 +23,7 @@ class RRT(BasePathPlanner):
         max_sample_step: Maximum number of steps of samples to generate.
         goal_sample_rate: Probability of sampling the goal directly.
         discrete: Whether to use discrete or continuous space.
-        faiss: Whether to use Faiss to accelerate the search.
+        use_faiss: Whether to use Faiss to accelerate the search.
         *kwargs: see the parent class.
 
     References:
