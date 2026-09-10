@@ -4,7 +4,7 @@
 @update: 2026.6.2
 """
 from itertools import product
-from typing import Iterable, Union, Tuple, Callable, List, Dict
+from typing import Iterable, Union, Tuple, List, Dict
 import math
 import time
 
@@ -338,6 +338,7 @@ class GridTypeMap:
         self._data = np.asarray(type_map)
         self._shape = self._data.shape
         self._dtype = self._data.dtype
+        self._esdf_lazy_flag_ = True
         
         self._dtype_options = [np.int8, np.int16, np.int32, np.int64]
         if self._dtype not in self._dtype_options:
@@ -354,6 +355,7 @@ class GridTypeMap:
 
     def __setitem__(self, idx, value):
         self._data[idx] = value
+        self._esdf_lazy_flag_ = True
 
     @property
     def data(self) -> np.ndarray:
@@ -443,7 +445,6 @@ class Grid(BaseMap):
         False
 
         >>> grid_map[1, 3] = TYPES.OBSTACLE
-        >>> grid_map.update_esdf()
         >>> grid_map.in_collision((1, 2), (3, 6))
         True
     """
@@ -475,7 +476,6 @@ class Grid(BaseMap):
         self._precompute_offsets()
         
         self._esdf = np.zeros(self.shape, dtype=np.float32)
-        # self.update_esdf()    # updated in self.inflate_obstacles()
 
         self.inflation_radius = inflation_radius
         if self.inflation_radius >= 1:
@@ -505,6 +505,9 @@ class Grid(BaseMap):
     
     @property
     def esdf(self) -> np.ndarray:
+        if self._esdf_lazy_flag_:
+            self.update_esdf()
+            self._esdf_lazy_flag_ = False
         return self._esdf
     
     @property
@@ -517,11 +520,19 @@ class Grid(BaseMap):
     def __setitem__(self, idx, value):
         self._type_map[idx] = value
 
+    @property
+    def _esdf_lazy_flag_(self) -> bool:
+        return self._type_map._esdf_lazy_flag_
+
+    @_esdf_lazy_flag_.setter
+    def _esdf_lazy_flag_(self, value: bool) -> None:
+        self._type_map._esdf_lazy_flag_ = value
+
     def _type_map_flat(self) -> np.ndarray:
         return np.ravel(self._type_map.data)
 
     def _esdf_flat(self) -> np.ndarray:
-        return np.ravel(self._esdf)
+        return np.ravel(self.esdf)
 
     def map_to_world(self, point: tuple) -> Tuple[float, ...]:
         """
@@ -720,7 +731,6 @@ class Grid(BaseMap):
         Args:
             radius: Radius of the inflation.
         """
-        self.update_esdf()
         mask = (self.esdf <= radius) & (self._type_map.data == TYPES.FREE)
         self._type_map[mask] = TYPES.INFLATION
         self.inflation_radius = radius
@@ -753,6 +763,7 @@ class Grid(BaseMap):
 
         self._esdf = dist_outside.astype(np.float32)
         self._esdf[obstacle_mask] = -dist_inside[obstacle_mask]
+        self._esdf_lazy_flag_ = False
 
     def path_map_to_world(self, path: List[tuple]) -> List[Tuple[float, ...]]:
         """
