@@ -1,12 +1,13 @@
 """
 @file: geometry.py
 @author: Wu Maojia
-@update: 2025.10.3
+@update: 2026.9.12
 """
 from typing import List, Tuple
 import math
 
 import numpy as np
+
 
 class Geometry:
     """
@@ -29,7 +30,7 @@ class Geometry:
         if len(p1) != len(p2):
             raise ValueError("Dimension mismatch")
         if type == 'Euclidean':
-            return math.sqrt(sum((a - b)** 2 for a, b in zip(p1, p2)))
+            return math.dist(p1, p2)
         elif type == 'Manhattan':
             return sum(abs(a - b) for a, b in zip(p1, p2))
         else:

@@ -5,7 +5,6 @@
 """
 from itertools import product
 from typing import Iterable, Union, Tuple, List, Dict
-import math
 import time
 
 import numpy as np
@@ -131,45 +130,6 @@ def _grid_is_expandable(
         subset = (subset - 1) & changed_mask
 
     return True
-
-
-@_njit(cache=True)
-def _grid_distance(p1: np.ndarray, p2: np.ndarray) -> float:
-    dist_square = 0.0
-    for d in range(p1.size):
-        diff = p1[d] - p2[d]
-        dist_square += diff * diff
-    return math.sqrt(dist_square)
-
-
-@_njit(cache=True)
-def _grid_map_to_world(point: np.ndarray, bounds: np.ndarray, resolution: float) -> np.ndarray:
-    point_world = np.empty(point.size, dtype=np.float64)
-    for d in range(point.size):
-        point_world[d] = (point[d] + 0.5) * resolution + bounds[d, 0]
-    return point_world
-
-
-@_njit(cache=True)
-def _grid_point_float_to_int(point: np.ndarray, shape: np.ndarray) -> np.ndarray:
-    point_int = np.empty(shape.size, dtype=np.int64)
-    for d in range(shape.size):
-        value = int(round(point[d]))
-        if value < 0:
-            value = 0
-        elif value >= shape[d]:
-            value = shape[d] - 1
-        point_int[d] = value
-    return point_int
-
-
-@_njit(cache=True)
-def _grid_world_to_map_float(point: np.ndarray, bounds: np.ndarray, resolution: float) -> np.ndarray:
-    point_map = np.empty(point.size, dtype=np.float64)
-    inv_resolution = 1.0 / resolution
-    for d in range(point.size):
-        point_map[d] = (point[d] - bounds[d, 0]) * inv_resolution - 0.5
-    return point_map
 
 
 @_njit(cache=True)
@@ -419,7 +379,7 @@ class GridTypeMap:
         self._data = np.asarray(type_map)
         self._shape = self._data.shape
         self._dtype = self._data.dtype
-        self._esdf_lazy_flag_ = True
+        self._lazy_flags_ = 3
         
         self._dtype_options = [np.int8, np.int16, np.int32, np.int64]
         if self._dtype not in self._dtype_options:
@@ -436,7 +396,7 @@ class GridTypeMap:
 
     def __setitem__(self, idx, value):
         self._data[idx] = value
-        self._esdf_lazy_flag_ = True
+        self._lazy_flags_ = 3
 
     @property
     def data(self) -> np.ndarray:
@@ -537,6 +497,14 @@ class Grid(BaseMap):
         >>> grid_map.strict_collision = False
         >>> grid_map.in_collision((0, 0), (1, 1))
         False
+
+        >>> grid_map = Grid(bounds=[[0, 4], [0, 4]])
+        >>> grid_map[2, :] = TYPES.OBSTACLE
+        >>> grid_map.is_connected((0, 0), (3, 3))
+        False
+        >>> grid_map[2, 1] = TYPES.FREE
+        >>> grid_map.is_connected((0, 0), (3, 3))
+        True
     """
     def __init__(self, 
                 bounds: Iterable = [[0, 30], [0, 40]], 
@@ -567,6 +535,7 @@ class Grid(BaseMap):
         self._precompute_offsets()
         
         self._esdf = np.zeros(self.shape, dtype=np.float32)
+        self._connectivity_map = np.zeros(self.shape, dtype=np.int32)
         self.strict_collision = strict_collision
 
         self.inflation_radius = inflation_radius
@@ -601,6 +570,13 @@ class Grid(BaseMap):
             self.update_esdf()
             self._esdf_lazy_flag_ = False
         return self._esdf
+
+    @property
+    def connectivity_map(self) -> np.ndarray:
+        if self._connectivity_lazy_flag_:
+            self.update_connectivity()
+            self._connectivity_lazy_flag_ = False
+        return self._connectivity_map
     
     @property
     def data(self) -> np.ndarray:
@@ -614,11 +590,34 @@ class Grid(BaseMap):
 
     @property
     def _esdf_lazy_flag_(self) -> bool:
-        return self._type_map._esdf_lazy_flag_
+        return bool(self._type_map._lazy_flags_ & 1)
 
     @_esdf_lazy_flag_.setter
     def _esdf_lazy_flag_(self, value: bool) -> None:
-        self._type_map._esdf_lazy_flag_ = value
+        if value:
+            self._type_map._lazy_flags_ |= 1
+        else:
+            self._type_map._lazy_flags_ &= ~1
+
+    @property
+    def _connectivity_lazy_flag_(self) -> bool:
+        return bool(self._type_map._lazy_flags_ & 2)
+
+    @_connectivity_lazy_flag_.setter
+    def _connectivity_lazy_flag_(self, value: bool) -> None:
+        if value:
+            self._type_map._lazy_flags_ |= 2
+        else:
+            self._type_map._lazy_flags_ &= ~2
+
+    @property
+    def strict_collision(self) -> bool:
+        return self._strict_collision
+
+    @strict_collision.setter
+    def strict_collision(self, value: bool) -> None:
+        self._strict_collision = value
+        self._connectivity_lazy_flag_ = True
 
     def _type_map_flat(self) -> np.ndarray:
         return np.ravel(self._type_map.data)
@@ -639,8 +638,9 @@ class Grid(BaseMap):
         if len(point) != self.dim:
             raise ValueError("Point dimension does not match map dimension.")
 
-        point_world = _grid_map_to_world(np.asarray(point, dtype=np.float64), self.bounds, self.resolution)
-        return tuple(float(x) for x in point_world)
+        bounds = self.bounds
+        resolution = self.resolution
+        return tuple(float((point[d] + 0.5) * resolution + bounds[d, 0]) for d in range(self.dim))
 
     def world_to_map(self, point: Tuple[float, ...], discrete: bool = True) -> tuple:
         """
@@ -656,13 +656,13 @@ class Grid(BaseMap):
         if len(point) != self.dim:
             raise ValueError("Point dimension does not match map dimension.")
         
-        point_array = np.asarray(point, dtype=np.float64)
         if discrete:
-            point_map = _grid_world_to_map_int(point_array, self.bounds, self.resolution, self._shape_array)
+            point_map = _grid_world_to_map_int(np.asarray(point, dtype=np.float64), self.bounds, self.resolution, self._shape_array)
             return tuple(int(x) for x in point_map)
         else:
-            point_map = _grid_world_to_map_float(point_array, self.bounds, self.resolution)
-            return tuple(float(x) for x in point_map)
+            inv_resolution = 1.0 / self.resolution
+            bounds = self.bounds
+            return tuple(float((point[d] - bounds[d, 0]) * inv_resolution - 0.5) for d in range(self.dim))
 
     def get_distance(self, p1: Tuple[int, int], p2: Tuple[int, int]) -> float:
         """
@@ -675,9 +675,7 @@ class Grid(BaseMap):
         Returns:
             dist: Distance between two points.
         """
-        if len(p1) != len(p2):
-            raise ValueError("Dimension mismatch")
-        return _grid_distance(np.asarray(p1, dtype=np.float64), np.asarray(p2, dtype=np.float64))
+        return Geometry.dist(p1, p2, type='Euclidean')
 
     def within_bounds(self, point: Tuple[int, ...]) -> bool:
         """
@@ -689,11 +687,31 @@ class Grid(BaseMap):
         Returns:
             bool: True if the point is within the bounds of the map, False otherwise.
         """
-        # if point.dim != self.dim:
-        #     raise ValueError("Point dimension does not match map dimension.")
+        if len(point) != self.dim:
+            return False
+        shape = self.shape
+        for d in range(self.dim):
+            if point[d] < 0 or point[d] >= shape[d]:
+                return False
+        return True
 
-        # return all(0 <= point[i] < self.shape[i] for i in range(self.dim))
-        return _grid_within_bounds(np.asarray(point, dtype=np.int64), self._shape_array)
+    def is_connected(self, p1: Tuple[int, ...], p2: Tuple[int, ...]) -> bool:
+        """
+        Check whether two points belong to the same free-space component.
+
+        Args:
+            p1: First point.
+            p2: Second point.
+
+        Returns:
+            connected: True if the two points are connected, False otherwise.
+        """
+        if not self.within_bounds(p1) or not self.within_bounds(p2):
+            raise ValueError("Points are out of bounds or invalid.")
+
+        connectivity_map = self.connectivity_map
+        component = connectivity_map[p1]
+        return component != 0 and component == connectivity_map[p2]
 
     def is_expandable(self, point: Tuple[int, ...], src_point: Tuple[int, ...] = None) -> bool:
         """
@@ -860,6 +878,15 @@ class Grid(BaseMap):
         self._esdf[obstacle_mask] = -dist_inside[obstacle_mask]
         self._esdf_lazy_flag_ = False
 
+    def update_connectivity(self) -> None:
+        """Update the free-space connected component map."""
+        type_map = self._type_map.data
+        free_mask = (type_map != TYPES.OBSTACLE) & (type_map != TYPES.INFLATION)
+        connectivity = 1 if self.strict_collision else self.dim
+        structure = ndimage.generate_binary_structure(self.dim, connectivity)
+        ndimage.label(free_mask, structure=structure, output=self._connectivity_map)
+        self._connectivity_lazy_flag_ = False
+
     def path_map_to_world(self, path: List[tuple]) -> List[Tuple[float, ...]]:
         """
         Convert path from map coordinates to world coordinates
@@ -917,8 +944,16 @@ class Grid(BaseMap):
         Returns:
             point: a point in integer coordinates
         """
-        point_int = _grid_point_float_to_int(np.asarray(point, dtype=np.float64), self._shape_array)
-        return tuple(int(x) for x in point_int)
+        shape = self.shape
+        point_int = []
+        for d in range(self.dim):
+            value = round(point[d])
+            if value < 0:
+                value = 0
+            elif value >= shape[d]:
+                value = shape[d] - 1
+            point_int.append(value)
+        return tuple(point_int)
 
     def _precompute_offsets(self):
         # Generate all possible offsets (-1, 0, +1) in each dimension
