@@ -1,7 +1,7 @@
 """
 @file: theta_star.py
 @author: Wu Maojia, Yang Haodong
-@update: 2025.10.6
+@update: 2026.9.12
 """
 from typing import Union, List, Tuple, Dict, Any
 import heapq
@@ -111,6 +111,7 @@ class ThetaStar(AStar):
             node_p (Node): parent node
             node_n (Node): next node
         """
-        if node_p.g + self.get_cost(node_p.current, node_n.current) <= node_n.g:
-            node_n.g = node_p.g + self.get_cost(node_p.current, node_n.current)
+        cost = node_p.g + self.get_cost(node_p.current, node_n.current)
+        if cost <= node_n.g:
+            node_n.g = cost
             node_n.parent = node_p.current

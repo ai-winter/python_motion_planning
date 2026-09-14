@@ -1,7 +1,7 @@
 """
 @file: lazy_theta_star.py
 @author: Wu Maojia, Yang Haodong
-@update: 2025.10.6
+@update: 2026.9.12
 """
 from typing import Union, List, Tuple, Dict, Any
 import heapq
@@ -61,12 +61,20 @@ class LazyThetaStar(ThetaStar):
             if node_p:
                 if self.map_.in_collision(node_p.current, node.current):
                     node.g = float("inf")
-                    for node_n in self.map_.get_neighbors(node, diagonal=self.diagonal):
-                        if node_n.current in CLOSED:
-                            node_n = CLOSED.get(node_n.current)
-                            if node.g > node_n.g + self.get_cost(node_n.current, node.current):
-                                node.g = node_n.g + self.get_cost(node_n.current, node.current)
-                                node.parent = node_n.current
+                    get_neighbor_arrays = getattr(self.map_, "_get_neighbor_arrays", None)
+                    if get_neighbor_arrays:
+                        positions, mask = get_neighbor_arrays(node, diagonal=self.diagonal)
+                        neighbors = (tuple(positions[i].tolist())
+                                     for i in range(positions.shape[0]) if mask[i])
+                    else:
+                        neighbors = (node_n.current for node_n in self.map_.get_neighbors(node, diagonal=self.diagonal))
+                    for point in neighbors:
+                        node_n = CLOSED.get(point)
+                        if node_n:
+                            cost = node_n.g + self.get_cost(point, node.current)
+                            if node.g > cost:
+                                node.g = cost
+                                node.parent = point
 
             # exists in CLOSED list
             if node.current in CLOSED:

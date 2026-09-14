@@ -757,6 +757,16 @@ class Grid(BaseMap):
         if node.dim != self.dim:
             raise ValueError("Node dimension does not match map dimension.")
         
+        positions, mask = self._get_neighbor_arrays(node, diagonal)
+
+        return [
+            Node(tuple(positions[i].tolist()), node.current, node.g, node.h)
+            for i in range(positions.shape[0])
+            if mask[i]
+        ]
+
+    def _get_neighbor_arrays(self, node: Node, diagonal: bool = True) -> Tuple[np.ndarray, np.ndarray]:
+        """Get candidate neighbor positions and their expandable mask."""
         offsets = self._diagonal_offsets_array if diagonal else self._orthogonal_offsets_array
         positions, mask = _grid_neighbor_positions_and_mask(
             np.asarray(node.current, dtype=np.int64),
@@ -768,12 +778,7 @@ class Grid(BaseMap):
             TYPES.INFLATION,
             self.strict_collision,
         )
-
-        return [
-            Node(tuple(int(x) for x in positions[i]), node.current, node.g, node.h)
-            for i in range(positions.shape[0])
-            if mask[i]
-        ]
+        return positions, mask
 
     def line_of_sight(self, p1: Tuple[int, ...], p2: Tuple[int, ...]) -> List[Tuple[int, ...]]:
         """
