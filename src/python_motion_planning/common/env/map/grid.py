@@ -185,7 +185,10 @@ def _grid_line_of_sight(p1: np.ndarray, p2: np.ndarray) -> np.ndarray:
                 continue
 
             error[d] += delta2[d]
-            if error[d] > abs_delta[primary_axis]:
+            # Reverse the tie-break when traversing the primary axis backwards.
+            if error[d] > abs_delta[primary_axis] or (
+                error[d] == abs_delta[primary_axis] and primary_step < 0
+            ):
                 current[d] += 1 if delta[d] > 0 else -1
                 error[d] -= delta2[primary_axis]
 
@@ -251,7 +254,10 @@ def _grid_in_collision(
                 continue
 
             error[d] += delta2[d]
-            if error[d] > abs_delta[primary_axis]:
+            # Keep the same cells as _grid_line_of_sight in both directions.
+            if error[d] > abs_delta[primary_axis] or (
+                error[d] == abs_delta[primary_axis] and primary_step < 0
+            ):
                 current[d] += 1 if delta[d] > 0 else -1
                 error[d] -= delta2[primary_axis]
 
