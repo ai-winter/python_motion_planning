@@ -88,3 +88,51 @@ vis.plot_grid_map(map_)
 vis.show()
 vis.close()
 ```
+
+The `strict_collision` argument controls whether diagonal motion is allowed beside obstacles or inflation cells. It is `True` by default. In strict mode, a diagonal step is considered a collision if either of the two side cells at the crossed corner is blocked. This prevents a path from passing through a diagonal gap. When it is `False`, only the cells on the discretized line are checked, so corner cutting is allowed. The mode can also be changed after the map is created through `map_.strict_collision`.
+
+![strict_collision_2d.svg](../../../assets/strict_collision_2d.svg)
+
+The effect can also be seen by running Theta\* on the tutorial map. Recreate the map and enable strict collision checking first.
+
+```python
+map_ = Grid(bounds=[[0, 51], [0, 31]], strict_collision=True)
+map_.fill_boundary_with_obstacles()
+map_[10:21, 15] = TYPES.OBSTACLE
+map_[20, :15] = TYPES.OBSTACLE
+map_[30, 15:] = TYPES.OBSTACLE
+map_[40, :16] = TYPES.OBSTACLE
+map_.inflate_obstacles(radius=3)
+
+start = (5, 5)
+goal = (45, 25)
+map_[start] = TYPES.START
+map_[goal] = TYPES.GOAL
+
+planner = ThetaStar(map_=map_, start=start, goal=goal)
+path, path_info = planner.plan()
+
+strict_vis = Visualizer2D()
+strict_vis.plot_grid_map(map_)
+strict_vis.plot_path(path, style="--", color="C4")
+strict_vis.show()
+strict_vis.close()
+```
+
+![strict_collision_true_2d.svg](../../../assets/strict_collision_true_2d.svg)
+
+Disable strict collision checking and plan again on the same map to allow corner cutting.
+
+```python
+map_.strict_collision = False
+planner = ThetaStar(map_=map_, start=start, goal=goal)
+path, path_info = planner.plan()
+
+relaxed_vis = Visualizer2D()
+relaxed_vis.plot_grid_map(map_)
+relaxed_vis.plot_path(path, style="--", color="C4")
+relaxed_vis.show()
+relaxed_vis.close()
+```
+
+![strict_collision_false_2d.svg](../../../assets/strict_collision_false_2d.svg)
