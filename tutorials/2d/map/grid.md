@@ -93,7 +93,7 @@ The `strict_collision` argument controls whether diagonal motion is allowed besi
 
 ![strict_collision_2d.svg](../../../assets/strict_collision_2d.svg)
 
-The effect can also be seen by running Theta\* on the tutorial map. Recreate the map and enable strict collision checking first.
+The effect can also be seen by running Theta\* on the tutorial map. Recreate the map and enable strict collision checking first. The code tutorial on path planning can be found in later chapters.
 
 ```python
 map_ = Grid(bounds=[[0, 51], [0, 31]], strict_collision=True)
